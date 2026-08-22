@@ -2,6 +2,7 @@ import type { Profile } from '../types'
 
 export const profile: Profile = {
   name: 'Kuldeep Lodha',
+  navDisplayName: 'K. Lodha',
   title: 'Software Developer',
   location: 'Pune, India',
   email: 'kuldeeplodha04@gmail.com',

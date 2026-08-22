@@ -4,16 +4,25 @@ export type ResumeVariant = 'software' | 'ai_ml' | 'data_analyst'
 
 export interface Profile {
   name: string
+  /** Compact name for navbar on small screens (keeps one line) */
+  navDisplayName?: string
   title: string
   location: string
   email: string
   phone?: string
   showPhone: boolean
   summary: string
+  /** Path under public/ e.g. /images/avatar.jpg */
+  avatarUrl?: string
   links: {
     linkedin?: string
     github?: string
   }
+}
+
+export interface MediaAttachment {
+  label: string
+  url: string
 }
 
 export interface ThemeTokens {
@@ -27,6 +36,8 @@ export interface ThemeTokens {
   accentMuted: string
   border: string
   heroGradient: string
+  /** Drives per-role layout and typography */
+  layoutVariant: 'terminal' | 'neural' | 'dashboard' | 'hybrid'
 }
 
 export interface HeroConfig {
@@ -68,6 +79,8 @@ export interface Experience {
   achievements: Achievement[]
   technologies: string[]
   relevantRoles: RoleId[]
+  imageUrl?: string
+  attachments?: MediaAttachment[]
 }
 
 export interface Project {
@@ -81,7 +94,10 @@ export interface Project {
   pipeline: string[]
   result?: string
   githubUrl?: string
+  futureImprovements?: string
   relevantRoles: RoleId[]
+  imageUrl?: string
+  attachments?: MediaAttachment[]
 }
 
 export interface SkillCategory {

@@ -21,6 +21,8 @@ export const projects: Project[] = [
       'Prediction',
     ],
     result: 'Gained expertise in time-series data and image-based classification.',
+    futureImprovements:
+      'Add real-time webcam inference and expand the gesture vocabulary with transfer learning.',
     githubUrl: undefined,
     relevantRoles: ['ai', 'system'],
   },
