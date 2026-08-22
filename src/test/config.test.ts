@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { portfolioConfig } from '../config'
 import { generateAnswer, searchKnowledge } from '../lib/ai/knowledgeSearch'
 import { ClientSearchProvider, ServerLLMProvider } from '../lib/ai/provider'
+import { validateFullConfig } from '../lib/config/exportImport'
 
 describe('portfolioConfig', () => {
   it('loads all four roles', () => {
@@ -129,5 +130,48 @@ describe('role themes', () => {
     for (const role of Object.values(portfolioConfig.roles)) {
       expect(portfolioConfig.themes[role.themeId]).toBeDefined()
     }
+  })
+})
+
+describe('validateFullConfig href-bound URL safety', () => {
+  const malicious = ['javascript:alert(1)', 'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==']
+
+  const clone = () => JSON.parse(JSON.stringify(portfolioConfig))
+
+  const cases: Array<{ label: string; inject: (cfg: any, url: string) => void }> = [
+    {
+      label: 'profile.links.linkedin',
+      inject: (cfg, url) => { cfg.profile.links.linkedin = url },
+    },
+    {
+      label: 'profile.links.github',
+      inject: (cfg, url) => { cfg.profile.links.github = url },
+    },
+    {
+      label: 'project.githubUrl',
+      inject: (cfg, url) => { cfg.projects[0].githubUrl = url },
+    },
+    {
+      label: 'certification.url',
+      inject: (cfg, url) => { cfg.certifications[0].url = url },
+    },
+  ]
+
+  it.each(cases.flatMap(({ label }) =>
+    malicious.map((url) => ({ label, url })),
+  ))('rejects $url in $label', ({ label, url }) => {
+    const cfg = clone()
+    cases.find((c) => c.label === label)!.inject(cfg, url)
+    const errors = validateFullConfig(cfg)
+    expect(errors.some((e) => /Invalid/i.test(e))).toBe(true)
+  })
+
+  it('accepts https URLs in all four fields', () => {
+    const cfg = clone()
+    cfg.profile.links.linkedin = 'https://www.linkedin.com/in/kuldeeplodha'
+    cfg.profile.links.github = 'https://github.com/kuldeeplodha'
+    cfg.projects[0].githubUrl = 'https://github.com/kuldeeplodha/kuldeep-portfolio'
+    cfg.certifications[0].url = 'https://example.com/cert'
+    expect(validateFullConfig(cfg)).toEqual([])
   })
 })

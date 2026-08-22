@@ -1,4 +1,5 @@
 import { useRole } from '../../hooks/useRole'
+import { isValidSafeUrl } from '../../lib/config/exportImport'
 
 export function CertificationsSection() {
   const { filteredCertifications } = useRole()
@@ -25,7 +26,7 @@ export function CertificationsSection() {
                 {cert.issuer}
                 {cert.date ? ` · ${cert.date}` : ''}
               </p>
-              {cert.url ? (
+              {cert.url && isValidSafeUrl(cert.url) ? (
                 <a
                   href={cert.url}
                   className="mt-2 inline-block text-xs underline"

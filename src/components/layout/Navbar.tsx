@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { portfolioConfig, getResumeForVariant } from '../../config'
+import { isValidSafeUrl } from '../../lib/config/exportImport'
 import { useRole } from '../../hooks/useRole'
 
 const NAV_ITEMS = [
@@ -191,14 +192,14 @@ export function ContactSection() {
           </p>
         )}
         <div className="mt-6 flex justify-center gap-4 text-sm">
-          {profile.links.linkedin ? (
+          {profile.links.linkedin && isValidSafeUrl(profile.links.linkedin) ? (
             <a href={profile.links.linkedin} style={{ color: 'var(--color-accent)' }}>
               LinkedIn
             </a>
           ) : (
             <span style={{ color: 'var(--color-text-muted)' }}>LinkedIn: not configured</span>
           )}
-          {profile.links.github ? (
+          {profile.links.github && isValidSafeUrl(profile.links.github) ? (
             <a href={profile.links.github} style={{ color: 'var(--color-accent)' }}>
               GitHub
             </a>

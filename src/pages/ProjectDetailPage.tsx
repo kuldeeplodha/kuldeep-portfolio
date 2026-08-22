@@ -1,5 +1,6 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
 import { portfolioConfig } from '../config'
+import { isValidSafeUrl } from '../lib/config/exportImport'
 import { useRole } from '../hooks/useRole'
 
 export function ProjectDetailPage() {
@@ -105,7 +106,7 @@ export function ProjectDetailPage() {
           </section>
         )}
 
-        {project.githubUrl ? (
+        {project.githubUrl && isValidSafeUrl(project.githubUrl) ? (
           <a
             href={project.githubUrl}
             target="_blank"

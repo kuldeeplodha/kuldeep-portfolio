@@ -69,6 +69,14 @@ export function validateFullConfig(config: PortfolioConfig): string[] {
     if (config.profile.avatarUrl && !isValidSafeUrl(config.profile.avatarUrl)) {
       errors.push('Profile: Invalid avatar URL')
     }
+    if (config.profile.links) {
+      if (config.profile.links.linkedin && !isValidSafeUrl(config.profile.links.linkedin)) {
+        errors.push('Profile: Invalid LinkedIn URL')
+      }
+      if (config.profile.links.github && !isValidSafeUrl(config.profile.links.github)) {
+        errors.push('Profile: Invalid GitHub URL')
+      }
+    }
   }
 
   if (!config.roles || typeof config.roles !== 'object') {
@@ -102,6 +110,7 @@ export function validateFullConfig(config: PortfolioConfig): string[] {
       if (!proj.title?.trim()) errors.push(`${prefix} Title is required`)
       if (!proj.overview?.trim()) errors.push(`${prefix} Overview is required`)
       if (proj.imageUrl && !isValidSafeUrl(proj.imageUrl)) errors.push(`${prefix} Invalid image URL`)
+      if (proj.githubUrl && !isValidSafeUrl(proj.githubUrl)) errors.push(`${prefix} Invalid GitHub URL`)
       if (Array.isArray(proj.attachments)) {
         proj.attachments.forEach((att, aIdx) => {
           if (!isValidSafeUrl(att.url)) errors.push(`${prefix} Invalid attachment URL at index ${aIdx}`)
@@ -144,6 +153,7 @@ export function validateFullConfig(config: PortfolioConfig): string[] {
       const prefix = `Certification #${idx + 1} (${cert.name || 'unnamed'}):`
       if (!cert.name?.trim()) errors.push(`${prefix} Name is required`)
       if (!cert.issuer?.trim()) errors.push(`${prefix} Issuer is required`)
+      if (cert.url && !isValidSafeUrl(cert.url)) errors.push(`${prefix} Invalid URL`)
     })
   } else {
     errors.push('Certifications section must be an array')
