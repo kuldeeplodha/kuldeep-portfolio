@@ -36,18 +36,23 @@ export function useRole() {
         },
         { replace: true },
       )
-      window.setTimeout(() => setIsTransitioning(false), 300)
+      window.setTimeout(() => setIsTransitioning(false), 450)
     },
     [roleId, setSearchParams],
   )
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--color-bg', theme.background)
-    document.documentElement.style.setProperty('--color-surface', theme.surface)
-    document.documentElement.style.setProperty('--color-text', theme.text)
-    document.documentElement.style.setProperty('--color-text-muted', theme.textMuted)
-    document.documentElement.style.setProperty('--color-accent', theme.accent)
-    document.documentElement.style.setProperty('--color-border', theme.border)
+    const root = document.documentElement
+    root.setAttribute('data-role', roleId)
+    root.setAttribute('data-layout', theme.layoutVariant)
+    root.style.setProperty('--color-bg', theme.background)
+    root.style.setProperty('--color-surface', theme.surface)
+    root.style.setProperty('--color-text', theme.text)
+    root.style.setProperty('--color-text-muted', theme.textMuted)
+    root.style.setProperty('--color-accent', theme.accent)
+    root.style.setProperty('--color-border', theme.border)
+    document.body.style.backgroundColor = theme.background
+    document.body.style.color = theme.text
   }, [theme])
 
   const filteredMetrics = useMemo(
@@ -79,6 +84,56 @@ export function useRole() {
     })
   }, [role])
 
+  const filteredSkills = useMemo(() => {
+    return portfolioConfig.skills
+      .filter((cat) => cat.relevantRoles.includes(roleId) || roleId === 'system')
+      .map((cat) => ({
+        ...cat,
+        skills:
+          role.highlightedSkillIds.length > 0
+            ? cat.skills.filter(
+                (s) =>
+                  role.highlightedSkillIds.includes(s.id) ||
+                  roleId === 'system',
+              )
+            : cat.skills,
+      }))
+      .filter((cat) => cat.skills.length > 0)
+  }, [role, roleId])
+
+  const filteredCertifications = useMemo(() => {
+    const variant = role.resumeVariant
+    return portfolioConfig.certifications.filter(
+      (c) =>
+        c.sourceVariants.includes(variant) || roleId === 'system',
+    )
+  }, [role, roleId])
+
+  const skillChains = useMemo(() => {
+    const chains: Record<RoleId, string[][]> = {
+      software: [
+        ['Python', 'Django', 'REST', 'PostgreSQL'],
+        ['Git', 'Docker', 'CI/CD'],
+        ['Python', 'Airflow', 'ETL'],
+      ],
+      ai: [
+        ['Python', 'ML', 'NLP', 'Deep Learning'],
+        ['TensorFlow', 'PyTorch', 'Scikit-learn'],
+        ['MLOps', 'MLflow', 'Airflow', 'SageMaker'],
+      ],
+      data: [
+        ['Python', 'Pandas', 'SQL', 'Airflow'],
+        ['Superset', 'Metabase', 'Power BI'],
+        ['ETL', 'Excel', 'Reporting'],
+      ],
+      system: [
+        ['Software', 'Data', 'ML', 'AI'],
+        ['Python', 'Django', 'Airflow', 'NLP'],
+      ],
+    }
+    return chains[roleId]
+  }, [roleId])
+
   return {
     roleId,
     role,
@@ -88,6 +143,9 @@ export function useRole() {
     filteredMetrics,
     filteredProjects,
     sortedExperience,
+    filteredSkills,
+    filteredCertifications,
+    skillChains,
     allRoles: ROLE_IDS.map((id) => portfolioConfig.roles[id]),
   }
 }
