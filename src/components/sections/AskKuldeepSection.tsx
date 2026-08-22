@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { portfolioConfig } from '../../config'
-import { generateAnswer } from '../../lib/ai/knowledgeSearch'
+import { getAIProvider } from '../../lib/ai/provider'
 
 const SUGGESTED = [
   'What backend technologies does Kuldeep use?',
@@ -12,10 +11,19 @@ const SUGGESTED = [
 export function AskKuldeepSection() {
   const [query, setQuery] = useState('')
   const [answer, setAnswer] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleAsk = (q: string) => {
+  const handleAsk = async (q: string) => {
     setQuery(q)
-    setAnswer(generateAnswer(q, portfolioConfig.aiKnowledge))
+    setLoading(true)
+    try {
+      const result = await getAIProvider().search(q)
+      setAnswer(result)
+    } catch (err) {
+      setAnswer(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -33,9 +41,13 @@ export function AskKuldeepSection() {
             e.preventDefault()
             handleAsk(query)
           }}
-          className="mb-4 flex gap-2"
+          className="mb-4 flex flex-col gap-2 sm:flex-row"
         >
+          <label htmlFor="ask-kuldeep-input" className="sr-only">
+            Question for portfolio assistant
+          </label>
           <input
+            id="ask-kuldeep-input"
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -46,17 +58,17 @@ export function AskKuldeepSection() {
               backgroundColor: 'var(--color-surface)',
               color: 'var(--color-text)',
             }}
-            aria-label="Question for portfolio assistant"
           />
           <button
             type="submit"
-            className="rounded-lg px-6 py-3 text-sm font-semibold"
+            disabled={loading}
+            className="min-h-11 rounded-lg px-6 py-3 text-sm font-semibold hover:opacity-90 disabled:opacity-50"
             style={{
               backgroundColor: 'var(--color-accent)',
               color: 'var(--color-bg)',
             }}
           >
-            Ask
+            {loading ? 'Asking...' : 'Ask'}
           </button>
         </form>
 
@@ -66,7 +78,7 @@ export function AskKuldeepSection() {
               key={q}
               type="button"
               onClick={() => handleAsk(q)}
-              className="rounded-full border px-3 py-1 text-xs transition-colors hover:opacity-80"
+              className="min-h-11 rounded-full border px-3 py-2 text-xs transition-colors hover:opacity-80"
               style={{
                 borderColor: 'var(--color-border)',
                 color: 'var(--color-text-muted)',
@@ -86,6 +98,7 @@ export function AskKuldeepSection() {
               color: 'var(--color-text)',
             }}
             role="status"
+            aria-live="polite"
           >
             {answer}
           </div>
