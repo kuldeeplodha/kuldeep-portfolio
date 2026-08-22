@@ -55,4 +55,29 @@ export const aiKnowledge: AIKnowledgeEntry[] = [
     tags: ['general'],
     source: 'resume:all',
   },
+  {
+    id: 'education-details',
+    questionPatterns: ['education', 'degree', 'study', 'university', 'college', 'gpa', 'cgpa', 'where did you study', 'where did he study'],
+    answer:
+      'Kuldeep holds an MS in Machine Learning & AI from Liverpool John Moores University (Jul \'24), an Executive PG in Machine Learning & AI from IIIT Bangalore (Mar \'23 – May \'24, 3.58/4 GPA), and a B.Tech in Computer Science from Hitkarini College of Engineering & Technology (Aug \'17 – Jul \'21, 8.00 CGPA).',
+    tags: ['education', 'general'],
+    source: 'resume:all',
+  },
+  {
+    id: 'certifications-details',
+    questionPatterns: ['certifications', 'certification', 'certificates', 'cert', 'certified'],
+    answer:
+      'Kuldeep\'s certifications include: Prompt Design in Vertex AI (Google Cloud Skills Boost), Data Analyst Associate (DataCamp), Docker Foundations Professional Certificate, Getting Started as an AWS Developer (LinkedIn), Building React and Django Apps (LinkedIn), Career Essentials in Software Development (Microsoft/LinkedIn), Excel Skills for Data Analytics and Visualization, SQL (Advanced) and Problem Solving (Intermediate) from HackerRank.',
+    tags: ['certifications', 'general'],
+    source: 'resume:all',
+  },
+  {
+    id: 'career-direction',
+    questionPatterns: ['career', 'direction', 'goal', 'objective', 'summary', 'about', 'who is', 'passionate about'],
+    answer:
+      'Kuldeep is a Software Developer with 4+ years of experience, passionate about solving complex problems and building reliable backend and data systems. He is eager to learn new technologies and is moving toward intelligent products and machine learning workflows.',
+    tags: ['general', 'career'],
+    source: 'resume:all',
+  },
 ]
+

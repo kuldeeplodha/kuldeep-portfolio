@@ -55,14 +55,28 @@ All portfolio content lives in `src/config/`:
 
 **Social links** (LinkedIn, GitHub) are placeholders until URLs are confirmed.
 
+## Admin panel
+
+The configuration panel at `/admin` is password-protected. Set your password in `.env.local`:
+
+```bash
+cp .env.example .env.local
+# Edit VITE_ADMIN_PASSWORD in .env.local
+```
+
+Restart the dev server after changing env vars. The admin link is not shown in the public navbar — navigate directly to `/admin`.
+
+> **Note:** On a static GitHub Pages site, this is a client-side gate only. It keeps casual visitors out but is not cryptographically secure. Do not treat it as true server authentication.
+
 ## Architecture
 
 See `docs/ARCHITECTURE.md` and `docs/CONTENT_MODEL.md`.
 
 ## Future work
 
-- [ ] Admin configuration panel with export/import
-- [ ] Research Lab section with distinctive visuals
-- [ ] Skills visualization (clusters, not percentages)
-- [ ] E2E tests with Playwright
+- [x] Admin configuration panel with export/import (password-protected at `/admin`)
+- [x] Research Lab section with distinctive visuals
+- [x] Skills visualization (clusters, not percentages)
+- [x] E2E tests with Playwright
 - [ ] Serverless LLM backend abstraction
+- [ ] Remaining admin tabs (skills, education, certifications, research, aiKnowledge)
