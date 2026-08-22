@@ -1,0 +1,125 @@
+import type { Experience } from '../types'
+
+export const experience: Experience[] = [
+  {
+    id: 'shelter-associates',
+    organization: 'Shelter Associates',
+    role: 'Software Developer',
+    period: "Jul '21 – Present",
+    location: 'Pune, IN',
+    responsibilities: [
+      'Backend development with Django and REST APIs',
+      'Database query optimization and preprocessing',
+      'ETL pipeline design and orchestration',
+      'Dashboard deployment for program teams',
+      'Exploratory data analysis on field-collected data',
+    ],
+    achievements: [
+      {
+        id: 'shelter-deployment',
+        text: 'Reduced feature deployment time by 30% through modular code design',
+        sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+        relevantRoles: ['software', 'system'],
+      },
+      {
+        id: 'shelter-api',
+        text: 'Reduced API response time by over 60% via query and preprocessing optimization',
+        sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+        relevantRoles: ['software', 'system'],
+      },
+      {
+        id: 'shelter-avni-ingestion',
+        text: 'Automated AVNI data ingestion, reducing manual data entry time by 75%',
+        sourceVariants: ['software'],
+        relevantRoles: ['software'],
+      },
+      {
+        id: 'shelter-latency',
+        text: 'Reduced data delivery latency by 40% and increased system uptime reliability by 25%',
+        sourceVariants: ['software'],
+        relevantRoles: ['software'],
+      },
+      {
+        id: 'shelter-airflow',
+        text: 'Configured Apache Airflow to orchestrate ETL workflows, replacing legacy cron jobs',
+        sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+        relevantRoles: ['software', 'data', 'ai', 'system'],
+      },
+      {
+        id: 'shelter-dashboards',
+        text: 'Deployed dashboards using Apache Superset and Metabase for 5+ program teams',
+        sourceVariants: ['ai_ml', 'data_analyst'],
+        relevantRoles: ['data', 'ai', 'system'],
+      },
+      {
+        id: 'shelter-eda',
+        text: 'Conducted exploratory data analysis to identify anomalies and trends for strategic planning',
+        sourceVariants: ['ai_ml', 'data_analyst'],
+        relevantRoles: ['data', 'ai'],
+      },
+    ],
+    technologies: [
+      'Python',
+      'Django',
+      'REST APIs',
+      'PostgreSQL',
+      'Apache Airflow',
+      'Apache Superset',
+      'Metabase',
+      'AVNI',
+    ],
+    relevantRoles: ['software', 'data', 'ai', 'system'],
+  },
+  {
+    id: 'swadhar-idwc',
+    organization: 'Swadhar IDWC',
+    role: 'Software Developer Consultant',
+    period: "Apr '23 – Present",
+    location: 'Pune, IN',
+    responsibilities: [
+      'Digital transformation from manual data entry to AVNI-based systems',
+      'Custom survey forms and workflow deployment',
+      'SQL reporting automation',
+      'KPI dashboard design and stakeholder training',
+    ],
+    achievements: [
+      {
+        id: 'swadhar-accuracy',
+        text: 'Improved data accuracy by 30% and reduced reporting time by 50%',
+        sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+        relevantRoles: ['data', 'software', 'system'],
+      },
+      {
+        id: 'swadhar-forms',
+        text: 'Created and deployed 30+ custom survey forms and workflows',
+        sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+        relevantRoles: ['data', 'software', 'system'],
+      },
+      {
+        id: 'swadhar-collection',
+        text: 'Increased field data collection speed by 40% across community programs',
+        sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+        relevantRoles: ['data', 'system'],
+      },
+      {
+        id: 'swadhar-reporting',
+        text: 'Reduced report generation time by 60%, enabling real-time decisions for 5+ program teams',
+        sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+        relevantRoles: ['data', 'software', 'system'],
+      },
+      {
+        id: 'swadhar-training',
+        text: 'Facilitated training sessions to promote data literacy among NGO staff',
+        sourceVariants: ['ai_ml', 'data_analyst'],
+        relevantRoles: ['data'],
+      },
+    ],
+    technologies: [
+      'AVNI',
+      'SQL',
+      'Data Visualization',
+      'Workflow Automation',
+    ],
+    relevantRoles: ['software', 'data', 'ai', 'system'],
+  },
+]
