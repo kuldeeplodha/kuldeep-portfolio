@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { portfolioConfig } from '../config'
 import type {
   Experience,
@@ -62,8 +62,9 @@ function filterByRole<T extends { relevantRoles: RoleId[] }>(
 }
 
 function AdminPanel() {
-  const [config, setConfig] = useState<PortfolioConfig>(portfolioConfig)
-  const [profile, setProfile] = useState<Profile>(portfolioConfig.profile)
+  const [initialDraft] = useState<PortfolioConfig | null>(() => loadDraftFromLocalStorage())
+  const [config, setConfig] = useState<PortfolioConfig>(initialDraft ?? portfolioConfig)
+  const [profile, setProfile] = useState<Profile>(initialDraft?.profile ?? portfolioConfig.profile)
   const [tab, setTab] = useState<AdminTab>('profile')
   const [filterRole, setFilterRole] = useState<RoleId | 'all'>('all')
   const [selectedExpId, setSelectedExpId] = useState(portfolioConfig.experience[0]?.id ?? '')
@@ -77,17 +78,8 @@ function AdminPanel() {
   const [selectedAIKnowledgeId, setSelectedAIKnowledgeId] = useState(portfolioConfig.aiKnowledge[0]?.id ?? '')
 
   const [errors, setErrors] = useState<string[]>([])
-  const [dirty, setDirty] = useState(false)
+  const [dirty, setDirty] = useState(Boolean(initialDraft))
   const [importStatus, setImportStatus] = useState<string | null>(null)
-
-  useEffect(() => {
-    const draft = loadDraftFromLocalStorage()
-    if (draft) {
-      setConfig(draft)
-      setProfile(draft.profile)
-      setDirty(true)
-    }
-  }, [])
 
   const persist = useCallback((next: PortfolioConfig) => {
     setConfig(next)
