@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { portfolioConfig } from '../config'
 import { generateAnswer, searchKnowledge } from '../lib/ai/knowledgeSearch'
+import { ClientSearchProvider, ServerLLMProvider } from '../lib/ai/provider'
 
 describe('portfolioConfig', () => {
   it('loads all four roles', () => {
@@ -28,6 +29,98 @@ describe('knowledgeSearch', () => {
   it('returns fallback for unknown queries', () => {
     const answer = generateAnswer('xyz unknown topic qwerty', portfolioConfig.aiKnowledge)
     expect(answer).toContain('do not have that information')
+  })
+
+  it('retrieves and combines multiple answers (multi-match)', () => {
+    // A mock knowledge set where query matches multiple patterns
+    const mockKnowledge = [
+      {
+        id: '1',
+        questionPatterns: ['django python backend'],
+        answer: 'Kuldeep builds backends using Django.',
+        tags: ['backend', 'python'],
+        source: 'resume'
+      },
+      {
+        id: '2',
+        questionPatterns: ['react typescript frontend'],
+        answer: 'Kuldeep builds frontends using React.',
+        tags: ['frontend', 'react'],
+        source: 'resume'
+      },
+      {
+        id: '3',
+        questionPatterns: ['postgres database backend'],
+        answer: 'Kuldeep works with PostgreSQL database.',
+        tags: ['backend', 'database'],
+        source: 'resume'
+      }
+    ]
+    const answer = generateAnswer('tell me about backend python database', mockKnowledge)
+    expect(answer).toContain('builds backends using Django')
+    expect(answer).toContain('Additionally:')
+    expect(answer).toContain('works with PostgreSQL')
+  })
+
+  it('prioritizes based on tag and pattern matches', () => {
+    const mockKnowledge = [
+      {
+        id: '1',
+        questionPatterns: ['generic work experience'],
+        answer: 'Generic experience.',
+        tags: ['work'],
+        source: 'resume'
+      },
+      {
+        id: '2',
+        questionPatterns: ['machine learning experience'],
+        answer: 'Machine learning specialist.',
+        tags: ['ml', 'machine-learning'],
+        source: 'resume'
+      }
+    ]
+    const results = searchKnowledge('machine learning', mockKnowledge)
+    expect(results[0].entry.id).toBe('2')
+  })
+
+  it('ignores stop words and punctuation', () => {
+    const mockKnowledge = [
+      {
+        id: '1',
+        questionPatterns: ['nlp thesis'],
+        answer: 'NLP research topic.',
+        tags: ['nlp'],
+        source: 'resume'
+      }
+    ]
+    const results = searchKnowledge('Tell me about the NLP!!!', mockKnowledge)
+    expect(results.length).toBeGreaterThan(0)
+    expect(results[0].entry.answer).toContain('NLP research topic')
+  })
+})
+
+describe('AI Providers', () => {
+  it('ClientSearchProvider returns correct answer for valid queries', async () => {
+    const provider = new ClientSearchProvider(portfolioConfig.aiKnowledge)
+    const result = await provider.search('What backend technologies does Kuldeep use?')
+    expect(result.toLowerCase()).toContain('django')
+  })
+
+  it('ClientSearchProvider handles empty query', async () => {
+    const provider = new ClientSearchProvider(portfolioConfig.aiKnowledge)
+    const result = await provider.search('   ')
+    expect(result).toContain('do not have that information')
+  })
+
+  it('ClientSearchProvider handles no-match query fallback', async () => {
+    const provider = new ClientSearchProvider(portfolioConfig.aiKnowledge)
+    const result = await provider.search('nonexistent keyword query')
+    expect(result).toContain('do not have that information')
+  })
+
+  it('ServerLLMProvider throws not configured error', async () => {
+    const provider = new ServerLLMProvider()
+    await expect(provider.search('test')).rejects.toThrow('ServerLLMProvider is not configured')
   })
 })
 
