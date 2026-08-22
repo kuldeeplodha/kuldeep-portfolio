@@ -53,7 +53,7 @@ export function useRole() {
     root.style.setProperty('--color-border', theme.border)
     document.body.style.backgroundColor = theme.background
     document.body.style.color = theme.text
-  }, [theme])
+  }, [theme, roleId])
 
   const filteredMetrics = useMemo(
     () =>
