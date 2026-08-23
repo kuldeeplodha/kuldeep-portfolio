@@ -55,4 +55,4 @@ Once the pipeline runs, update the `.env` configuration or provide the god agent
 ## Security Consideration
 
 > [!WARNING]
-> The admin CMS panel password (`VITE_ADMIN_PASSWORD`) is compiled into the production client-side JS bundle. Any user viewing the source code can retrieve this password. This is suitable for a simple static presentation but should not protect confidential data.
+> The admin CMS panel gate is client-side only. Since 2026-08-23 the build embeds a `VITE_ADMIN_PASSWORD_HASH` (SHA-256 hex digest) instead of the plaintext password, so the raw password no longer appears in the production bundle — but the gate itself remains deterrence-grade and should not protect confidential data. True server-side auth would require a backend/serverless function.

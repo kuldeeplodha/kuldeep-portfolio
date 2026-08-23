@@ -57,16 +57,24 @@ All portfolio content lives in `src/config/`:
 
 ## Admin panel
 
-The configuration panel at `/admin` is password-protected. Set your password in `.env.local`:
+The configuration panel at `/admin` is password-protected. The gate compares a
+SHA-256 digest, so the public bundle only ever contains the hash — never your
+plaintext password. Set it up in `.env.local`:
 
 ```bash
 cp .env.example .env.local
-# Edit VITE_ADMIN_PASSWORD in .env.local
+# Generate a hash for your password, then edit VITE_ADMIN_PASSWORD_HASH in .env.local
+echo -n 'your-password' | shasum -a 256
 ```
 
 Restart the dev server after changing env vars. The admin link is not shown in the public navbar — navigate directly to `/admin`.
 
-> **Note:** On a static GitHub Pages site, this is a client-side gate only. It keeps casual visitors out but is not cryptographically secure. Do not treat it as true server authentication.
+For production (GitHub Pages), add a repository secret named
+`VITE_ADMIN_PASSWORD_HASH` with that same hex digest; the deploy workflow picks
+it up at build time. Until the secret exists, `/admin` shows "Admin not
+configured" and stays disabled.
+
+> **Note:** On a static GitHub Pages site this remains a client-side gate. Hashing keeps your password out of the bundle, but it is deterrence-grade — not true server authentication. Do not treat it as such and do not store sensitive data behind it.
 
 ## Architecture
 
