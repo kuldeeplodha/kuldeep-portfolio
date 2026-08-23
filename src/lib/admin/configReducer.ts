@@ -18,7 +18,7 @@ export type ConfigAction =
   | { type: 'insertEntity'; section: ConfigSection; entity: any; afterId?: string }
   | { type: 'removeEntity'; section: ConfigSection; id: string }
   | { type: 'duplicateEntity'; section: ConfigSection; id: string }
-  | { type: 'moveEntity'; section: ConfigSection; id: string; delta: -1 | 1 }
+  | { type: 'moveEntity'; section: ConfigSection; id: string; delta?: -1 | 1; direction?: -1 | 1 }
   | { type: 'replaceConfig'; config: PortfolioConfig }
 
 const SECTION_KEYS: ConfigSection[] = [
@@ -145,7 +145,8 @@ export function configDraftReducer(state: PortfolioConfig, action: ConfigAction)
     }
 
     case 'moveEntity': {
-      const { section, id, delta } = action
+      const { section, id } = action
+      const delta = (action.delta ?? action.direction ?? 1) as -1 | 1
       return {
         ...state,
         [section]: moveByDelta(state[section] as any[], id, delta),
