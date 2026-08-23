@@ -28,8 +28,8 @@ export function AdminGate({ children }: AdminGateProps) {
         <div className="max-w-md text-center">
           <h1 className="mb-4 text-xl font-bold">Admin not configured</h1>
           <p className="mb-6 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-            Set <code>VITE_ADMIN_PASSWORD</code> in <code>.env.local</code> and restart the dev
-            server. This gate protects the configuration panel on the static site.
+            Set <code>VITE_ADMIN_PASSWORD_HASH</code> in <code>.env.local</code> and restart the
+            dev server. This gate protects the configuration panel on the static site.
           </p>
           <Link to="/" style={{ color: 'var(--color-accent)' }}>
             ← Back to portfolio
@@ -47,13 +47,17 @@ export function AdminGate({ children }: AdminGateProps) {
       <form
         className="w-full max-w-sm rounded-2xl border p-8"
         style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault()
-          if (loginAdmin(password)) {
-            setAuthenticated(true)
-            setError(null)
-          } else {
-            setError('Incorrect password')
+          try {
+            if (await loginAdmin(password)) {
+              setAuthenticated(true)
+              setError(null)
+            } else {
+              setError('Incorrect password')
+            }
+          } catch {
+            setError('Sign-in unavailable in this browser (no WebCrypto)')
           }
         }}
       >
