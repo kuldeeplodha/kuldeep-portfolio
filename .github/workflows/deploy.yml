@@ -32,6 +32,9 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          # Missing/empty secret resolves to '' -> admin stays in its safe
+          # "not configured" state; no workflow failure.
+          VITE_ADMIN_PASSWORD_HASH: ${{ secrets.VITE_ADMIN_PASSWORD_HASH }}
       - name: Create SPA fallback (404.html)
         run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3

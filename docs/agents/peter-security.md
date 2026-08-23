@@ -9,7 +9,7 @@
 Static React portfolio on GitHub Pages with:
 - Role-switching public site (`src/config/`)
 - Client-side "Ask Kuldeep" knowledge search (no API keys today)
-- Password-gated admin at `/admin` (`VITE_ADMIN_PASSWORD`, sessionStorage)
+- Password-gated admin at `/admin` (`VITE_ADMIN_PASSWORD_HASH` — SHA-256 digest only, sessionStorage)
 - JSON import/export in admin panel
 - Draft config stored in `localStorage`
 

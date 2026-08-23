@@ -18,7 +18,10 @@ export default defineConfig({
     port: 4173,
     reuseExistingServer: !process.env.CI,
     env: {
-      VITE_ADMIN_PASSWORD: 'test-admin-password',
+      // sha256('test-admin-password') — the e2e suite logs in with the
+      // plaintext form; only the digest reaches the bundle.
+      VITE_ADMIN_PASSWORD_HASH:
+        'f7a03f48c0e2aa2d5e55ca186c20032ddbf53b7f5f93fce387d65c3f83433e8d',
     },
   },
 })
