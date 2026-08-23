@@ -2,6 +2,14 @@ import type { PortfolioConfig } from '../../types'
 import { portfolioConfig } from '../../config'
 
 const STORAGE_KEY = 'kuldeep-portfolio-config-draft'
+const QUARANTINE_KEY = 'kuldeep-portfolio-config-draft-corrupt'
+const CURRENT_SCHEMA_VERSION = 2
+
+export interface StoredDraft {
+  schemaVersion: number
+  savedAt: string
+  config: PortfolioConfig
+}
 
 export function isValidSafeUrl(url: string): boolean {
   if (!url) return true;
@@ -14,8 +22,39 @@ export function isValidSafeUrl(url: string): boolean {
   }
 }
 
+function createStoredDraft(config: PortfolioConfig): StoredDraft {
+  return {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    savedAt: new Date().toISOString(),
+    config,
+  }
+}
+
+function migrateDraft(raw: unknown): PortfolioConfig | null {
+  if (!raw || typeof raw !== 'object') return null
+
+  const obj = raw as Record<string, unknown>
+
+  if ('schemaVersion' in obj) {
+    const version = obj.schemaVersion as number
+    if (version === CURRENT_SCHEMA_VERSION && 'config' in obj) {
+      return obj.config as PortfolioConfig
+    }
+    if (version === 1 && 'config' in obj) {
+      return obj.config as PortfolioConfig
+    }
+    return null
+  }
+
+  if ('profile' in obj || 'experience' in obj || 'projects' in obj) {
+    return obj as unknown as PortfolioConfig
+  }
+
+  return null
+}
+
 export function exportConfig(config: PortfolioConfig = portfolioConfig): string {
-  return JSON.stringify(config, null, 2)
+  return JSON.stringify(createStoredDraft(config), null, 2)
 }
 
 export function downloadConfig(config: PortfolioConfig = portfolioConfig): void {
@@ -32,7 +71,6 @@ export function saveDraftToLocalStorage(config: PortfolioConfig): void {
   try {
     localStorage.setItem(STORAGE_KEY, exportConfig(config))
   } catch {
-    // localStorage may be unavailable
   }
 }
 
@@ -40,9 +78,53 @@ export function loadDraftFromLocalStorage(): PortfolioConfig | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    return JSON.parse(raw) as PortfolioConfig
+
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      quarantineDraft(raw)
+      return null
+    }
+
+    const migrated = migrateDraft(parsed)
+    if (!migrated) {
+      quarantineDraft(raw)
+      return null
+    }
+
+    const errors = validateFullConfig(migrated)
+    if (errors.length > 0) {
+      quarantineDraft(raw)
+      return null
+    }
+
+    return migrated
   } catch {
     return null
+  }
+}
+
+function quarantineDraft(raw: unknown): void {
+  try {
+    const payload = typeof raw === 'string' ? raw : JSON.stringify(raw)
+    localStorage.setItem(QUARANTINE_KEY, payload)
+  } catch {
+  }
+}
+
+export function getQuarantinedDraft(): string | null {
+  try {
+    return localStorage.getItem(QUARANTINE_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function clearQuarantine(): void {
+  try {
+    localStorage.removeItem(QUARANTINE_KEY)
+  } catch {
   }
 }
 
@@ -50,7 +132,6 @@ export function clearDraft(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch {
-    // ignore
   }
 }
 
@@ -195,12 +276,25 @@ export function validateFullConfig(config: PortfolioConfig): string[] {
 }
 
 export function parseImportedConfig(json: string): PortfolioConfig {
-  const parsed = JSON.parse(json) as PortfolioConfig
-  const errors = validateFullConfig(parsed)
+  const parsed = JSON.parse(json) as unknown
+  
+  // Handle versioned envelope format
+  if (parsed && typeof parsed === 'object' && 'schemaVersion' in parsed && 'config' in parsed) {
+    const envelope = parsed as StoredDraft
+    const errors = validateFullConfig(envelope.config)
+    if (errors.length > 0) {
+      throw new Error(`Validation failed:\n${errors.join('\n')}`)
+    }
+    return envelope.config
+  }
+  
+  // Handle legacy raw config format
+  const legacyConfig = parsed as PortfolioConfig
+  const errors = validateFullConfig(legacyConfig)
   if (errors.length > 0) {
     throw new Error(`Validation failed:\n${errors.join('\n')}`)
   }
-  return parsed
+  return legacyConfig
 }
 
 export function validateProfile(profile: PortfolioConfig['profile']): string[] {

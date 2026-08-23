@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useReducer, useState } from 'react'
 import { portfolioConfig } from '../config'
 import type {
   Experience,
@@ -26,7 +26,10 @@ import {
   parseImportedConfig,
   saveDraftToLocalStorage,
   validateFullConfig,
+  getQuarantinedDraft,
+  clearQuarantine,
 } from '../lib/config/exportImport'
+import { configDraftReducer, initialConfig } from '../lib/admin/configReducer'
 
 type AdminTab =
   | 'profile'
@@ -63,28 +66,23 @@ function filterByRole<T extends { relevantRoles: RoleId[] }>(
 
 function AdminPanel() {
   const [initialDraft] = useState<PortfolioConfig | null>(() => loadDraftFromLocalStorage())
-  const [config, setConfig] = useState<PortfolioConfig>(initialDraft ?? portfolioConfig)
-  const [profile, setProfile] = useState<Profile>(initialDraft?.profile ?? portfolioConfig.profile)
+  const [config, dispatch] = useReducer(configDraftReducer, initialDraft ?? initialConfig)
   const [tab, setTab] = useState<AdminTab>('profile')
   const [filterRole, setFilterRole] = useState<RoleId | 'all'>('all')
-  const [selectedExpId, setSelectedExpId] = useState(portfolioConfig.experience[0]?.id ?? '')
-  const [selectedProjectId, setSelectedProjectId] = useState(portfolioConfig.projects[0]?.id ?? '')
+  const [selectedExpId, setSelectedExpId] = useState(config.experience[0]?.id ?? '')
+  const [selectedProjectId, setSelectedProjectId] = useState(config.projects[0]?.id ?? '')
   const [selectedRoleId, setSelectedRoleId] = useState<RoleId>('software')
-  const [selectedMetricId, setSelectedMetricId] = useState(portfolioConfig.metrics[0]?.id ?? '')
-  const [selectedSkillCategoryId, setSelectedSkillCategoryId] = useState(portfolioConfig.skills[0]?.id ?? '')
-  const [selectedEduId, setSelectedEduId] = useState(portfolioConfig.education[0]?.id ?? '')
-  const [selectedCertId, setSelectedCertId] = useState(portfolioConfig.certifications[0]?.id ?? '')
-  const [selectedResearchId, setSelectedResearchId] = useState(portfolioConfig.research[0]?.id ?? '')
-  const [selectedAIKnowledgeId, setSelectedAIKnowledgeId] = useState(portfolioConfig.aiKnowledge[0]?.id ?? '')
+  const [selectedMetricId, setSelectedMetricId] = useState(config.metrics[0]?.id ?? '')
+  const [selectedSkillCategoryId, setSelectedSkillCategoryId] = useState(config.skills[0]?.id ?? '')
+  const [selectedEduId, setSelectedEduId] = useState(config.education[0]?.id ?? '')
+  const [selectedCertId, setSelectedCertId] = useState(config.certifications[0]?.id ?? '')
+  const [selectedResearchId, setSelectedResearchId] = useState(config.research[0]?.id ?? '')
+  const [selectedAIKnowledgeId, setSelectedAIKnowledgeId] = useState(config.aiKnowledge[0]?.id ?? '')
 
   const [errors, setErrors] = useState<string[]>([])
   const [dirty, setDirty] = useState(Boolean(initialDraft))
   const [importStatus, setImportStatus] = useState<string | null>(null)
-
-  const persist = useCallback((next: PortfolioConfig) => {
-    setConfig(next)
-    setDirty(true)
-  }, [])
+  const [showQuarantineBanner, setShowQuarantineBanner] = useState(false)
 
   const filteredExperience = useMemo(
     () => filterByRole(config.experience, filterRole),
@@ -103,29 +101,27 @@ function AdminPanel() {
     [config.skills, filterRole],
   )
 
-  const handleProfileChange = (field: keyof Profile, value: string | boolean) => {
-    setProfile((prev) => ({ ...prev, [field]: value }))
+  const handleProfileChange = useCallback((field: keyof Profile, value: string | boolean) => {
+    dispatch({ type: 'patchProfile', patch: { [field]: value } })
     setDirty(true)
-  }
+  }, [])
 
-  const handleSaveDraft = () => {
-    const validationErrors = validateFullConfig({ ...config, profile })
+  const handleSaveDraft = useCallback(() => {
+    const validationErrors = validateFullConfig(config)
     setErrors(validationErrors)
     if (validationErrors.length > 0) return
-    const updated = { ...config, profile }
-    setConfig(updated)
-    saveDraftToLocalStorage(updated)
+    saveDraftToLocalStorage(config)
     setDirty(false)
     setImportStatus('Draft saved to browser localStorage. Export JSON to publish via GitHub.')
-  }
+  }, [config])
 
-  const handleExport = () => {
-    const validationErrors = validateFullConfig({ ...config, profile })
+  const handleExport = useCallback(() => {
+    const validationErrors = validateFullConfig(config)
     setErrors(validationErrors)
     if (validationErrors.length > 0) return
-    downloadConfig({ ...config, profile })
+    downloadConfig(config)
     setImportStatus('Configuration exported as JSON.')
-  }
+  }, [config])
 
   const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -134,8 +130,7 @@ function AdminPanel() {
     reader.onload = () => {
       try {
         const imported = parseImportedConfig(reader.result as string)
-        setConfig(imported)
-        setProfile(imported.profile)
+        dispatch({ type: 'replaceConfig', config: imported })
         setDirty(true)
         setImportStatus('Config imported. Review and save draft or export.')
         setErrors([])
@@ -147,14 +142,18 @@ function AdminPanel() {
     e.target.value = ''
   }, [])
 
-  const handleReset = () => {
-    setConfig(portfolioConfig)
-    setProfile(portfolioConfig.profile)
+  const handleReset = useCallback(() => {
+    dispatch({ type: 'replaceConfig', config: portfolioConfig })
     clearDraft()
     setDirty(false)
     setErrors([])
     setImportStatus('Reset to default configuration.')
-  }
+  }, [])
+
+  const handleDismissQuarantine = useCallback(() => {
+    clearQuarantine()
+    setShowQuarantineBanner(false)
+  }, [])
 
   const selectedExp = config.experience.find((e) => e.id === selectedExpId)
   const selectedProject = config.projects.find((p) => p.id === selectedProjectId)
@@ -166,99 +165,54 @@ function AdminPanel() {
   const selectedResearch = config.research.find((r) => r.id === selectedResearchId)
   const selectedAIKnowledge = config.aiKnowledge.find((k) => k.id === selectedAIKnowledgeId)
 
-  const updateExperience = (patch: Partial<Experience>) => {
-    persist({
-      ...config,
-      profile,
-      experience: config.experience.map((e) =>
-        e.id === selectedExpId ? { ...e, ...patch } : e,
-      ),
-    })
-  }
+  const updateExperience = useCallback((patch: Partial<Experience>) => {
+    dispatch({ type: 'patchEntity', section: 'experience', id: selectedExpId, patch })
+    setDirty(true)
+  }, [selectedExpId])
 
-  const updateProject = (patch: Partial<Project>) => {
-    persist({
-      ...config,
-      profile,
-      projects: config.projects.map((p) =>
-        p.id === selectedProjectId ? { ...p, ...patch } : p,
-      ),
-    })
-  }
+  const updateProject = useCallback((patch: Partial<Project>) => {
+    dispatch({ type: 'patchEntity', section: 'projects', id: selectedProjectId, patch })
+    setDirty(true)
+  }, [selectedProjectId])
 
-  const updateRoleHero = (field: 'headline' | 'subtitle', value: string) => {
-    persist({
-      ...config,
-      profile,
-      roles: {
-        ...config.roles,
-        [selectedRoleId]: {
-          ...config.roles[selectedRoleId],
-          hero: { ...config.roles[selectedRoleId].hero, [field]: value },
-        },
-      },
+  const updateRoleHero = useCallback((field: 'headline' | 'subtitle', value: string) => {
+    dispatch({
+      type: 'patchRole',
+      id: selectedRoleId,
+      patch: { hero: { ...config.roles[selectedRoleId].hero, [field]: value } },
     })
-  }
+    setDirty(true)
+  }, [selectedRoleId, config.roles])
 
-  const updateMetric = (patch: Partial<Metric>) => {
-    persist({
-      ...config,
-      profile,
-      metrics: config.metrics.map((m) =>
-        m.id === selectedMetricId ? { ...m, ...patch } : m,
-      ),
-    })
-  }
+  const updateMetric = useCallback((patch: Partial<Metric>) => {
+    dispatch({ type: 'patchEntity', section: 'metrics', id: selectedMetricId, patch })
+    setDirty(true)
+  }, [selectedMetricId])
 
-  const updateSkillCategory = (patch: Partial<SkillCategory>) => {
-    persist({
-      ...config,
-      profile,
-      skills: config.skills.map((s) =>
-        s.id === selectedSkillCategoryId ? { ...s, ...patch } : s,
-      ),
-    })
-  }
+  const updateSkillCategory = useCallback((patch: Partial<SkillCategory>) => {
+    dispatch({ type: 'patchEntity', section: 'skills', id: selectedSkillCategoryId, patch })
+    setDirty(true)
+  }, [selectedSkillCategoryId])
 
-  const updateEdu = (patch: Partial<Education>) => {
-    persist({
-      ...config,
-      profile,
-      education: config.education.map((e) =>
-        e.id === selectedEduId ? { ...e, ...patch } : e,
-      ),
-    })
-  }
+  const updateEdu = useCallback((patch: Partial<Education>) => {
+    dispatch({ type: 'patchEntity', section: 'education', id: selectedEduId, patch })
+    setDirty(true)
+  }, [selectedEduId])
 
-  const updateCert = (patch: Partial<Certification>) => {
-    persist({
-      ...config,
-      profile,
-      certifications: config.certifications.map((c) =>
-        c.id === selectedCertId ? { ...c, ...patch } : c,
-      ),
-    })
-  }
+  const updateCert = useCallback((patch: Partial<Certification>) => {
+    dispatch({ type: 'patchEntity', section: 'certifications', id: selectedCertId, patch })
+    setDirty(true)
+  }, [selectedCertId])
 
-  const updateResearch = (patch: Partial<Research>) => {
-    persist({
-      ...config,
-      profile,
-      research: config.research.map((r) =>
-        r.id === selectedResearchId ? { ...r, ...patch } : r,
-      ),
-    })
-  }
+  const updateResearch = useCallback((patch: Partial<Research>) => {
+    dispatch({ type: 'patchEntity', section: 'research', id: selectedResearchId, patch })
+    setDirty(true)
+  }, [selectedResearchId])
 
-  const updateAIKnowledge = (patch: Partial<AIKnowledgeEntry>) => {
-    persist({
-      ...config,
-      profile,
-      aiKnowledge: config.aiKnowledge.map((k) =>
-        k.id === selectedAIKnowledgeId ? { ...k, ...patch } : k,
-      ),
-    })
-  }
+  const updateAIKnowledge = useCallback((patch: Partial<AIKnowledgeEntry>) => {
+    dispatch({ type: 'patchEntity', section: 'aiKnowledge', id: selectedAIKnowledgeId, patch })
+    setDirty(true)
+  }, [selectedAIKnowledgeId])
 
   const sidebar = (
     <nav className="space-y-1" aria-label="Admin sections">
@@ -320,6 +274,12 @@ function AdminPanel() {
         Export JSON to publish.
       </p>
 
+      {showQuarantineBanner && getQuarantinedDraft() && (
+        <div className="mb-6 rounded-lg border border-amber-600 bg-amber-900/30 p-4 text-sm text-amber-200 flex items-center justify-between" role="alert">
+          <span>Corrupted draft quarantined. <a href="#" onClick={handleDismissQuarantine} className="underline hover:text-amber-100">Dismiss</a></span>
+        </div>
+      )}
+
       {importStatus && (
         <div className="mb-6 rounded-lg border border-slate-700 bg-slate-800/50 p-4 text-sm text-slate-300" role="status">
           {importStatus}
@@ -350,7 +310,7 @@ function AdminPanel() {
                 </span>
                 <input
                   type={field === 'email' ? 'email' : 'text'}
-                  value={(profile[field] as string) ?? ''}
+                  value={(config.profile[field] as string) ?? ''}
                   onChange={(e) => handleProfileChange(field, e.target.value)}
                   placeholder={field === 'navDisplayName' ? 'K. Lodha' : undefined}
                   className={adminInputClass}
@@ -359,14 +319,14 @@ function AdminPanel() {
             ))}
             <ImageField
               label="Profile photo"
-              value={profile.avatarUrl}
+              value={config.profile.avatarUrl}
               onChange={(url) => handleProfileChange('avatarUrl', url)}
               hint="Place image in public/ and use path like /images/avatar.jpg"
             />
             <label className="block">
               <span className="mb-1 block text-sm text-slate-400">Summary</span>
               <textarea
-                value={profile.summary}
+                value={config.profile.summary}
                 onChange={(e) => handleProfileChange('summary', e.target.value)}
                 rows={3}
                 className={adminInputClass}
