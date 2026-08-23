@@ -69,4 +69,34 @@ The production build sets `VITE_BASE_PATH` to the repo name — verify nothing i
 
 ## Verification run
 
-_(pending — execute after first successful Pages deployment)_
+**Executed:** 2026-08-23T01:45Z vs https://kuldeeplodha.github.io/kuldeep-portfolio/ (deploy run 32610524676, commit `b5d0398` = merge of PR #2; tree byte-identical to gated `3d9297d`). Automated Playwright suite (`prod-verify.mjs`) + curl probes. **Overall: FAIL — blocked by T-DEPLOY-T1.**
+
+| § | Item | Status | Evidence |
+|---|------|--------|----------|
+| 0 | Actions run green | PASS | Deploy run on `b5d0398` completed success (one earlier same-SHA run failed → retry succeeded, transient). CI green on `3d9297d`. |
+| 0 | Pages serving latest commit | PASS | Live HTML serves `/kuldeep-portfolio/assets/index-CY4R2S_Q.js`, matching `b5d0398` build. |
+| 1 | Homepage HTTPS 200 | PASS | curl + navigation: 200. |
+| 1 | CSS/JS bundles load from correct base | PASS | All asset requests carry `/kuldeep-portfolio/` prefix; zero root-relative asset requests observed. |
+| 1 | Fonts load | PASS | Google Fonts CSS 200; font file 200. |
+| 1 | Images load | BLOCKED | 0 `<img>` mounted — T-DEPLOY-T1 prevents section render. |
+| 1 | Subpath deep link (`/projects/<slug>`) | **FAIL** | Serves GitHub default 404 page (no SPA fallback). → **T-DEPLOY-T3** |
+| 2 | Console clean | **FAIL** | (a) CSP violation: fetch of `fonts.googleapis.com/css2?...` violates `connect-src` → **T-DEPLOY-T4**; (b) react-router warning `No routes matched location "/kuldeep-portfolio/"` → T-DEPLOY-T1 symptom. No pageerrors/unhandled rejections. |
+| 3 | Role themes via tabs | BLOCKED | Role tab UI never mounts (T1). Theme bootstrap itself works: body bg correct & distinct ×4 on deep links (software `rgb(15,20,25)` / ai `rgb(10,14,26)` / data `rgb(248,250,252)` / system `rgb(17,24,39)`). |
+| 3 | `?role=` deep links + invalid fallback | PARTIAL | Deep-link theme application PASS ×4; content render + URL-sync/no-reload checks BLOCKED by T1. |
+| 4 | Nav anchors / project routing / Ask Kuldeep | BLOCKED | Only navbar + footer exist in DOM (#root has 2 children, no `h1`/`h2` anywhere). |
+| 5 | Viewports 1440/768/320 | PARTIAL | 320px: no horizontal overflow (trivial — near-empty page); meaningful layout checks BLOCKED by T1. Tap-target spot-check flagged navbar brand cluster 32px height (re-check after T1). |
+| 6 | Keyboard focus + axe | PARTIAL | Focus-visible outline present on first Tab (solid outline). axe mobile: 0 serious/critical — **but scanned the unmounted skeleton only**; re-scan required post-fix. Desktop axe BLOCKED. |
+| 7 | HTTPS-only, no mixed content | PASS | Zero non-https requests across all sessions. |
+| 7 | Admin gate + draft round-trip | BLOCKED | `/admin` renders login-shell only; Password field absent (T1). |
+| 7 | Secrets in bundles | PASS | All JS bundles fetched & regex-scanned (sk-/ghp_/AKIA/private-key): none found. |
+| 7 | sitemap.xml reachable, canonical URLs | PASS | `/kuldeep-portfolio/sitemap.xml` → 200. |
+| 7 | robots.txt | **FAIL** | `https://kuldeeplodha.github.io/robots.txt` → 404. → **T-DEPLOY-T2** |
+
+### Tickets raised
+
+- **T-DEPLOY-T1 (Blocker) — Router basename missing on Pages build.** Symptom: prod serves only navbar+footer; console: `No routes matched location "/kuldeep-portfolio/"`. Expected: full SPA. Likely fix: `<BrowserRouter basename={import.meta.env.BASE_URL}>` in `src/main.tsx` (local dev unaffected since BASE=`/`). Blocks §§1–6 substantive checks.
+- **T-DEPLOY-T2 (Low) — robots.txt missing** at site root; checklist §7 expects 200.
+- **T-DEPLOY-T3 (Medium) — No SPA fallback for subpaths:** direct/refreshed `/projects/<slug>` URLs get GitHub default 404. Fix: copy `index.html` → `dist/404.html` in deploy workflow (works with basename-corrected router).
+- **T-DEPLOY-T4 (Medium) — CSP self-violation:** strict CSP meta blocks `connect-src` fetch of Google Fonts stylesheet requested at runtime. Either allow `style-src https://fonts.googleapis.com` (+ `font-src https://fonts.gstatic.com`) explicitly, or self-host fonts (preferred: removes external dep entirely).
+
+**Re-test plan:** after T1 (+ideally T3/T4) land on main and Pages redeploys, re-run `prod-verify.mjs` end-to-end; all BLOCKED/PARTIAL items must resolve to PASS before deployment is declared verified.

@@ -11,8 +11,7 @@ export const profile: Profile = {
   summary:
     'Software Developer with 4+ years of experience across backend engineering, data pipelines, machine learning, NLP, and MLOps. Building reliable systems and moving toward intelligent products.',
   links: {
-    // Placeholders — update when URLs are confirmed
-    linkedin: undefined,
-    github: undefined,
+    linkedin: 'https://www.linkedin.com/in/kuldeeplodha',
+    github: 'https://github.com/kuldeeplodha',
   },
 }

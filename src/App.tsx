@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { Navbar } from './components/layout/Navbar'
 import { Footer } from './components/layout/Footer'
 import { HomePage } from './pages/HomePage'
+import { NotFoundPage } from './pages/NotFoundPage'
 
 const ProjectDetailPage = lazy(() =>
   import('./pages/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })),
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
       {!isAdminRoute && <Footer />}

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import App from '../App'
 import { RoleSwitcher } from '../components/ui/RoleSwitcher'
 import { validateProfile, parseImportedConfig, exportConfig } from '../lib/config/exportImport'
 import { portfolioConfig } from '../config'
@@ -112,5 +114,30 @@ describe('role filtering', () => {
   it('ai role highlights ML projects', () => {
     const role = portfolioConfig.roles.ai
     expect(role.highlightedProjectIds).toContain('gesture-recognition')
+  })
+})
+
+describe('catch-all route', () => {
+  it('renders NotFound content for unknown paths', () => {
+    render(
+      <MemoryRouter initialEntries={['/some-unknown-path']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: /page not found/i })).toBeVisible()
+    expect(screen.getByText(/doesn't exist or has moved/i)).toBeVisible()
+    expect(screen.getByRole('link', { name: /back to home/i })).toHaveAttribute('href', '/')
+  })
+
+  it('still matches known routes exactly', async () => {
+    render(
+      <MemoryRouter initialEntries={['/projects/gesture-recognition']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('heading', { name: /gesture recognition/i })).toBeVisible()
+    expect(screen.queryByRole('heading', { name: /page not found/i })).toBeNull()
   })
 })

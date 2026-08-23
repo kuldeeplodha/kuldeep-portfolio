@@ -193,14 +193,24 @@ export function ContactSection() {
         )}
         <div className="mt-6 flex justify-center gap-4 text-sm">
           {profile.links.linkedin && isValidSafeUrl(profile.links.linkedin) ? (
-            <a href={profile.links.linkedin} style={{ color: 'var(--color-accent)' }}>
+            <a
+              href={profile.links.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--color-accent)' }}
+            >
               LinkedIn
             </a>
           ) : (
             <span style={{ color: 'var(--color-text-muted)' }}>LinkedIn: not configured</span>
           )}
           {profile.links.github && isValidSafeUrl(profile.links.github) ? (
-            <a href={profile.links.github} style={{ color: 'var(--color-accent)' }}>
+            <a
+              href={profile.links.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--color-accent)' }}
+            >
               GitHub
             </a>
           ) : (
