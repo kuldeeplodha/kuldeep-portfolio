@@ -42,4 +42,13 @@ test.describe('Portfolio', () => {
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.locator('h1')).toContainText('Configuration Panel')
   })
+
+  test('unknown route renders not-found fallback', async ({ page }) => {
+    await page.goto('/some-unknown-path')
+    await expect(page.locator('h1')).toContainText(/page not found/i)
+    const home = page.getByRole('link', { name: /back to home/i })
+    await expect(home).toBeVisible()
+    await home.click()
+    await expect(page).toHaveURL(/\/$/)
+  })
 })
