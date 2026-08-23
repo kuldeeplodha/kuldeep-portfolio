@@ -26,15 +26,15 @@ export function AdminLayout({ sidebar, children, header, onSignOut, dirty }: Adm
             <button
               type="button"
               onClick={onSignOut}
-              className="text-sm text-slate-500 hover:text-slate-300"
+              className="text-sm text-slate-400 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded"
             >
               Sign out
             </button>
           </div>
         </aside>
 
-        <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-950/90 px-4 py-4 backdrop-blur sm:px-6">
+        <div className="flex flex-1 flex-col min-w-0">
+          <header className="lg:sticky top-0 z-10 border-b border-slate-800 bg-slate-950/90 px-4 py-4 backdrop-blur sm:px-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h1 className="text-lg font-bold text-white">Configuration Panel</h1>
@@ -43,14 +43,14 @@ export function AdminLayout({ sidebar, children, header, onSignOut, dirty }: Adm
                 )}
               </div>
               <div className="flex items-center gap-3 lg:hidden">
-                <Link to="/" className="text-sm text-cyan-400">← Site</Link>
-                <button type="button" onClick={onSignOut} className="text-sm text-slate-500">Sign out</button>
+                <Link to="/" className="text-sm text-cyan-400 hover:underline">← Site</Link>
+                <button type="button" onClick={onSignOut} className="text-sm text-slate-400 hover:text-slate-200">Sign out</button>
               </div>
             </div>
             {header}
           </header>
 
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 scroll-pt-28">
             <div className="mx-auto max-w-3xl">{children}</div>
           </main>
         </div>
@@ -67,7 +67,7 @@ interface AdminCardProps {
 
 export function AdminCard({ title, description, children }: AdminCardProps) {
   return (
-    <section className="rounded-xl border border-slate-700/80 bg-slate-900/60 p-6 shadow-lg shadow-black/20">
+    <section className="rounded-xl border border-slate-700/80 bg-slate-900/60 p-6 shadow-lg shadow-black/20 scroll-mt-28">
       <h2 className="mb-1 text-base font-semibold text-white">{title}</h2>
       {description && <p className="mb-5 text-sm text-slate-400">{description}</p>}
       {!description && <div className="mb-5" />}

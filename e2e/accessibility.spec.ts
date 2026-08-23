@@ -34,4 +34,18 @@ test.describe('Accessibility (A11y) Audit', () => {
 
     expect(accessibilityScanResults.violations).toEqual([])
   })
+
+  test('admin configuration panel should not have any automatically detectable accessibility issues', async ({ page }) => {
+    await page.goto('/admin')
+    await page.getByLabel('Password').fill('test-admin-password')
+    await page.getByRole('button', { name: 'Sign in' }).click()
+    await expect(page.locator('h1')).toContainText('Configuration Panel')
+    await page.waitForLoadState('networkidle')
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag21a', 'wcag2aa', 'wcag21aa'])
+      .analyze()
+
+    expect(accessibilityScanResults.violations).toEqual([])
+  })
 })

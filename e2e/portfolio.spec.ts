@@ -43,6 +43,33 @@ test.describe('Portfolio', () => {
     await expect(page.locator('h1')).toContainText('Configuration Panel')
   })
 
+  test('admin panel V2 controls allow reordering, adding and deleting with confirm modal', async ({ page, isMobile }) => {
+    await page.goto('/admin')
+    await page.getByLabel('Password').fill('test-admin-password')
+    await page.getByRole('button', { name: 'Sign in' }).click()
+    await expect(page.locator('h1')).toContainText('Configuration Panel')
+
+    // Navigate to Experience tab
+    const expTab = isMobile
+      ? page.locator('div[aria-label="Mobile sections"]').getByRole('button', { name: /Experience/i })
+      : page.locator('nav[aria-label="Admin sections"]').getByRole('button', { name: /Experience/i })
+    await expTab.click()
+
+    // Add experience item
+    await page.getByRole('button', { name: /Add new Experience/i }).click()
+    await expect(page.getByRole('textbox', { name: 'Organization' })).toHaveValue('New Organization')
+
+    // Click Delete to open confirmation dialog
+    await page.getByRole('button', { name: /^Delete /i }).first().click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+    await expect(dialog).toHaveAttribute('aria-modal', 'true')
+
+    // Cancel modal
+    await page.getByRole('button', { name: 'Cancel' }).click()
+    await expect(dialog).not.toBeVisible()
+  })
+
   test('unknown route renders not-found fallback', async ({ page }) => {
     await page.goto('/some-unknown-path')
     await expect(page.locator('h1')).toContainText(/page not found/i)
