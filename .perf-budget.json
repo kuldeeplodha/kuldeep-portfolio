@@ -1,0 +1,11 @@
+{
+  "_comment": "Gzip budget file — measured 2026-09, +~13% headroom. Edit here to ratchet.",
+  "budgets": [
+    { "name": "entry (index.js)",           "pattern": "^index-",           "type": "js",  "maxBytes": 122880 },
+    { "name": "validationRegistry chunk",   "pattern": "^validationRegistry-", "type": "js",  "maxBytes": 33792  },
+    { "name": "AdminPage chunk",            "pattern": "^AdminPage-",        "type": "js",  "maxBytes": 19456  },
+    { "name": "total JS",                   "pattern": null,                 "type": "js",  "maxBytes": 179200, "aggregate": true },
+    { "name": "total CSS",                  "pattern": null,                 "type": "css", "maxBytes": 12288,  "aggregate": true }
+  ],
+  "warnThreshold": 0.9
+}
