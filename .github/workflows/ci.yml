@@ -29,4 +29,16 @@ jobs:
       - run: npm run test:e2e
         env:
           VITE_BASE_PATH: /
+      # Aggregate axe results into the GitHub Actions job summary
+      - name: Generate a11y report summary
+        if: always()
+        run: node scripts/a11y-summary.mjs >> "$GITHUB_STEP_SUMMARY"
+      # Upload raw axe JSON results as a downloadable CI artifact
+      - name: Upload a11y JSON results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-results
+          path: test-results/a11y/
+          if-no-files-found: warn
       - run: npm run build
