@@ -25,12 +25,17 @@ import {
   clearDraft,
   downloadConfig,
   loadDraftFromLocalStorage,
-  parseImportedConfig,
+  parseImportedConfigDiagnostic,
   saveDraftToLocalStorage,
-  validateFullConfig,
+  validateConfigRegistry,
   getQuarantinedDraft,
   clearQuarantine,
 } from '../lib/config/exportImport'
+import { getFieldIssue, type ValidationSummary } from '../lib/config/validationRegistry'
+import { FieldFeedback } from '../components/admin/InlineFieldFeedback'
+import { getFieldInputClass } from '../lib/admin/validationStyles'
+import { ValidationStatusBar } from '../components/admin/ValidationStatusBar'
+import { DiagnosticImportModal } from '../components/admin/DiagnosticImportModal'
 import { configDraftReducer, initialConfig, type ConfigSection } from '../lib/admin/configReducer'
 import { createDefaultEntity } from '../lib/admin/defaultTemplates'
 
@@ -83,7 +88,6 @@ function AdminPanel() {
   const [selectedResearchId, setSelectedResearchId] = useState(config.research[0]?.id ?? '')
   const [selectedAIKnowledgeId, setSelectedAIKnowledgeId] = useState(config.aiKnowledge[0]?.id ?? '')
 
-  const [errors, setErrors] = useState<string[]>([])
   const [dirty, setDirty] = useState(Boolean(initialDraft))
   const [importStatus, setImportStatus] = useState<string | null>(null)
   const [showQuarantineBanner, setShowQuarantineBanner] = useState(false)
@@ -94,6 +98,67 @@ function AdminPanel() {
     title: string
     itemName: string
   } | null>(null)
+
+  const [diagnosticData, setDiagnosticData] = useState<{
+    summary: ValidationSummary
+    fileName: string
+    candidateConfig?: PortfolioConfig
+  } | null>(null)
+
+  const validationSummary = useMemo(() => {
+    return validateConfigRegistry(config)
+  }, [config])
+
+  const handleNavigateToIssue = useCallback((section: string, itemId?: string, field?: string) => {
+    const targetTab: AdminTab = section === "certifications" ? "certs" : (section as AdminTab)
+    setTab(targetTab)
+
+    if (itemId) {
+      switch (section) {
+        case "experience":
+          setSelectedExpId(itemId)
+          break
+        case "projects":
+          setSelectedProjectId(itemId)
+          break
+        case "roles":
+          setSelectedRoleId(itemId as RoleId)
+          break
+        case "metrics":
+          setSelectedMetricId(itemId)
+          break
+        case "skills":
+          setSelectedSkillCategoryId(itemId)
+          break
+        case "education":
+          setSelectedEduId(itemId)
+          break
+        case "certifications":
+          setSelectedCertId(itemId)
+          break
+        case "research":
+          setSelectedResearchId(itemId)
+          break
+        case "aiKnowledge":
+          setSelectedAIKnowledgeId(itemId)
+          break
+      }
+    }
+
+    requestAnimationFrame(() => {
+      if (!field) return
+      const targetInput =
+        document.getElementById(`input-${section}-${itemId ? itemId + "-" : ""}${field}`) ||
+        document.getElementById(`input-${section}-${field}`) ||
+        document.getElementById(`input-${field}`) ||
+        document.querySelector(`[name="${field}"]`) ||
+        document.querySelector(`[data-field="${field}"]`)
+      if (targetInput instanceof HTMLElement) {
+        targetInput.focus()
+        targetInput.scrollIntoView?.({ behavior: "smooth", block: "center" })
+      }
+    })
+  }, [])
 
   const tabCounts = useMemo<Record<AdminTab, number | undefined>>(
     () => ({
@@ -128,7 +193,7 @@ function AdminPanel() {
     [config.skills, filterRole],
   )
 
-  const handleProfileChange = useCallback((field: keyof Profile, value: string | boolean) => {
+  const handleProfileChange = useCallback((field: keyof Profile, value: any) => {
     dispatch({ type: 'patchProfile', patch: { [field]: value } })
     setDirty(true)
   }, [])
@@ -230,21 +295,21 @@ function AdminPanel() {
   }, [config, deleteTarget])
 
   const handleSaveDraft = useCallback(() => {
-    const validationErrors = validateFullConfig(config)
-    setErrors(validationErrors)
-    if (validationErrors.length > 0) return
+    if (!validationSummary.isValid) return
     saveDraftToLocalStorage(config)
     setDirty(false)
-    setImportStatus('Draft saved to browser localStorage. Export JSON to publish via GitHub.')
-  }, [config])
+    if (validationSummary.warningCount > 0) {
+      setImportStatus(`Draft saved. ${validationSummary.warningCount} quality recommendation(s) remaining.`)
+    } else {
+      setImportStatus('Draft saved to browser localStorage. Export JSON to publish via GitHub.')
+    }
+  }, [config, validationSummary])
 
   const handleExport = useCallback(() => {
-    const validationErrors = validateFullConfig(config)
-    setErrors(validationErrors)
-    if (validationErrors.length > 0) return
+    if (!validationSummary.isValid) return
     downloadConfig(config)
     setImportStatus('Configuration exported as JSON.')
-  }, [config])
+  }, [config, validationSummary])
 
   const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -252,11 +317,31 @@ function AdminPanel() {
     const reader = new FileReader()
     reader.onload = () => {
       try {
-        const imported = parseImportedConfig(reader.result as string)
-        dispatch({ type: 'replaceConfig', config: imported })
-        setDirty(true)
-        setImportStatus('Config imported. Review and save draft or export.')
-        setErrors([])
+        const result = parseImportedConfigDiagnostic(reader.result as string)
+        if (result.syntaxError || result.summary.errorCount > 0) {
+          setDiagnosticData({
+            summary: result.summary,
+            fileName: file.name,
+          })
+          setImportStatus(null)
+          return
+        }
+
+        if (result.summary.warningCount > 0) {
+          setDiagnosticData({
+            summary: result.summary,
+            fileName: file.name,
+            candidateConfig: result.config,
+          })
+          return
+        }
+
+        if (result.config) {
+          dispatch({ type: 'replaceConfig', config: result.config })
+          saveDraftToLocalStorage(result.config)
+          setDirty(true)
+          setImportStatus('Config imported. Review and save draft or export.')
+        }
       } catch (err) {
         setImportStatus(`Import failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
@@ -269,7 +354,6 @@ function AdminPanel() {
     dispatch({ type: 'replaceConfig', config: portfolioConfig })
     clearDraft()
     setDirty(false)
-    setErrors([])
     setImportStatus('Reset to default configuration.')
   }, [])
 
@@ -307,7 +391,7 @@ function AdminPanel() {
   )
 
   const updateRoleHero = useCallback(
-    (field: 'headline' | 'subtitle', value: string) => {
+    (field: 'headline' | 'subtitle' | 'primaryCta', value: string) => {
       dispatch({
         type: 'patchRole',
         id: selectedRoleId,
@@ -377,6 +461,36 @@ function AdminPanel() {
       {TAB_META.map((t) => {
         const count = tabCounts[t.id]
         const isActive = tab === t.id
+        const secKey = t.id === 'certs' ? 'certifications' : t.id
+        const secIssues = validationSummary.issuesBySection[secKey] || []
+        const secErrors = secIssues.filter((i) => i.severity === 'error')
+        const secWarnings = secIssues.filter((i) => i.severity === 'warning')
+
+        let badge = null
+        if (secErrors.length > 0) {
+          badge = (
+            <span className="ml-auto rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-semibold text-red-400 border border-red-500/30 font-mono">
+              {secErrors.length} err
+            </span>
+          )
+        } else if (secWarnings.length > 0) {
+          badge = (
+            <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-300 border border-amber-500/30 font-mono">
+              {secWarnings.length} warn
+            </span>
+          )
+        } else if (count !== undefined) {
+          badge = (
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-mono font-medium ${
+                isActive ? 'bg-cyan-400/20 text-cyan-300' : 'bg-slate-800 text-slate-400'
+              }`}
+            >
+              {count}
+            </span>
+          )
+        }
+
         return (
           <button
             key={t.id}
@@ -392,15 +506,7 @@ function AdminPanel() {
               <span aria-hidden>{t.icon}</span>
               <span>{t.label}</span>
             </span>
-            {count !== undefined && (
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-mono font-medium ${
-                  isActive ? 'bg-cyan-400/20 text-cyan-300' : 'bg-slate-800 text-slate-400'
-                }`}
-              >
-                {count}
-              </span>
-            )}
+            {badge}
           </button>
         )
       })}
@@ -447,6 +553,32 @@ function AdminPanel() {
         {TAB_META.map((t) => {
           const count = tabCounts[t.id]
           const isActive = tab === t.id
+          const secKey = t.id === 'certs' ? 'certifications' : t.id
+          const secIssues = validationSummary.issuesBySection[secKey] || []
+          const secErrors = secIssues.filter((i) => i.severity === 'error')
+          const secWarnings = secIssues.filter((i) => i.severity === 'warning')
+
+          let mobileBadge = null
+          if (secErrors.length > 0) {
+            mobileBadge = (
+              <span className="rounded-full bg-red-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-red-400 border border-red-500/30 font-mono">
+                {secErrors.length} err
+              </span>
+            )
+          } else if (secWarnings.length > 0) {
+            mobileBadge = (
+              <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/30 font-mono">
+                {secWarnings.length} warn
+              </span>
+            )
+          } else if (count !== undefined) {
+            mobileBadge = (
+              <span className="rounded-full bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400 font-mono">
+                {count}
+              </span>
+            )
+          }
+
           return (
             <button
               key={t.id}
@@ -460,11 +592,7 @@ function AdminPanel() {
             >
               <span aria-hidden>{t.icon}</span>
               <span>{t.label}</span>
-              {count !== undefined && (
-                <span className="rounded-full bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400 font-mono">
-                  {count}
-                </span>
-              )}
+              {mobileBadge}
             </button>
           )
         })}
@@ -501,13 +629,10 @@ function AdminPanel() {
         </div>
       )}
 
-      {errors.length > 0 && (
-        <ul className="mb-6 list-disc pl-5 text-sm text-red-400" role="alert">
-          {errors.map((e) => (
-            <li key={e}>{e}</li>
-          ))}
-        </ul>
-      )}
+      <ValidationStatusBar
+        summary={validationSummary}
+        onNavigateToIssue={handleNavigateToIssue}
+      />
 
       <form
         onSubmit={(e) => {
@@ -518,35 +643,72 @@ function AdminPanel() {
       >
         {tab === 'profile' && (
           <AdminCard title="Profile" description="Global info shown across all resume pages.">
-            {(['name', 'navDisplayName', 'title', 'email'] as const).map((field) => (
-              <label key={field} className="block">
-                <span className="mb-1 block text-sm text-slate-400">
-                  {field === 'navDisplayName' ? 'Navbar name (short, single line)' : field}
-                </span>
-                <input
-                  type={field === 'email' ? 'email' : 'text'}
-                  value={(config.profile[field] as string) ?? ''}
-                  onChange={(e) => handleProfileChange(field, e.target.value)}
-                  placeholder={field === 'navDisplayName' ? 'K. Lodha' : undefined}
-                  className={adminInputClass}
-                />
-              </label>
-            ))}
-            <ImageField
-              label="Profile photo"
-              value={config.profile.avatarUrl}
-              onChange={(url) => handleProfileChange('avatarUrl', url)}
-              hint="Place image in public/ and use path like /images/avatar.jpg"
-            />
-            <label className="block">
-              <span className="mb-1 block text-sm text-slate-400">Summary</span>
-              <textarea
-                value={config.profile.summary}
-                onChange={(e) => handleProfileChange('summary', e.target.value)}
-                rows={3}
-                className={adminInputClass}
+            {(
+              [
+                { field: 'name', label: 'Full name', required: true },
+                { field: 'navDisplayName', label: 'Navbar name (short, single line)', required: false },
+                { field: 'title', label: 'Professional title', required: true },
+                { field: 'email', label: 'Email address', required: true },
+              ] as const
+            ).map(({ field, label, required }) => {
+              const issue = getFieldIssue(validationSummary, 'profile', field)
+              const inputId = `input-profile-${field}`
+              const feedbackId = `feedback-profile-${field}`
+              return (
+                <div key={field} className="space-y-1">
+                  <label htmlFor={inputId} className="block">
+                    <span className="mb-1 block text-sm text-slate-400">
+                      {label}
+                      {required && <span className="ml-1 text-red-400" aria-hidden="true">*</span>}
+                    </span>
+                    <input
+                      id={inputId}
+                      type={field === 'email' ? 'email' : 'text'}
+                      value={(config.profile[field] as string) ?? ''}
+                      onChange={(e) => handleProfileChange(field, e.target.value)}
+                      placeholder={field === 'navDisplayName' ? 'K. Lodha' : undefined}
+                      aria-invalid={issue?.severity === 'error'}
+                      aria-describedby={issue ? feedbackId : undefined}
+                      className={getFieldInputClass(issue)}
+                    />
+                  </label>
+                  <FieldFeedback id={feedbackId} issue={issue} />
+                </div>
+              )
+            })}
+            <div className="space-y-1">
+              <ImageField
+                label="Profile photo"
+                value={config.profile.avatarUrl}
+                onChange={(url) => handleProfileChange('avatarUrl', url)}
+                hint="Place image in public/ and use path like /images/avatar.jpg"
               />
-            </label>
+              <FieldFeedback
+                id="feedback-profile-avatarUrl"
+                issue={getFieldIssue(validationSummary, 'profile', 'avatarUrl')}
+              />
+            </div>
+            {(() => {
+              const summaryIssue = getFieldIssue(validationSummary, 'profile', 'summary')
+              const feedbackId = 'feedback-profile-summary'
+              return (
+                <div className="space-y-1">
+                  <label htmlFor="input-profile-summary" className="block">
+                    <span className="mb-1 block text-sm text-slate-400">Summary</span>
+                    <textarea
+                      id="input-profile-summary"
+                      value={config.profile.summary}
+                      onChange={(e) => handleProfileChange('summary', e.target.value)}
+                      rows={3}
+                      aria-invalid={summaryIssue?.severity === 'error'}
+                      aria-describedby={summaryIssue ? feedbackId : undefined}
+                      className={getFieldInputClass(summaryIssue)}
+                    />
+                  </label>
+                  <FieldFeedback id={feedbackId} issue={summaryIssue} />
+                </div>
+              )
+            })()}
           </AdminCard>
         )}
 
@@ -612,39 +774,115 @@ function AdminPanel() {
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Organization</span>
                       <input
+                        id={`input-experience-${selectedExp.id}-organization`}
                         value={selectedExp.organization}
                         onChange={(e) => updateExperience({ organization: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'experience', 'organization', selectedExp.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'experience', 'organization', selectedExp.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'experience', 'organization', selectedExp.id)
+                            ? `exp-${selectedExp.id}-org-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'experience', 'organization', selectedExp.id)}
+                        fieldId={`exp-${selectedExp.id}-org`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Role</span>
                       <input
+                        id={`input-experience-${selectedExp.id}-role`}
                         value={selectedExp.role}
                         onChange={(e) => updateExperience({ role: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'experience', 'role', selectedExp.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'experience', 'role', selectedExp.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'experience', 'role', selectedExp.id)
+                            ? `exp-${selectedExp.id}-role-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'experience', 'role', selectedExp.id)}
+                        fieldId={`exp-${selectedExp.id}-role`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Period</span>
                       <input
+                        id={`input-experience-${selectedExp.id}-period`}
                         value={selectedExp.period}
                         onChange={(e) => updateExperience({ period: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'experience', 'period', selectedExp.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'experience', 'period', selectedExp.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'experience', 'period', selectedExp.id)
+                            ? `exp-${selectedExp.id}-period-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'experience', 'period', selectedExp.id)}
+                        fieldId={`exp-${selectedExp.id}-period`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Location</span>
                       <input
+                        id={`input-experience-${selectedExp.id}-location`}
                         value={selectedExp.location}
                         onChange={(e) => updateExperience({ location: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'experience', 'location', selectedExp.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'experience', 'location', selectedExp.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'experience', 'location', selectedExp.id)
+                            ? `exp-${selectedExp.id}-location-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'experience', 'location', selectedExp.id)}
+                        fieldId={`exp-${selectedExp.id}-location`}
                       />
                     </label>
                     <ImageField
                       label="Company / role image"
                       value={selectedExp.imageUrl}
                       onChange={(url) => updateExperience({ imageUrl: url })}
+                    />
+                    <FieldFeedback
+                      issue={getFieldIssue(validationSummary, 'experience', 'imageUrl', selectedExp.id)}
+                      fieldId={`exp-${selectedExp.id}-image`}
                     />
                     <AttachmentsEditor
                       value={selectedExp.attachments}
@@ -719,41 +957,117 @@ function AdminPanel() {
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Title</span>
                       <input
+                        id={`input-projects-${selectedProject.id}-title`}
                         value={selectedProject.title}
                         onChange={(e) => updateProject({ title: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'projects', 'title', selectedProject.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'projects', 'title', selectedProject.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'projects', 'title', selectedProject.id)
+                            ? `proj-${selectedProject.id}-title-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'projects', 'title', selectedProject.id)}
+                        fieldId={`proj-${selectedProject.id}-title`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Period</span>
                       <input
+                        id={`input-projects-${selectedProject.id}-period`}
                         value={selectedProject.period}
                         onChange={(e) => updateProject({ period: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'projects', 'period', selectedProject.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'projects', 'period', selectedProject.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'projects', 'period', selectedProject.id)
+                            ? `proj-${selectedProject.id}-period-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'projects', 'period', selectedProject.id)}
+                        fieldId={`proj-${selectedProject.id}-period`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Overview</span>
                       <textarea
+                        id={`input-projects-${selectedProject.id}-overview`}
                         value={selectedProject.overview}
                         onChange={(e) => updateProject({ overview: e.target.value })}
                         rows={4}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'projects', 'overview', selectedProject.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'projects', 'overview', selectedProject.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'projects', 'overview', selectedProject.id)
+                            ? `proj-${selectedProject.id}-overview-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'projects', 'overview', selectedProject.id)}
+                        fieldId={`proj-${selectedProject.id}-overview`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">GitHub URL</span>
                       <input
+                        id={`input-projects-${selectedProject.id}-githubUrl`}
                         value={selectedProject.githubUrl || ''}
                         onChange={(e) => updateProject({ githubUrl: e.target.value })}
                         placeholder="https://github.com/..."
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'projects', 'githubUrl', selectedProject.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'projects', 'githubUrl', selectedProject.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'projects', 'githubUrl', selectedProject.id)
+                            ? `proj-${selectedProject.id}-github-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'projects', 'githubUrl', selectedProject.id)}
+                        fieldId={`proj-${selectedProject.id}-github`}
                       />
                     </label>
                     <ImageField
                       label="Project thumbnail"
                       value={selectedProject.imageUrl}
                       onChange={(url) => updateProject({ imageUrl: url })}
+                    />
+                    <FieldFeedback
+                      issue={getFieldIssue(validationSummary, 'projects', 'imageUrl', selectedProject.id)}
+                      fieldId={`proj-${selectedProject.id}-image`}
                     />
                     <AttachmentsEditor
                       value={selectedProject.attachments}
@@ -795,18 +1109,80 @@ function AdminPanel() {
             <label className="block">
               <span className="mb-1 block text-sm text-slate-400">Headline</span>
               <input
+                id={`input-roles-${selectedRoleId}-headline`}
                 value={selectedRole.hero.headline}
                 onChange={(e) => updateRoleHero('headline', e.target.value)}
-                className={adminInputClass}
+                className={getFieldInputClass(
+                  getFieldIssue(validationSummary, 'roles', 'hero.headline', selectedRoleId),
+                )}
+                aria-invalid={
+                  getFieldIssue(validationSummary, 'roles', 'hero.headline', selectedRoleId)
+                    ?.severity === 'error'
+                    ? true
+                    : undefined
+                }
+                aria-describedby={
+                  getFieldIssue(validationSummary, 'roles', 'hero.headline', selectedRoleId)
+                    ? `roles-${selectedRoleId}-headline-feedback`
+                    : undefined
+                }
+              />
+              <FieldFeedback
+                issue={getFieldIssue(validationSummary, 'roles', 'hero.headline', selectedRoleId)}
+                fieldId={`roles-${selectedRoleId}-headline`}
               />
             </label>
             <label className="block">
               <span className="mb-1 block text-sm text-slate-400">Subtitle</span>
               <textarea
+                id={`input-roles-${selectedRoleId}-subtitle`}
                 value={selectedRole.hero.subtitle}
                 onChange={(e) => updateRoleHero('subtitle', e.target.value)}
                 rows={3}
-                className={adminInputClass}
+                className={getFieldInputClass(
+                  getFieldIssue(validationSummary, 'roles', 'hero.subtitle', selectedRoleId),
+                )}
+                aria-invalid={
+                  getFieldIssue(validationSummary, 'roles', 'hero.subtitle', selectedRoleId)
+                    ?.severity === 'error'
+                    ? true
+                    : undefined
+                }
+                aria-describedby={
+                  getFieldIssue(validationSummary, 'roles', 'hero.subtitle', selectedRoleId)
+                    ? `roles-${selectedRoleId}-subtitle-feedback`
+                    : undefined
+                }
+              />
+              <FieldFeedback
+                issue={getFieldIssue(validationSummary, 'roles', 'hero.subtitle', selectedRoleId)}
+                fieldId={`roles-${selectedRoleId}-subtitle`}
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm text-slate-400">Primary CTA label</span>
+              <input
+                id={`input-roles-${selectedRoleId}-primaryCta`}
+                value={selectedRole.hero.primaryCta}
+                onChange={(e) => updateRoleHero('primaryCta', e.target.value)}
+                className={getFieldInputClass(
+                  getFieldIssue(validationSummary, 'roles', 'hero.primaryCta', selectedRoleId),
+                )}
+                aria-invalid={
+                  getFieldIssue(validationSummary, 'roles', 'hero.primaryCta', selectedRoleId)
+                    ?.severity === 'error'
+                    ? true
+                    : undefined
+                }
+                aria-describedby={
+                  getFieldIssue(validationSummary, 'roles', 'hero.primaryCta', selectedRoleId)
+                    ? `roles-${selectedRoleId}-primaryCta-feedback`
+                    : undefined
+                }
+              />
+              <FieldFeedback
+                issue={getFieldIssue(validationSummary, 'roles', 'hero.primaryCta', selectedRoleId)}
+                fieldId={`roles-${selectedRoleId}-primaryCta`}
               />
             </label>
           </AdminCard>
@@ -871,17 +1247,53 @@ function AdminPanel() {
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Value</span>
                       <input
+                        id={`input-metrics-${selectedMetric.id}-value`}
                         value={selectedMetric.value}
                         onChange={(e) => updateMetric({ value: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'metrics', 'value', selectedMetric.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'metrics', 'value', selectedMetric.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'metrics', 'value', selectedMetric.id)
+                            ? `metrics-${selectedMetric.id}-val-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'metrics', 'value', selectedMetric.id)}
+                        fieldId={`metrics-${selectedMetric.id}-val`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Label</span>
                       <input
+                        id={`input-metrics-${selectedMetric.id}-label`}
                         value={selectedMetric.label}
                         onChange={(e) => updateMetric({ label: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'metrics', 'label', selectedMetric.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'metrics', 'label', selectedMetric.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'metrics', 'label', selectedMetric.id)
+                            ? `metrics-${selectedMetric.id}-label-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'metrics', 'label', selectedMetric.id)}
+                        fieldId={`metrics-${selectedMetric.id}-label`}
                       />
                     </label>
                   </>
@@ -950,9 +1362,27 @@ function AdminPanel() {
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Category name</span>
                       <input
+                        id={`input-skills-${selectedSkillCategory.id}-name`}
                         value={selectedSkillCategory.name}
                         onChange={(e) => updateSkillCategory({ name: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'skills', 'name', selectedSkillCategory.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'skills', 'name', selectedSkillCategory.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'skills', 'name', selectedSkillCategory.id)
+                            ? `skills-${selectedSkillCategory.id}-name-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'skills', 'name', selectedSkillCategory.id)}
+                        fieldId={`skills-${selectedSkillCategory.id}-name`}
                       />
                     </label>
 
@@ -1065,41 +1495,131 @@ function AdminPanel() {
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Degree</span>
                       <input
+                        id={`input-education-${selectedEdu.id}-degree`}
                         value={selectedEdu.degree}
                         onChange={(e) => updateEdu({ degree: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'education', 'degree', selectedEdu.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'education', 'degree', selectedEdu.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'education', 'degree', selectedEdu.id)
+                            ? `edu-${selectedEdu.id}-degree-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'education', 'degree', selectedEdu.id)}
+                        fieldId={`edu-${selectedEdu.id}-degree`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Institution</span>
                       <input
+                        id={`input-education-${selectedEdu.id}-institution`}
                         value={selectedEdu.institution}
                         onChange={(e) => updateEdu({ institution: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'education', 'institution', selectedEdu.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'education', 'institution', selectedEdu.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'education', 'institution', selectedEdu.id)
+                            ? `edu-${selectedEdu.id}-inst-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'education', 'institution', selectedEdu.id)}
+                        fieldId={`edu-${selectedEdu.id}-inst`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Period</span>
                       <input
+                        id={`input-education-${selectedEdu.id}-period`}
                         value={selectedEdu.period}
                         onChange={(e) => updateEdu({ period: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'education', 'period', selectedEdu.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'education', 'period', selectedEdu.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'education', 'period', selectedEdu.id)
+                            ? `edu-${selectedEdu.id}-period-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'education', 'period', selectedEdu.id)}
+                        fieldId={`edu-${selectedEdu.id}-period`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">Location</span>
                       <input
+                        id={`input-education-${selectedEdu.id}-location`}
                         value={selectedEdu.location}
                         onChange={(e) => updateEdu({ location: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'education', 'location', selectedEdu.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'education', 'location', selectedEdu.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'education', 'location', selectedEdu.id)
+                            ? `edu-${selectedEdu.id}-location-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'education', 'location', selectedEdu.id)}
+                        fieldId={`edu-${selectedEdu.id}-location`}
                       />
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-sm text-slate-400">GPA</span>
                       <input
+                        id={`input-education-${selectedEdu.id}-gpa`}
                         value={selectedEdu.gpa || ''}
                         onChange={(e) => updateEdu({ gpa: e.target.value })}
-                        className={adminInputClass}
+                        className={getFieldInputClass(
+                          getFieldIssue(validationSummary, 'education', 'gpa', selectedEdu.id),
+                        )}
+                        aria-invalid={
+                          getFieldIssue(validationSummary, 'education', 'gpa', selectedEdu.id)
+                            ?.severity === 'error'
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby={
+                          getFieldIssue(validationSummary, 'education', 'gpa', selectedEdu.id)
+                            ? `edu-${selectedEdu.id}-gpa-feedback`
+                            : undefined
+                        }
+                      />
+                      <FieldFeedback
+                        issue={getFieldIssue(validationSummary, 'education', 'gpa', selectedEdu.id)}
+                        fieldId={`edu-${selectedEdu.id}-gpa`}
                       />
                     </label>
                     <label className="block">
@@ -1420,14 +1940,34 @@ function AdminPanel() {
         <div className="flex flex-wrap gap-3 rounded-xl border border-slate-700 bg-slate-900/40 p-4">
           <button
             type="submit"
-            className="min-h-[44px] min-w-[44px] rounded-lg bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            disabled={validationSummary.errorCount > 0}
+            title={
+              validationSummary.errorCount > 0
+                ? `Cannot save draft: Fix ${validationSummary.errorCount} blocking error(s)`
+                : undefined
+            }
+            className={`min-h-[44px] min-w-[44px] rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+              validationSummary.errorCount > 0
+                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400 shadow'
+            }`}
           >
             Save Draft
           </button>
           <button
             type="button"
             onClick={handleExport}
-            className="min-h-[44px] min-w-[44px] rounded-lg border border-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-200 hover:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            disabled={validationSummary.errorCount > 0}
+            title={
+              validationSummary.errorCount > 0
+                ? 'Export is disabled until all blocking errors are resolved.'
+                : undefined
+            }
+            className={`min-h-[44px] min-w-[44px] rounded-lg border px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+              validationSummary.errorCount > 0
+                ? 'border-slate-800 text-slate-600 bg-slate-900/30 cursor-not-allowed'
+                : 'border-slate-600 text-slate-200 hover:border-cyan-400 hover:text-white'
+            }`}
           >
             Export JSON
           </button>
@@ -1453,6 +1993,27 @@ function AdminPanel() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+
+      {/* Diagnostic Import Modal */}
+      {diagnosticData && (
+        <DiagnosticImportModal
+          isOpen={Boolean(diagnosticData)}
+          summary={diagnosticData.summary}
+          fileName={diagnosticData.fileName}
+          onClose={() => setDiagnosticData(null)}
+          onConfirmImport={
+            diagnosticData.candidateConfig
+              ? () => {
+                  dispatch({ type: 'replaceConfig', config: diagnosticData.candidateConfig! })
+                  saveDraftToLocalStorage(diagnosticData.candidateConfig!)
+                  setDirty(true)
+                  setImportStatus('Configuration imported with quality warnings.')
+                  setDiagnosticData(null)
+                }
+              : undefined
+          }
+        />
+      )}
     </AdminLayout>
   )
 }
