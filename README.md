@@ -25,6 +25,7 @@ npm run dev
 | `npm run dev` | Start dev server |
 | `npm run build` | Production build |
 | `npm run test` | Run unit tests |
+| `npm run test:coverage` | Run unit tests with V8 coverage + enforce the coverage floor |
 | `npm run typecheck` | TypeScript check |
 | `npm run lint` | Oxlint |
 
