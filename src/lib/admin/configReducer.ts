@@ -1,5 +1,6 @@
 import type { PortfolioConfig, Profile, RoleConfig, RoleId } from '../../types'
 import { portfolioConfig } from '../../config'
+import { validateConfigRegistry, type ValidationSummary } from '../config/validationRegistry'
 
 export type ConfigSection =
   | 'experience'
@@ -159,3 +160,11 @@ export function configDraftReducer(state: PortfolioConfig, action: ConfigAction)
 }
 
 export const initialConfig = portfolioConfig
+
+export function validateDraft(state: PortfolioConfig): ValidationSummary {
+  return validateConfigRegistry(state)
+}
+
+export function isDraftValid(state: PortfolioConfig): boolean {
+  return validateConfigRegistry(state).isValid
+}
