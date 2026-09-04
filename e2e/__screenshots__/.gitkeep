@@ -1,0 +1,3 @@
+# Baseline PNGs are committed here after initial generation in the Playwright
+# Docker container (mcr.microsoft.com/playwright, version-pinned).
+# See: npm run test:e2e:update-visual (Docker only — never run locally on mac).
