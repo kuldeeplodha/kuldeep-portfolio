@@ -51,3 +51,29 @@ jobs:
           path: test-results/a11y/
           if-no-files-found: warn
       - run: npm run build
+
+  perf-budgets:
+    runs-on: ubuntu-latest
+    # Runs in parallel with verify (not dependent on it) to stay under +4 min ceiling.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_BASE_PATH: /
+
+      # WS-4a — Bespoke gzip budget check (hard-fail from day one)
+      - name: Check bundle size budgets
+        run: node scripts/check-bundle-size.mjs
+
+      # WS-4b — Lighthouse CI (perf soft-warn first cycle; a11y + BP hard-fail)
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.js
+          uploadArtifacts: true
+          temporaryPublicStorage: true
