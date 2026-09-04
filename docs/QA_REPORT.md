@@ -64,3 +64,25 @@ Test Files  2 passed (2)
 Running 18 tests using 4 workers
   18 passed (11.8s)
 ```
+
+## Coverage Enforcement (V1.4 · T-QA-7)
+
+The unit suite now runs under a CI-enforced coverage floor via
+`npm run test:coverage` (`@vitest/coverage-v8`, dev-only). See
+[`CICD_PLAN.md`](./CICD_PLAN.md#coverage-enforcement-v14--ws-1--t-qa-7) for the
+floors of record and denominator.
+
+Current suite: **9 Vitest files / 155 tests** passing (added
+`coverageExpansion.test.ts` and `useRole.test.tsx` to drive the validation
+registry, exportImport, AI provider, and role-hook branches). Measured
+coverage on the enforced denominator:
+
+| Metric | Measured | Floor |
+| --- | --- | --- |
+| Statements | ~81.6% | 58% |
+| Lines | ~82.6% | 58% |
+| Functions | ~69.6% | 45% |
+| Branches | ~71.8% | 50% |
+| `validationRegistry.ts` branches | ~96.7% | 90% |
+
+The HTML report is published as the `coverage-report` CI artifact each run.

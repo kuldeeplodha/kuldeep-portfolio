@@ -24,6 +24,36 @@ The GitHub Actions workflow is defined at:
 
 ---
 
+## Coverage Enforcement (V1.4 · WS-1 · T-QA-7)
+
+The PR CI workflow (`.github/workflows/ci.yml`) runs `npm run test:coverage`
+instead of `npm run test`. This produces a V8 coverage report and **fails the
+build when coverage drops below the floor** configured in
+`vite.config.ts` → `test.coverage.thresholds`.
+
+**Phase A floors of record** (ADR-005 Amendment-1, confirmed by architect):
+
+| Metric | Floor |
+| --- | --- |
+| Statements | 58% |
+| Lines | 58% |
+| Functions | 45% |
+| Branches | 50% |
+| `validationRegistry.ts` branches | 90% (PRD-V1.4 AC-1.3) |
+
+- Floors are **up-only**: Phase B ratchets them higher after further targeted
+  suites; they never drop without an ADR note.
+- **Denominator:** all `src/**` app source except the e2e-only view shells
+  (`HomePage.tsx`, `AdminPage.tsx`), the React bootstrap (`main.tsx`),
+  type-only files, and the test suites themselves — so the floor reflects
+  unit-testable code.
+- The full HTML coverage report is uploaded as the **`coverage-report`** CI
+  artifact on every run (14-day retention); `lcov.info` is emitted for
+  external tooling.
+- Tooling: `@vitest/coverage-v8` (dev-only; no runtime dependency added).
+
+---
+
 ## Action Items: How to Setup & Activate
 
 To activate this pipeline, follow these 3 steps:
