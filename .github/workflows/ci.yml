@@ -24,7 +24,16 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm run test
+      # Runs unit/component suites AND enforces the coverage floor
+      # (thresholds in vite.config.ts; fails the build below the floor).
+      - run: npm run test:coverage
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
       - run: npx playwright install chromium --with-deps
       - run: npm run test:e2e
         env:

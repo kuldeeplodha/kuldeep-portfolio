@@ -19,6 +19,11 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       PATH: process.env.PATH || '',
+      // Pin the preview build's base path so it always matches the
+      // baseURL the e2e specs hit (localhost:4173/). Defaults to '/' for
+      // local + CI e2e runs; a caller that sets VITE_BASE_PATH (e.g. to
+      // /kuldeep-portfolio/) gets a matching build under that prefix. (T-QA-6)
+      VITE_BASE_PATH: process.env.VITE_BASE_PATH || '/',
       // sha256('test-admin-password') — the e2e suite logs in with the
       // plaintext form; only the digest reaches the bundle.
       VITE_ADMIN_PASSWORD_HASH:
