@@ -366,7 +366,7 @@ describe('AdminPage Validation Integration', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.getByText(/Draft is valid and safe to save and export/i)).toBeInTheDocument()
+    expect(screen.getByText(/All sections valid\. Ready to export or save draft\./i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Save Draft/i })).toBeEnabled()
     expect(screen.getByRole('button', { name: /Export JSON/i })).toBeEnabled()
   })

@@ -88,10 +88,12 @@ export function isValidCssColor(color: string | undefined | null): boolean {
 export function isValidGpa(gpa: string | undefined | null): boolean {
   if (!gpa || !gpa.trim()) return true
   const trimmed = gpa.trim()
-  const match = trimmed.match(/^([\d.]+)(?:\s*\/\s*([\d.]+))?$/)
+  const isCgpa = /cgpa/i.test(trimmed)
+  const clean = trimmed.replace(/\b(?:cgpa|gpa)\b/gi, '').trim()
+  const match = clean.match(/^([\d.]+)(?:\s*(?:\/|\bout of\b)\s*([\d.]+))?$/)
   if (!match) return false
   const val = parseFloat(match[1])
-  const max = match[2] ? parseFloat(match[2]) : 4.0
+  const max = match[2] ? parseFloat(match[2]) : (isCgpa ? 10.0 : 4.0)
   if (isNaN(val) || isNaN(max)) return false
   if (val < 0 || val > max) return false
   return true

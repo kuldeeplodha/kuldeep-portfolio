@@ -98,7 +98,10 @@ describe('validationRegistry', () => {
       expect(isValidGpa('3.8')).toBe(true)
       expect(isValidGpa('3.85 / 4.0')).toBe(true)
       expect(isValidGpa('4.0')).toBe(true)
+      expect(isValidGpa('8.00 CGPA')).toBe(true)
+      expect(isValidGpa('8.5 / 10')).toBe(true)
       expect(isValidGpa('5.2')).toBe(false) // > 4.0 max
+      expect(isValidGpa('11.0 CGPA')).toBe(false) // > 10.0 max
       expect(isValidGpa('invalid')).toBe(false)
     })
   })
