@@ -31,7 +31,7 @@ export function DiagnosticImportModal({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        onClose()
+        onClose?.()
         return
       }
 

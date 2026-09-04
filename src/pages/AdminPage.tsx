@@ -155,7 +155,7 @@ function AdminPanel() {
         document.querySelector(`[data-field="${field}"]`)
       if (targetInput instanceof HTMLElement) {
         targetInput.focus()
-        targetInput.scrollIntoView({ behavior: "smooth", block: "center" })
+        targetInput.scrollIntoView?.({ behavior: "smooth", block: "center" })
       }
     })
   }, [])
@@ -643,35 +643,72 @@ function AdminPanel() {
       >
         {tab === 'profile' && (
           <AdminCard title="Profile" description="Global info shown across all resume pages.">
-            {(['name', 'navDisplayName', 'title', 'email'] as const).map((field) => (
-              <label key={field} className="block">
-                <span className="mb-1 block text-sm text-slate-400">
-                  {field === 'navDisplayName' ? 'Navbar name (short, single line)' : field}
-                </span>
-                <input
-                  type={field === 'email' ? 'email' : 'text'}
-                  value={(config.profile[field] as string) ?? ''}
-                  onChange={(e) => handleProfileChange(field, e.target.value)}
-                  placeholder={field === 'navDisplayName' ? 'K. Lodha' : undefined}
-                  className={adminInputClass}
-                />
-              </label>
-            ))}
-            <ImageField
-              label="Profile photo"
-              value={config.profile.avatarUrl}
-              onChange={(url) => handleProfileChange('avatarUrl', url)}
-              hint="Place image in public/ and use path like /images/avatar.jpg"
-            />
-            <label className="block">
-              <span className="mb-1 block text-sm text-slate-400">Summary</span>
-              <textarea
-                value={config.profile.summary}
-                onChange={(e) => handleProfileChange('summary', e.target.value)}
-                rows={3}
-                className={adminInputClass}
+            {(
+              [
+                { field: 'name', label: 'Full name', required: true },
+                { field: 'navDisplayName', label: 'Navbar name (short, single line)', required: false },
+                { field: 'title', label: 'Professional title', required: true },
+                { field: 'email', label: 'Email address', required: true },
+              ] as const
+            ).map(({ field, label, required }) => {
+              const issue = getFieldIssue(validationSummary, 'profile', field)
+              const inputId = `input-profile-${field}`
+              const feedbackId = `feedback-profile-${field}`
+              return (
+                <div key={field} className="space-y-1">
+                  <label htmlFor={inputId} className="block">
+                    <span className="mb-1 block text-sm text-slate-400">
+                      {label}
+                      {required && <span className="ml-1 text-red-400" aria-hidden="true">*</span>}
+                    </span>
+                    <input
+                      id={inputId}
+                      type={field === 'email' ? 'email' : 'text'}
+                      value={(config.profile[field] as string) ?? ''}
+                      onChange={(e) => handleProfileChange(field, e.target.value)}
+                      placeholder={field === 'navDisplayName' ? 'K. Lodha' : undefined}
+                      aria-invalid={issue?.severity === 'error'}
+                      aria-describedby={issue ? feedbackId : undefined}
+                      className={getFieldInputClass(issue)}
+                    />
+                  </label>
+                  <FieldFeedback id={feedbackId} issue={issue} />
+                </div>
+              )
+            })}
+            <div className="space-y-1">
+              <ImageField
+                label="Profile photo"
+                value={config.profile.avatarUrl}
+                onChange={(url) => handleProfileChange('avatarUrl', url)}
+                hint="Place image in public/ and use path like /images/avatar.jpg"
               />
-            </label>
+              <FieldFeedback
+                id="feedback-profile-avatarUrl"
+                issue={getFieldIssue(validationSummary, 'profile', 'avatarUrl')}
+              />
+            </div>
+            {(() => {
+              const summaryIssue = getFieldIssue(validationSummary, 'profile', 'summary')
+              const feedbackId = 'feedback-profile-summary'
+              return (
+                <div className="space-y-1">
+                  <label htmlFor="input-profile-summary" className="block">
+                    <span className="mb-1 block text-sm text-slate-400">Summary</span>
+                    <textarea
+                      id="input-profile-summary"
+                      value={config.profile.summary}
+                      onChange={(e) => handleProfileChange('summary', e.target.value)}
+                      rows={3}
+                      aria-invalid={summaryIssue?.severity === 'error'}
+                      aria-describedby={summaryIssue ? feedbackId : undefined}
+                      className={getFieldInputClass(summaryIssue)}
+                    />
+                  </label>
+                  <FieldFeedback id={feedbackId} issue={summaryIssue} />
+                </div>
+              )
+            })()}
           </AdminCard>
         )}
 

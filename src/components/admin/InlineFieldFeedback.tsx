@@ -2,16 +2,19 @@ import type { ValidationIssue } from '../../lib/config/validationRegistry'
 
 interface FieldFeedbackProps {
   issue?: ValidationIssue
-  fieldId: string
+  fieldId?: string
+  id?: string
 }
 
-export function FieldFeedback({ issue, fieldId }: FieldFeedbackProps) {
+export function FieldFeedback({ issue, fieldId, id }: FieldFeedbackProps) {
   if (!issue) return null
+
+  const resolvedId = id || (fieldId ? `${fieldId}-${issue.severity}` : undefined)
 
   if (issue.severity === 'error') {
     return (
       <div
-        id={`${fieldId}-error`}
+        id={resolvedId}
         className="mt-1.5 flex flex-col gap-0.5 text-xs text-red-400 font-medium"
         role="alert"
       >
@@ -28,8 +31,9 @@ export function FieldFeedback({ issue, fieldId }: FieldFeedbackProps) {
 
   return (
     <div
-      id={`${fieldId}-warning`}
+      id={resolvedId}
       className="mt-1.5 flex flex-col gap-0.5 text-xs text-amber-300 font-medium"
+      role="status"
     >
       <div className="flex items-center gap-1.5">
         <span aria-hidden="true">ℹ️</span>
