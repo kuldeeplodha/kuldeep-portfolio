@@ -12,6 +12,12 @@ const ProjectDetailPage = lazy(() =>
 const AdminPage = lazy(() =>
   import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })),
 )
+const BlogListPage = lazy(() =>
+  import('./pages/BlogListPage').then((m) => ({ default: m.BlogListPage })),
+)
+const BlogDetailPage = lazy(() =>
+  import('./pages/BlogDetailPage').then((m) => ({ default: m.BlogDetailPage })),
+)
 
 function PageLoader() {
   return (
@@ -53,6 +59,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blog/:slug" element={<BlogDetailPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
