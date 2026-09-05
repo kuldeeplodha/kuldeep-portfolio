@@ -28,6 +28,16 @@ function parseFrontmatter(raw) {
   return result;
 }
 
+function escapeHtml(unsafe) {
+  if (typeof unsafe !== 'string') return unsafe;
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 const DIST_DIR = path.resolve(process.cwd(), 'dist');
 const BLOG_CONTENT_DIR = path.resolve(process.cwd(), 'src/content/blog');
 const BASE_PATH = process.env.VITE_BASE_PATH || '/';
@@ -84,15 +94,19 @@ async function run() {
     }
     const fullCanonicalUrl = origin + canonicalPath;
     
+    const safeTitle = escapeHtml(post.title);
+    const safeExcerpt = escapeHtml(post.excerpt || '');
+    const safeCanonicalUrl = escapeHtml(fullCanonicalUrl);
+    
     let postHtml = baseHtml
-      .replace(/<title>.*?<\/title>/, `<title>${post.title} | Blog</title>`)
-      .replace(/<meta name="description" content=".*?">/, `<meta name="description" content="${post.excerpt || ''}">`);
+      .replace(/<title>.*?<\/title>/, `<title>${safeTitle} | Blog</title>`)
+      .replace(/<meta name="description" content=".*?">/, `<meta name="description" content="${safeExcerpt}">`);
       
     const ogTags = `
-    <link rel="canonical" href="${fullCanonicalUrl}">
-    <meta property="og:title" content="${post.title}">
-    <meta property="og:description" content="${post.excerpt || ''}">
-    <meta property="og:url" content="${fullCanonicalUrl}">
+    <link rel="canonical" href="${safeCanonicalUrl}">
+    <meta property="og:title" content="${safeTitle}">
+    <meta property="og:description" content="${safeExcerpt}">
+    <meta property="og:url" content="${safeCanonicalUrl}">
     <meta property="og:type" content="article">
     `;
     postHtml = postHtml.replace('</head>', `${ogTags}</head>`);
