@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { portfolioConfig, getResumeForVariant } from '../../config'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
@@ -16,26 +16,57 @@ const NAV_ITEMS = [
   { id: 'contact', label: 'Contact' },
 ]
 
+// Leaner desktop IA (V1.6 §2.1): 4 primary links stay on the bar, the rest
+// move into the "More" menu. Blog + Resume are kept as standalone CTAs.
+const PRIMARY_IDS = ['projects', 'experience', 'skills', 'contact']
+const PRIMARY_ITEMS = NAV_ITEMS.filter((item) => PRIMARY_IDS.includes(item.id))
+const MORE_ITEMS = NAV_ITEMS.filter((item) => !PRIMARY_IDS.includes(item.id) && item.id !== 'home')
+
+function navLinkStyle(active: boolean) {
+  return {
+    color: active ? 'var(--color-accent)' : 'var(--color-text-muted)',
+  }
+}
+
 export function Navbar() {
   const { profile } = portfolioConfig
   const { role } = useRole()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreRef = useRef<HTMLLIElement>(null)
   const resume = getResumeForVariant(role.resumeVariant)
 
+  useEffect(() => {
+    if (!moreOpen) return
+
+    function handlePointerDown(event: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
+        setMoreOpen(false)
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMoreOpen(false)
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [moreOpen])
+
   return (
-    <header
-      className="sticky top-0 z-50 border-b backdrop-blur-md"
-      style={{
-        borderColor: 'var(--color-border)',
-        backgroundColor: 'color-mix(in srgb, var(--color-bg) 90%, transparent)',
-      }}
-    >
+    <header className="sticky top-3 z-50 px-3 sm:top-4 sm:px-4">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
       <nav
-        className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4"
+        className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-[var(--radius-pill)] border px-4 py-2.5 shadow-[var(--shadow-glass-sm)] backdrop-blur-xl sm:px-5"
+        style={{
+          borderColor: 'color-mix(in srgb, var(--color-border) 55%, transparent)',
+          backgroundColor: 'color-mix(in srgb, var(--color-bg) 78%, transparent)',
+        }}
         aria-label="Main navigation"
       >
         <Link
@@ -71,26 +102,61 @@ export function Navbar() {
           </span>
         </Link>
 
-        <ul className="hidden items-center gap-5 lg:flex">
-          {NAV_ITEMS.map((item) => (
+        <ul className="hidden items-center gap-1 lg:flex">
+          {PRIMARY_ITEMS.map((item) => (
             <li key={item.id}>
               <Link
                 to={{ pathname: '/', hash: item.id, search: location.search }}
-                className="rounded-md px-2 py-2 text-sm transition-opacity hover:opacity-80"
-                style={{
-                  color: role.navEmphasis.includes(item.id)
-                    ? 'var(--color-accent)'
-                    : 'var(--color-text-muted)',
-                }}
+                className="rounded-[var(--radius-base)] px-3 py-2 text-sm transition-colors nav-hover"
+                style={navLinkStyle(role.navEmphasis.includes(item.id))}
               >
                 {item.label}
               </Link>
             </li>
           ))}
+          <li className="relative" ref={moreRef}>
+            <button
+              type="button"
+              className="flex items-center gap-1 rounded-[var(--radius-base)] px-3 py-2 text-sm transition-colors nav-hover"
+              style={navLinkStyle(MORE_ITEMS.some((item) => role.navEmphasis.includes(item.id)))}
+              onClick={() => setMoreOpen((open) => !open)}
+              aria-haspopup="menu"
+              aria-expanded={moreOpen}
+            >
+              More
+              <span aria-hidden className={`transition-transform ${moreOpen ? 'rotate-180' : ''}`}>
+                ▾
+              </span>
+            </button>
+            {moreOpen && (
+              <div
+                role="menu"
+                aria-label="More navigation links"
+                className="menu-pop-in absolute right-0 top-[calc(100%+0.5rem)] w-48 overflow-hidden rounded-[var(--radius-base)] border p-1.5 shadow-[var(--shadow-glass-md)] backdrop-blur-xl"
+                style={{
+                  borderColor: 'color-mix(in srgb, var(--color-border) 55%, transparent)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-bg) 92%, transparent)',
+                }}
+              >
+                {MORE_ITEMS.map((item) => (
+                  <Link
+                    key={item.id}
+                    role="menuitem"
+                    to={{ pathname: '/', hash: item.id, search: location.search }}
+                    className="block rounded-[calc(var(--radius-base)-4px)] px-3 py-2 text-sm transition-colors nav-hover"
+                    style={navLinkStyle(role.navEmphasis.includes(item.id))}
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </li>
           <li>
             <Link
               to="/blog"
-              className="rounded-md px-2 py-2 text-sm transition-opacity hover:opacity-80"
+              className="rounded-[var(--radius-base)] px-3 py-2 text-sm transition-colors nav-hover"
               style={{
                 color: location.pathname.startsWith('/blog')
                   ? 'var(--color-text)'
@@ -104,7 +170,7 @@ export function Navbar() {
             <a
               href={resume.path}
               download={resume.filename}
-              className="rounded-lg border px-3 py-1.5 text-sm font-medium transition-opacity hover:opacity-80"
+              className="rounded-[var(--radius-pill)] border px-3.5 py-1.5 text-sm font-medium transition-transform hover:scale-105"
               style={{
                 borderColor: 'var(--color-accent)',
                 color: 'var(--color-accent)',
@@ -117,7 +183,7 @@ export function Navbar() {
 
         <button
           type="button"
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border p-2 lg:hidden"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-pill)] border p-2 lg:hidden"
           style={{ borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-expanded={mobileOpen}
@@ -131,8 +197,11 @@ export function Navbar() {
       {mobileOpen && (
         <div
           id="mobile-menu"
-          className="border-t px-6 py-4 lg:hidden"
-          style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
+          className="menu-pop-in mx-auto mt-2 max-w-5xl rounded-[var(--radius-card)] border px-6 py-4 shadow-[var(--shadow-glass-md)] backdrop-blur-xl lg:hidden"
+          style={{
+            borderColor: 'color-mix(in srgb, var(--color-border) 55%, transparent)',
+            backgroundColor: 'color-mix(in srgb, var(--color-bg) 92%, transparent)',
+          }}
         >
           <ul className="space-y-3">
             {NAV_ITEMS.map((item) => (

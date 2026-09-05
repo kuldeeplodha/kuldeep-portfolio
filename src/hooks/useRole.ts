@@ -51,6 +51,11 @@ export function useRole() {
     root.style.setProperty('--color-text-muted', theme.textMuted)
     root.style.setProperty('--color-accent', theme.accent)
     root.style.setProperty('--color-border', theme.border)
+    // V1.6 UI Modernization Phase 2 (docs/design/ui-v1.6-design-spec.md §1):
+    // per-role gradient mesh tokens for future components (hero, featured blog).
+    root.style.setProperty('--color-gradient-1', theme.accent)
+    root.style.setProperty('--color-gradient-2', theme.accentMuted)
+    root.style.setProperty('--color-gradient-3', theme.surface)
     document.body.style.backgroundColor = theme.background
     document.body.style.color = theme.text
   }, [theme, roleId])

@@ -3,6 +3,16 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* V1.6 UI Modernization — unified radius scale (docs/design/ui-v1.6-design-spec.md §1) */
+  --radius-base: 16px;
+  --radius-card: 24px;
+  --radius-pill: 9999px;
+
+  /* V1.6 UI Modernization — glassmorphism elevation scale */
+  --shadow-glass-sm: 0 4px 16px 0 color-mix(in srgb, var(--color-text) 5%, transparent);
+  --shadow-glass-md: 0 8px 32px 0 color-mix(in srgb, var(--color-text) 5%, transparent);
+  --shadow-glass-lg: 0 12px 48px 0 color-mix(in srgb, var(--color-accent) 15%, transparent);
 }
 
 @layer base {
@@ -51,6 +61,33 @@
 
   .skip-link:focus {
     top: 1rem;
+  }
+
+  /* V1.6 UI Modernization — theme-aware hover surface for nav/menu items,
+     used instead of Tailwind's dark: variant since theming is role-driven
+     (data-role) rather than prefers-color-scheme. */
+  .nav-hover:hover {
+    background-color: color-mix(in srgb, var(--color-text) 6%, transparent);
+  }
+
+  /* V1.6 UI Modernization — CSS-only enter animation for the nav "More"
+     dropdown and mobile menu (deliberately no framer-motion here: both live
+     in the eagerly-loaded index chunk, which is already at the gzip budget
+     ceiling — see .perf-budget.json / scripts/check-bundle-size.mjs).
+     The global prefers-reduced-motion rule above already zeroes this out. */
+  @keyframes menu-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .menu-pop-in {
+    animation: menu-pop-in 150ms ease-out;
   }
 
   .sr-only {
