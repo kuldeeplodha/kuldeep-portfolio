@@ -46,4 +46,18 @@ test.describe('Blog', () => {
     await expect(page).toHaveURL(/.*\/blog$/);
     await expect(page.getByRole('heading', { name: 'Blog', level: 1, exact: true })).toBeVisible();
   });
+
+  // V1.6 UI Modernization (T-UI-IMPL §2.2): bento grid layout for the post list.
+  test('blog list renders posts in a responsive bento grid', async ({ page }) => {
+    await page.goto('/blog');
+
+    const grid = page.locator('main').locator('div.grid').first();
+    await expect(grid).toBeVisible();
+    await expect(grid).toHaveClass(/grid-cols-1/);
+    await expect(grid).toHaveClass(/md:grid-cols-2/);
+    await expect(grid).toHaveClass(/lg:grid-cols-3/);
+
+    const cards = grid.locator('> article');
+    await expect(cards).toHaveCount(3);
+  });
 });
