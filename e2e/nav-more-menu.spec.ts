@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test'
 
 // V2-P1 nav restructure (docs/design/portfolio-v2-design-spec.md §2.1): the
-// desktop navbar's primary bar is Work/Experience/Lab/About; Skills/
+// desktop navbar's primary bar is Work/Experience/Lab/About; Stack/
 // Education/Contact/Blog collapse behind a "More" menu; Ask Kuldeep +
 // Resume are standalone secondary CTAs. Only applies to the desktop layout
-// (`lg:flex`) — the mobile menu keeps a single flat list.
+// (`lg:flex`) — the mobile menu keeps a single flat list. ('Stack' replaced
+// 'Skills' in V2-P4 — SkillsSection is no longer rendered on the homepage.)
 test.describe('Navbar "More" menu', () => {
   test('opens on click, exposes secondary links, and is keyboard accessible', async ({
     page,
@@ -23,7 +24,7 @@ test.describe('Navbar "More" menu', () => {
 
     const menu = page.getByRole('menu', { name: 'More navigation links' })
     await expect(menu).toBeVisible()
-    for (const label of ['Skills', 'Education', 'Contact', 'Blog']) {
+    for (const label of ['Stack', 'Education', 'Contact', 'Blog']) {
       await expect(menu.getByRole('menuitem', { name: label })).toBeVisible()
     }
 
@@ -41,9 +42,9 @@ test.describe('Navbar "More" menu', () => {
 
     await page.goto('/')
     await page.getByRole('button', { name: 'More' }).click()
-    await page.getByRole('menuitem', { name: 'Skills' }).click()
+    await page.getByRole('menuitem', { name: 'Stack' }).click()
 
-    await expect(page.locator('#skills')).toBeInViewport()
+    await expect(page.locator('#stack')).toBeInViewport()
     await expect(page.getByRole('button', { name: 'More' })).toHaveAttribute('aria-expanded', 'false')
   })
 

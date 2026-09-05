@@ -11,7 +11,7 @@ export const aiKnowledge: AIKnowledgeEntry[] = [
       'python frameworks',
     ],
     answer:
-      'Kuldeep uses Python with Django and REST APIs for backend development, along with PostgreSQL, Docker, Git, and CI/CD. He has built ETL pipelines with Apache Airflow.',
+      'Kuldeep uses Python with Django and Django REST Framework for backend development, along with PostgreSQL, Docker, Git, and CI/CD. As Senior Software Developer (Lead) at Vidai Solutions, he builds and optimizes REST APIs and integrations across EMR, billing, and CRM systems.',
     tags: ['software', 'backend'],
     source: 'resume:software',
   },
@@ -51,7 +51,7 @@ export const aiKnowledge: AIKnowledgeEntry[] = [
     id: 'experience-years',
     questionPatterns: ['years of experience', 'how long', 'experience'],
     answer:
-      'Kuldeep has 4+ years of software development experience, currently working as Software Developer at Shelter Associates and Software Developer Consultant at Swadhar IDWC.',
+      'Kuldeep has 5+ years of software development experience. He is currently Senior Software Developer (Lead) at Vidai Solutions (Aug 2025 – Present), and previously worked at Shelter Associates and as a Software Developer Consultant at Swadhar IDWC.',
     tags: ['general'],
     source: 'resume:all',
   },
@@ -75,7 +75,7 @@ export const aiKnowledge: AIKnowledgeEntry[] = [
     id: 'career-direction',
     questionPatterns: ['career', 'direction', 'goal', 'objective', 'summary', 'about', 'who is', 'passionate about'],
     answer:
-      'Kuldeep is a Software Developer with 4+ years of experience, passionate about solving complex problems and building reliable backend and data systems. He is eager to learn new technologies and is moving toward intelligent products and machine learning workflows.',
+      'Kuldeep is a Senior Software Developer (Lead) with 5+ years of experience building backend systems, APIs, and data workflows. His career has evolved from software engineering into data and, through an MS in Machine Learning & AI, into machine learning, NLP, and AI research.',
     tags: ['general', 'career'],
     source: 'resume:all',
   },

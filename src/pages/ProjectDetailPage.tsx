@@ -27,6 +27,17 @@ export function ProjectDetailPage() {
           ← Back to projects
         </Link>
 
+        {project.category && (
+          <span
+            className="mb-3 inline-block rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
+              color: 'var(--color-accent)',
+            }}
+          >
+            {project.category}
+          </span>
+        )}
         <p className="mb-2 text-sm" style={{ color: 'var(--color-text-muted)' }}>
           {project.period}
         </p>
@@ -52,7 +63,7 @@ export function ProjectDetailPage() {
         <section className="mb-8">
           <h2 className="mb-4 text-lg font-semibold">Pipeline</h2>
           <div
-            className="overflow-x-auto rounded-xl border p-4 sm:p-6"
+            className="overflow-x-auto rounded-[var(--radius-card)] border p-4 sm:p-6"
             style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
             tabIndex={0}
             aria-label="Pipeline steps"
@@ -61,7 +72,7 @@ export function ProjectDetailPage() {
               {project.pipeline.map((step, i) => (
                 <span key={step} className="flex shrink-0 items-center gap-2">
                   <span
-                    className="rounded-lg border px-3 py-2 text-sm font-mono whitespace-nowrap"
+                    className="rounded-[var(--radius-base)] border px-3 py-2 text-sm font-mono whitespace-nowrap"
                     style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
                   >
                     {step}
@@ -83,7 +94,7 @@ export function ProjectDetailPage() {
             {project.technologies.map((tech) => (
               <span
                 key={tech}
-                className="rounded-full border px-3 py-1 text-sm"
+                className="rounded-[var(--radius-pill)] border px-3 py-1 text-sm"
                 style={{ borderColor: 'var(--color-border)' }}
               >
                 {tech}
@@ -111,7 +122,7 @@ export function ProjectDetailPage() {
             href={project.githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block rounded-lg px-6 py-3 text-sm font-semibold"
+            className="inline-block rounded-[var(--radius-base)] px-6 py-3 text-sm font-semibold"
             style={{ backgroundColor: 'var(--color-accent)', color: theme.background }}
           >
             View on GitHub

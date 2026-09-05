@@ -7,7 +7,7 @@ import { ContactSection } from '../components/layout/Navbar'
 const ExperienceSection = lazy(() => import('../components/sections/ExperienceSection').then(m => ({ default: m.ExperienceSection })))
 const ProjectsSection = lazy(() => import('../components/sections/ProjectsSection').then(m => ({ default: m.ProjectsSection })))
 const ResearchLabSection = lazy(() => import('../components/sections/ResearchLabSection').then(m => ({ default: m.ResearchLabSection })))
-const SkillsSection = lazy(() => import('../components/sections/SkillsSection').then(m => ({ default: m.SkillsSection })))
+const EngineeringStackSection = lazy(() => import('../components/sections/EngineeringStackSection').then(m => ({ default: m.EngineeringStackSection })))
 const EducationSection = lazy(() => import('../components/sections/EducationSection').then(m => ({ default: m.EducationSection })))
 const CertificationsSection = lazy(() => import('../components/sections/CertificationsSection').then(m => ({ default: m.CertificationsSection })))
 const AskKuldeepSection = lazy(() => import('../components/sections/AskKuldeepSection').then(m => ({ default: m.AskKuldeepSection })))
@@ -16,14 +16,17 @@ function SectionLoader() {
   return <div className="min-h-[20vh]" aria-hidden="true" />
 }
 
-// V2-P3: order follows src/config/sectionOrder.ts (signal -> work -> experience
-// -> about -> lab -> stack -> ask) for the 4 sections this phase rebuilds.
-// MetricsSection is deliberately NOT rendered here anymore — its old content
-// (years-experience, manual-entry-reduction, etc.) restated the same
+// Order follows src/config/sectionOrder.ts (signal -> work -> experience ->
+// about -> lab -> stack -> ask).
+//
+// MetricsSection (V2-P3) and SkillsSection (V2-P4) are deliberately NOT
+// rendered here anymore. MetricsSection's old content restated the same
 // achievements now covered authoritatively by ProjectsSection's impact-metrics
-// strip, which uiContentRules explicitly warns against ("repeating the same
-// achievement in multiple sections"). The component/config are left intact
-// (AdminPage still manages them) in case they're repurposed later.
+// strip. SkillsSection is superseded by EngineeringSignalSection (categories)
+// + EngineeringStackSection (the full technology matrix) — both uiContentRules
+// violations (repeating content / a redundant skills listing) if left in
+// alongside their replacements. Both components and their config are left
+// intact (AdminPage still manages them) in case they're repurposed later.
 export function HomePage() {
   return (
     <main
@@ -40,7 +43,7 @@ export function HomePage() {
       <AboutSection />
       <Suspense fallback={<SectionLoader />}>
         <ResearchLabSection />
-        <SkillsSection />
+        <EngineeringStackSection />
         <EducationSection />
         <CertificationsSection />
         <AskKuldeepSection />
