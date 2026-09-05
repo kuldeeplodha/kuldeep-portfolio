@@ -99,8 +99,10 @@ async function run() {
     const safeCanonicalUrl = escapeHtml(fullCanonicalUrl);
     
     let postHtml = baseHtml
-      .replace(/<title>.*?<\/title>/, `<title>${safeTitle} | Blog</title>`)
-      .replace(/<meta name="description" content=".*?">/, `<meta name="description" content="${safeExcerpt}">`);
+      .replace(/<title>.*?<\/title>/s, `<title>${safeTitle} | Blog</title>`)
+      .replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/s, `<meta name="description" content="${safeExcerpt}">`)
+      .replace(/<link\s+rel="canonical"[^>]*>/gs, '')
+      .replace(/<meta\s+property="og:[^"]+"[^>]*>/gs, '');
       
     const ogTags = `
     <link rel="canonical" href="${safeCanonicalUrl}">

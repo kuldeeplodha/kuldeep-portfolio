@@ -26,7 +26,7 @@ export function BlogListPage() {
                 {post.tags && post.tags.length > 0 && (
                   <div className="flex gap-2">
                     {post.tags.map(tag => (
-                      <span key={tag} className="rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--color-border)' }}>
+                      <span key={tag} className="rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--color-border)', color: 'var(--color-text)' }}>
                         {tag}
                       </span>
                     ))}

@@ -117,4 +117,34 @@ test.describe('Accessibility (A11y) Audit', () => {
 
     expect(gatingViolations(accessibilityScanResults.violations)).toEqual([])
   })
+
+  test('blog list page should not have any automatically detectable accessibility issues', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/blog')
+    await page.waitForLoadState('networkidle')
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag21a', 'wcag2aa', 'wcag21aa'])
+      .analyze()
+
+    saveA11yResults(accessibilityScanResults, 'blog-list', testInfo)
+
+    expect(gatingViolations(accessibilityScanResults.violations)).toEqual([])
+  })
+
+  test('blog detail page should not have any automatically detectable accessibility issues', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/blog/welcome-to-markdown-blog')
+    await page.waitForLoadState('networkidle')
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag21a', 'wcag2aa', 'wcag21aa'])
+      .analyze()
+
+    saveA11yResults(accessibilityScanResults, 'blog-detail', testInfo)
+
+    expect(gatingViolations(accessibilityScanResults.violations)).toEqual([])
+  })
 })
