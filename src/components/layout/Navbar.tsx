@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { id: 'projects', label: 'Work' },
   { id: 'research', label: 'Lab' },
   { id: 'experience', label: 'Experience' },
-  { id: 'skills', label: 'Skills' },
+  { id: 'stack', label: 'Stack' },
   { id: 'education', label: 'Education' },
   { id: 'about', label: 'About' },
   { id: 'ask', label: 'Ask Kuldeep' },
@@ -20,14 +20,16 @@ const NAV_ITEMS = [
 
 // V2 IA (docs/design/portfolio-v2-design-spec.md §2.1): primary bar is
 // Work / Experience / Lab / About, in that order. Ask Kuldeep + Resume are
-// standalone secondary CTAs. Everything else (Skills/Education/Contact/
+// standalone secondary CTAs. Everything else (Stack/Education/Contact/
 // Blog) is demoted into the "More" menu — Blog stays reachable there.
+// 'stack' (Engineering Stack, V2-P4) replaced the old 'skills' anchor —
+// SkillsSection is no longer rendered on the homepage.
 const PRIMARY_IDS = ['projects', 'experience', 'research', 'about'] as const
 const PRIMARY_ITEMS = PRIMARY_IDS.map((id) => NAV_ITEMS.find((item) => item.id === id)!)
 
 type MoreItem = { id: string; label: string; to?: string }
 const MORE_ITEMS: MoreItem[] = [
-  { id: 'skills', label: 'Skills' },
+  { id: 'stack', label: 'Stack' },
   { id: 'education', label: 'Education' },
   { id: 'contact', label: 'Contact' },
   { id: 'blog', label: 'Blog', to: '/blog' },

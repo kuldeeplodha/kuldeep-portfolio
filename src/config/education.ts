@@ -106,15 +106,24 @@ export const certifications: Certification[] = [
   },
 ]
 
+// V2 §2.7: this is the ONLY real research entry (MS thesis, completed 2024) —
+// content.research.featured, verbatim. Do not add other "experiments"; Kelly's
+// content audit flagged multi-experiment framing here as very-high fabrication risk.
 export const research: Research[] = [
   {
     id: 'nlp-explainability',
     title: 'Explainability in Low-Resource and Multilingual NLP Applications',
+    type: 'MS Research Thesis · 2024',
     description:
-      'Research thesis exploring explainability techniques for NLP in low-resource and multilingual settings.',
-    status: 'In progress (MS program)',
+      'Research focused on explainability and interpretability challenges in NLP systems operating across low-resource and multilingual settings.',
+    status: 'Completed · 2024',
+    areas: ['Explainable AI', 'Natural Language Processing', 'Low-Resource NLP', 'Multilingual NLP', 'Model Interpretability'],
   },
 ]
+
+// content.research.intro, verbatim.
+export const researchIntro =
+  'My interest in AI goes beyond applying models. I am particularly interested in understanding how models behave, how their decisions can be explained, and how AI can work effectively where data and language resources are limited.'
 
 export const metrics: Metric[] = [
   {

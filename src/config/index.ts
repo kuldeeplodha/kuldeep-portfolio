@@ -4,13 +4,16 @@ import { themes } from './themes'
 import { experience } from './experience'
 import { projects } from './projects'
 import { skills } from './skills'
-import { education, certifications, research, metrics } from './education'
+import { education, certifications, research, metrics, researchIntro } from './education'
 import { aiKnowledge } from './aiKnowledge'
 import { careerJourney } from './careerJourney'
 import { engineeringSignal } from './engineeringSignal'
 import { philosophy } from './philosophy'
 import { impactMetrics } from './impactMetrics'
 import { experienceStory } from './experienceStory'
+import { engineeringStack } from './engineeringStack'
+import { currentlyExploring } from './currentlyExploring'
+import { askKuldeepContent } from './askKuldeepContent'
 import type { PortfolioConfig } from '../types'
 
 export const portfolioConfig: PortfolioConfig = {
@@ -30,6 +33,10 @@ export const portfolioConfig: PortfolioConfig = {
   philosophy,
   impactMetrics,
   experienceStory,
+  engineeringStack,
+  researchIntro,
+  currentlyExploring,
+  askKuldeepContent,
 }
 
 export * from './profile'
@@ -45,4 +52,7 @@ export * from './engineeringSignal'
 export * from './philosophy'
 export * from './impactMetrics'
 export * from './experienceStory'
+export * from './engineeringStack'
+export * from './currentlyExploring'
+export * from './askKuldeepContent'
 export * from './resumes'

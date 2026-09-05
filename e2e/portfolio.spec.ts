@@ -32,7 +32,8 @@ test.describe('Portfolio', () => {
 
   test('Ask Kuldeep returns grounded answer', async ({ page }) => {
     await page.goto('/#ask')
-    await page.getByRole('button', { name: /NLP work/i }).click()
+    // V2-P4: suggested questions are now the real content.askKuldeep.suggestedQuestions.
+    await page.getByRole('button', { name: /What did you research during your MS/i }).click()
     await expect(page.getByRole('status')).toContainText(/NLP/i)
   })
 

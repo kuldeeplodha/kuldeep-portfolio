@@ -148,6 +148,10 @@ export interface Research {
   title: string
   description: string
   status: string
+  /** e.g. "MS Research Thesis · 2024" (V2 §2.7) */
+  type?: string
+  /** Named research areas, e.g. "Explainable AI", "Low-Resource NLP" */
+  areas?: string[]
 }
 
 export interface Metric {
@@ -222,6 +226,19 @@ export interface ExperienceStoryEntry {
   impact?: { value: string; label: string }[]
 }
 
+/** One category in the Engineering Stack matrix (V2 §2.8), e.g. "backend" -> techs. No proficiency levels. */
+export interface EngineeringStackCategory {
+  id: string
+  label: string
+  technologies: string[]
+}
+
+/** One "Currently Exploring" item (V2 §2.7), from content.currentlyExploring.items. */
+export interface CurrentlyExploringItem {
+  title: string
+  description: string
+}
+
 export interface PortfolioConfig {
   profile: Profile
   roles: Record<RoleId, RoleConfig>
@@ -239,4 +256,8 @@ export interface PortfolioConfig {
   philosophy: { title: string; items: PhilosophyItem[] }
   impactMetrics: { title: string; description: string; items: ImpactMetricItem[] }
   experienceStory: ExperienceStoryEntry[]
+  engineeringStack: EngineeringStackCategory[]
+  researchIntro: string
+  currentlyExploring: { title: string; items: CurrentlyExploringItem[] }
+  askKuldeepContent: { title: string; description: string; suggestedQuestions: string[]; responseHeading: string }
 }
