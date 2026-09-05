@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useBlogPosts } from '../lib/blog';
 
 const containerVariants = {
@@ -27,14 +27,14 @@ export function BlogListPage() {
       {posts.length === 0 ? (
         <p style={{ color: 'var(--color-text-muted)' }}>No posts found.</p>
       ) : (
-        <motion.div
+        <m.div
           className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {posts.map((post) => (
-            <motion.article
+            <m.article
               key={post.slug}
               variants={cardVariants}
               whileHover={{ y: -4 }}
@@ -79,9 +79,9 @@ export function BlogListPage() {
               >
                 Read more →
               </Link>
-            </motion.article>
+            </m.article>
           ))}
-        </motion.div>
+        </m.div>
       )}
     </main>
   );
