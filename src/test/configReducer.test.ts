@@ -23,7 +23,18 @@ describe('configDraftReducer', () => {
     const action: ConfigAction = {
       type: 'patchRole',
       id: 'software',
-      patch: { hero: { headline: 'New Headline', subtitle: 'New Subtitle', primaryCta: 'CTA', secondaryCta: 'Sec' } },
+      patch: {
+        hero: {
+          eyebrow: 'EYEBROW',
+          headline: 'New Headline',
+          subtitle: 'New Subtitle',
+          focus: ['Focus'],
+          primaryCta: 'CTA',
+          primaryCtaTarget: '#projects',
+          secondaryCta: 'Sec',
+          secondaryCtaTarget: 'resume',
+        },
+      },
     }
     const result = configDraftReducer(initialState, action)
     expect(result.roles.software.hero.headline).toBe('New Headline')

@@ -1,16 +1,31 @@
 import type { RoleConfig } from '../types'
 
+// Hero content (eyebrow/headline/subtitle/focus/CTAs) is sourced verbatim
+// from the human-provided V2 content model (roleModes), mapped onto the
+// existing RoleId scheme: software -> software, ai -> machineLearning,
+// data -> data, system -> fullJourney. See docs/design/portfolio-v2-design-spec.md §2.2.
 export const roles: Record<string, RoleConfig> = {
   software: {
     id: 'software',
     label: 'Software Engineer',
     themeId: 'software',
     hero: {
-      headline: 'I engineer reliable systems, APIs and data pipelines.',
+      eyebrow: 'SENIOR SOFTWARE DEVELOPER • LEAD',
+      headline: 'Building reliable software that solves real problems.',
       subtitle:
-        'Backend-focused developer building Django services, REST APIs, ETL workflows, and production-ready automation.',
+        'Senior software developer and backend engineering lead with 5+ years of experience building production systems, APIs, databases, integrations, and business-critical applications.',
+      focus: [
+        'Backend Engineering',
+        'Django & REST APIs',
+        'System Design',
+        'Database Optimization',
+        'Third-Party Integrations',
+        'Team Leadership',
+      ],
       primaryCta: 'Explore My Work',
-      secondaryCta: 'View Architecture',
+      primaryCtaTarget: '#projects',
+      secondaryCta: 'Download Resume',
+      secondaryCtaTarget: 'resume',
     },
     highlightedSkillIds: [
       'python',
@@ -37,11 +52,22 @@ export const roles: Record<string, RoleConfig> = {
     label: 'AI / ML',
     themeId: 'ai',
     hero: {
-      headline: 'I build intelligent systems from data, language and models.',
+      eyebrow: 'MACHINE LEARNING • AI • NLP',
+      headline: 'Engineering intelligent systems from data, models, and real-world problems.',
       subtitle:
-        'ML, NLP, deep learning, and MLOps — from gesture recognition to multilingual NLP research.',
-      primaryCta: 'Explore Research Lab',
-      secondaryCta: 'View ML Projects',
+        'Software engineer with an MS in Machine Learning & Artificial Intelligence, combining production engineering experience with machine learning, NLP, deep learning, and AI research.',
+      focus: [
+        'Machine Learning',
+        'Natural Language Processing',
+        'Deep Learning',
+        'Generative AI',
+        'Explainable AI',
+        'MLOps',
+      ],
+      primaryCta: 'Explore AI Work',
+      primaryCtaTarget: '#projects',
+      secondaryCta: 'View Research',
+      secondaryCtaTarget: '#research',
     },
     highlightedSkillIds: [
       'nlp',
@@ -66,11 +92,15 @@ export const roles: Record<string, RoleConfig> = {
     label: 'Data Analyst',
     themeId: 'data',
     hero: {
-      headline: 'I turn messy data into decisions people can act on.',
+      eyebrow: 'DATA • ANALYTICS • ENGINEERING',
+      headline: 'Turning data into decisions and measurable impact.',
       subtitle:
-        'SQL, dashboards, ETL pipelines, and analytics that help teams move faster with confidence.',
-      primaryCta: 'See Impact Metrics',
-      secondaryCta: 'View Dashboards Work',
+        'Experienced in building data pipelines, automating reporting workflows, analyzing operational data, and creating dashboards that help teams understand performance and make better decisions.',
+      focus: ['Python', 'SQL', 'ETL', 'Data Pipelines', 'Analytics', 'Dashboards'],
+      primaryCta: 'Explore Data Work',
+      primaryCtaTarget: '#projects',
+      secondaryCta: 'View Impact',
+      secondaryCtaTarget: '#metrics',
     },
     highlightedSkillIds: [
       'sql',
@@ -97,11 +127,22 @@ export const roles: Record<string, RoleConfig> = {
     label: 'System View',
     themeId: 'system',
     hero: {
-      headline: 'Software → Data → Machine Learning → AI',
+      eyebrow: 'SOFTWARE → DATA → ML → AI',
+      headline: "A software engineer's journey into intelligent systems.",
       subtitle:
-        'A coherent engineering journey: systems as foundation, data as material, AI as specialization.',
-      primaryCta: 'Explore Full Profile',
-      secondaryCta: 'Ask Kuldeep',
+        'My career has evolved from software development and backend engineering into data, machine learning, NLP, and AI while staying grounded in building practical production systems.',
+      focus: [
+        'Software Engineering',
+        'Backend Systems',
+        'Data',
+        'Machine Learning',
+        'NLP',
+        'Artificial Intelligence',
+      ],
+      primaryCta: 'Explore My Journey',
+      primaryCtaTarget: '#projects',
+      secondaryCta: 'Download Resume',
+      secondaryCtaTarget: 'resume',
     },
     highlightedSkillIds: [],
     highlightedProjectIds: [

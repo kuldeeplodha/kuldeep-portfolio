@@ -6,6 +6,7 @@ import { projects } from './projects'
 import { skills } from './skills'
 import { education, certifications, research, metrics } from './education'
 import { aiKnowledge } from './aiKnowledge'
+import { careerJourney } from './careerJourney'
 import type { PortfolioConfig } from '../types'
 
 export const portfolioConfig: PortfolioConfig = {
@@ -20,6 +21,7 @@ export const portfolioConfig: PortfolioConfig = {
   research,
   metrics,
   aiKnowledge,
+  careerJourney,
 }
 
 export * from './profile'
@@ -30,4 +32,5 @@ export * from './projects'
 export * from './skills'
 export * from './education'
 export * from './aiKnowledge'
+export * from './careerJourney'
 export * from './resumes'

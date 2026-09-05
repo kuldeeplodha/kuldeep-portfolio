@@ -3,13 +3,13 @@ import type { Profile } from '../types'
 export const profile: Profile = {
   name: 'Kuldeep Lodha',
   navDisplayName: 'K. Lodha',
-  title: 'Software Developer',
+  title: 'Senior Software Developer (Lead)',
   location: 'Pune, India',
   email: 'kuldeeplodha04@gmail.com',
   phone: '+917987507342',
   showPhone: false,
   summary:
-    'Software Developer with 4+ years of experience across backend engineering, data pipelines, machine learning, NLP, and MLOps. Building reliable systems and moving toward intelligent products.',
+    'Senior Software Developer and backend engineering lead with 5+ years of experience building backend systems, APIs, databases, integrations, data workflows, and production applications.',
   links: {
     linkedin: 'https://www.linkedin.com/in/kuldeeplodha',
     github: 'https://github.com/kuldeeplodha',
