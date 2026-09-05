@@ -52,6 +52,40 @@ jobs:
           if-no-files-found: warn
       - run: npm run build
 
+  # Visual regression runs in parallel with `verify`, inside the official
+  # Playwright container so baselines match the committed Linux PNGs exactly.
+  # On failure, diff images are uploaded so reviewers can inspect regressions.
+  #
+  # Bootstrap note: on the very first run after baseline PNGs are committed,
+  # this job will pass. Until then (no committed baselines) the job will fail
+  # with "snapshot missing" — generate baselines via:
+  #   docker run --rm -v $(pwd):/work -w /work \
+  #     mcr.microsoft.com/playwright:v$(node -p "require('@playwright/test/package.json').version")-jammy \
+  #     npm run test:e2e:update-visual
+  # then commit e2e/__screenshots__/**/*.png and push.
+  visual:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-jammy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Run visual regression tests
+        run: npm run test:e2e:visual
+        env:
+          VITE_BASE_PATH: /
+      - name: Upload visual diff artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: test-results/
+          retention-days: 7
+
   perf-budgets:
     runs-on: ubuntu-latest
     # Runs in parallel with verify (not dependent on it) to stay under +4 min ceiling.
@@ -74,6 +108,6 @@ jobs:
       - name: Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
-          configPath: ./lighthouserc.js
+          configPath: ./lighthouserc.cjs
           uploadArtifacts: true
           temporaryPublicStorage: true

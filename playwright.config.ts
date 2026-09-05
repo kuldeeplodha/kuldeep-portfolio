@@ -9,9 +9,44 @@ export default defineConfig({
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
   },
+  // Baseline PNGs are stored here; subdirectories are named by project.
+  snapshotDir: 'e2e/__screenshots__',
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile-chrome', use: { ...devices['Pixel 5'] } },
+    // ── Functional e2e (existing) ───────────────────────────────────────────
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, testMatch: /(?<!visual)\.spec\.ts$/ },
+    { name: 'mobile-chrome', use: { ...devices['Pixel 5'] }, testMatch: /(?<!visual)\.spec\.ts$/ },
+
+    // ── Visual regression ──────────────────────────────────────────────────
+    // Baselines are generated ONLY inside the official Playwright Docker image
+    // (mcr.microsoft.com/playwright, pinned to the installed Playwright version).
+    // Local mac runs are advisory/diff-only — NEVER commit locally generated baselines.
+    // To regenerate: docker run … npm run test:e2e:update-visual (see README).
+    {
+      name: 'visual-desktop',
+      testMatch: /visual\.spec\.ts$/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // Emulate prefers-reduced-motion: reduce → triggers MotionConfig
+        // reducedMotion="user" (PR #10) to still all framer-motion animations.
+        reducedMotion: 'reduce',
+        // Pin environment for byte-stable baselines.
+        deviceScaleFactor: 1,
+        locale: 'en-US',
+        timezoneId: 'UTC',
+      },
+    },
+    {
+      name: 'visual-mobile',
+      testMatch: /visual\.spec\.ts$/,
+      use: {
+        ...devices['Pixel 5'],
+        reducedMotion: 'reduce',
+        locale: 'en-US',
+        timezoneId: 'UTC',
+        // Pixel 5 preset already sets deviceScaleFactor: 2.75; leave it as-is
+        // so the mobile baseline matches the device's actual DPR.
+      },
+    },
   ],
   webServer: {
     command: 'npm run build && npm run preview',

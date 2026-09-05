@@ -5,12 +5,23 @@
 module.exports = {
   ci: {
     collect: {
-      staticDistDir: './dist',
+      // `staticDistDir` serves dist/ as literal files with NO SPA fallback,
+      // so any client-routed path (/admin, /projects/*) 404s even though the
+      // route works fine in the real app. Use the app's own preview server
+      // instead (same `vite preview` the e2e/Playwright suite already relies
+      // on for these exact routes) — it has correct SPA history fallback.
+      startServerCommand: 'npm run preview',
+      startServerReadyPattern: 'Local:',
       numberOfRuns: 1,
-      url: ['/', '/kuldeep-portfolio', '/admin'],
+      url: [
+        'http://localhost:4173/',
+        'http://localhost:4173/projects/gesture-recognition',
+        'http://localhost:4173/admin',
+      ],
       settings: {
-        // Mobile preset (Lighthouse default for performance)
-        preset: 'desktop',
+        // Mobile emulation: explicit formFactor + throttling only. Do NOT add
+        // preset: 'desktop' here -- it conflicts with formFactor: 'mobile' and
+        // newer Lighthouse versions hard-error on the mismatch (T-PR13-L1).
         formFactor: 'mobile',
         throttling: {
           rttMs: 40,

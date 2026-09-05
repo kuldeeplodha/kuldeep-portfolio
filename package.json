@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project chromium --project mobile-chrome",
+    "test:e2e:visual": "playwright test --project visual-desktop --project visual-mobile",
+    "test:e2e:update-visual": "playwright test --project visual-desktop --project visual-mobile --update-snapshots",
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
