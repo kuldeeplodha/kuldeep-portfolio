@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import type { RoleId } from '../../types'
 
 const STAGES = [
@@ -61,7 +61,7 @@ export function CareerPipeline({ roleId }: CareerPipelineProps) {
 
           return (
             <div key={stage.id} className="flex items-center sm:flex-1 sm:justify-center">
-              <motion.button
+              <m.button
                 type="button"
                 className="relative z-10 w-full rounded-lg border px-4 py-2.5 text-sm font-mono transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
                 style={{
@@ -98,7 +98,7 @@ export function CareerPipeline({ roleId }: CareerPipelineProps) {
                   />
                   {stage.label}
                 </span>
-              </motion.button>
+              </m.button>
 
               {index < STAGES.length - 1 && (
                 <div
@@ -136,7 +136,7 @@ export function CareerPipeline({ roleId }: CareerPipelineProps) {
       </div>
 
       {isSystem && !reduceMotion && (
-        <motion.p
+        <m.p
           className="mt-3 text-center text-xs"
           style={{ color: 'var(--color-text-muted)' }}
           initial={{ opacity: 0 }}
@@ -144,7 +144,7 @@ export function CareerPipeline({ roleId }: CareerPipelineProps) {
           transition={{ delay: 0.5 }}
         >
           Hover or focus nodes to explore the career path
-        </motion.p>
+        </m.p>
       )}
     </div>
   )

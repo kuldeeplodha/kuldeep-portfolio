@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { portfolioConfig } from '../../config'
 import { useRole } from '../../hooks/useRole'
 
@@ -74,7 +74,7 @@ export function ResearchLabSection() {
                 const from = SAMPLE_TOKENS[line.from]
                 const to = SAMPLE_TOKENS[line.to]
                 return (
-                  <motion.line
+                  <m.line
                     key={i}
                     x1={from.x + 30}
                     y1={from.y + 10}
@@ -96,7 +96,7 @@ export function ResearchLabSection() {
             aria-hidden="true"
           >
             {SAMPLE_TOKENS.map((token, i) => (
-              <motion.span
+              <m.span
                 key={token.text}
                 className="shrink-0 rounded-md border px-3 py-1.5 font-mono text-xs whitespace-nowrap"
                 style={{
@@ -119,7 +119,7 @@ export function ResearchLabSection() {
                 }}
               >
                 {token.text}
-              </motion.span>
+              </m.span>
             ))}
           </div>
 
