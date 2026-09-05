@@ -36,12 +36,30 @@ function ScrollToHash() {
   const { pathname, hash } = useLocation()
 
   useEffect(() => {
-    if (hash) {
-      const el = document.querySelector(hash)
-      el?.scrollIntoView({ behavior: 'smooth' })
-    } else {
+    if (!hash) {
       window.scrollTo(0, 0)
+      return
     }
+
+    // Some homepage sections are lazy-loaded behind <Suspense> (see
+    // HomePage.tsx / .perf-budget.json code-splitting), so the target
+    // element may not exist yet the instant the hash changes — poll
+    // briefly for it to mount before giving up.
+    let frame: number
+    let attempts = 0
+    const tryScroll = () => {
+      const el = document.querySelector(hash)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+      attempts += 1
+      if (attempts < 60) {
+        frame = requestAnimationFrame(tryScroll)
+      }
+    }
+    frame = requestAnimationFrame(tryScroll)
+    return () => cancelAnimationFrame(frame)
   }, [pathname, hash])
 
   return null
