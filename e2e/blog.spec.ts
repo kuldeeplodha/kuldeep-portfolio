@@ -32,4 +32,18 @@ test.describe('Blog', () => {
     // Ensure marked + DOMPurify rendered the markdown content
     await expect(page.locator('.blog-content h2').filter({ hasText: 'What\'s under the hood?' })).toBeVisible();
   });
+
+  test('navigation to blog works from homepage (desktop and mobile)', async ({ page, isMobile }) => {
+    await page.goto('/');
+    if (isMobile) {
+      await page.getByRole('button', { name: 'Toggle menu' }).click();
+    }
+    
+    const blogLink = page.getByRole('link', { name: 'Blog', exact: true });
+    await expect(blogLink).toBeVisible();
+    await blogLink.click();
+    
+    await expect(page).toHaveURL(/.*\/blog$/);
+    await expect(page.getByRole('heading', { name: 'Blog', level: 1, exact: true })).toBeVisible();
+  });
 });
