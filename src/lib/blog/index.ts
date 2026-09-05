@@ -35,7 +35,7 @@ function parseSimpleFrontmatter(raw: string): Record<string, any> {
   return result;
 }
 
-export function useBlogPosts(): BlogPost[] {
+export function getAllBlogPosts(): BlogPost[] {
   return Object.entries(postModules)
     .map(([filepath, module]) => {
       const rawString = typeof module === 'string' ? module : module.default;
@@ -46,7 +46,11 @@ export function useBlogPosts(): BlogPost[] {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
+export function useBlogPosts(): BlogPost[] {
+  return getAllBlogPosts();
+}
+
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
-  const posts = useBlogPosts();
+  const posts = getAllBlogPosts();
   return posts.find(p => p.slug === slug);
 }
