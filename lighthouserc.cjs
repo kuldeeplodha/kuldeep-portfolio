@@ -9,8 +9,9 @@ module.exports = {
       numberOfRuns: 1,
       url: ['/', '/kuldeep-portfolio', '/admin'],
       settings: {
-        // Mobile preset (Lighthouse default for performance)
-        preset: 'desktop',
+        // Mobile emulation: explicit formFactor + throttling only. Do NOT add
+        // preset: 'desktop' here -- it conflicts with formFactor: 'mobile' and
+        // newer Lighthouse versions hard-error on the mismatch (T-PR13-L1).
         formFactor: 'mobile',
         throttling: {
           rttMs: 40,
