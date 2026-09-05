@@ -35,6 +35,8 @@ Coverage floors and the rest of the automated-QA gates (a11y reporting, gzip
 performance budgets, visual regression) are documented in
 [`docs/AUTOMATED_QA.md`](docs/AUTOMATED_QA.md).
 
+> **Note:** To regenerate Playwright visual regression baselines without needing Docker locally, trigger the **Update Visual Baselines** workflow via the Actions tab in GitHub.
+
 ## GitHub Pages deployment
 
 Set the base path when building:

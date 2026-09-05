@@ -1,0 +1,55 @@
+name: Update Visual Baselines
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to update baselines for (default: current branch)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  update-visual-baselines:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-jammy
+    permissions:
+      contents: write
+    steps:
+      - name: Determine Target Branch
+        id: branch-target
+        run: |
+          TARGET="${{ github.event.inputs.branch }}"
+          if [ -z "$TARGET" ]; then
+            TARGET="${{ github.ref }}"
+          fi
+          TARGET="${TARGET#refs/heads/}"
+          echo "target_branch=$TARGET" >> $GITHUB_OUTPUT
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.branch-target.outputs.target_branch }}
+
+      - name: Git Safe Directory
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Visual Baselines
+        run: npm run test:e2e:update-visual
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add e2e/__screenshots__/
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "test(e2e): update visual baselines"
+            git push origin "HEAD:refs/heads/${{ steps.branch-target.outputs.target_branch }}"
+          else
+            echo "No visual baseline changes detected."
+          fi
