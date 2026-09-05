@@ -1,22 +1,62 @@
 import { Link } from 'react-router-dom'
+import { portfolioConfig } from '../../config'
 import { useRole } from '../../hooks/useRole'
 import { RoleTransition } from '../ui/RoleTransition'
+import { SectionHeader } from '../ui/SectionHeader'
+import { SectionShell } from '../ui/SectionShell'
 
-export function ProjectsSection() {
-  const { filteredProjects, roleId } = useRole()
+/**
+ * V2 §2.4 Selected Work — impact metrics strip grouped with the case-study
+ * previews (content.impact, verbatim, already exactly 5 items per
+ * uiContentRules.limits.impactMetrics).
+ */
+function ImpactMetricsStrip() {
+  const { impactMetrics } = portfolioConfig
 
   return (
-    <section id="projects" className="px-6 py-16" style={{ backgroundColor: 'var(--color-surface)' }}>
+    <div className="mt-12 border-t pt-10" style={{ borderColor: 'var(--color-border)' }}>
+      <h3 className="mb-1 text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
+        {impactMetrics.title}
+      </h3>
+      <p className="mb-6 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+        {impactMetrics.description}
+      </p>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+        {impactMetrics.items.map((item) => (
+          <div key={item.label} className="rounded-[var(--radius-base)] border p-4" style={{ borderColor: 'var(--color-border)' }}>
+            <p className="text-2xl font-bold" style={{ color: 'var(--color-accent)' }}>
+              {item.metric}
+            </p>
+            <p className="mt-1 text-xs font-medium" style={{ color: 'var(--color-text)' }}>
+              {item.label}
+            </p>
+            <p className="mt-0.5 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              {item.context}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function ProjectsSection() {
+  useRole() // keeps this section's RoleTransition timing in sync with the rest of the page
+  // Deliberately NOT role-filtered: the real content model has exactly 3
+  // projects total and none are tagged relevant to the software/data roles,
+  // which would otherwise leave "Selected Work" empty for those two modes.
+  // Honest content beats an empty section — show all 3 for every role.
+  const { projects } = portfolioConfig
+
+  return (
+    <SectionShell id="projects" muted>
       <RoleTransition>
-        <div className="mx-auto max-w-5xl">
-        <h2 className="mb-8 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Projects
-        </h2>
-        <div className={`grid gap-6 ${roleId === 'data' ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
-          {filteredProjects.map((project) => (
+        <SectionHeader slug="work" title="Selected Work" />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project) => (
             <article
               key={project.id}
-              className="role-card group flex flex-col overflow-hidden border p-0 transition-all duration-300 hover:border-[var(--color-accent)]"
+              className="role-card group flex flex-col overflow-hidden border p-0 shadow-[var(--shadow-glass-md)] transition-all duration-300 hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-glass-lg)]"
               style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
             >
               {project.imageUrl && (
@@ -29,39 +69,51 @@ export function ProjectsSection() {
                 </div>
               )}
               <div className="flex flex-1 flex-col p-6">
-              <h3 className="mb-2 font-semibold" style={{ color: 'var(--color-text)' }}>
-                {project.title}
-              </h3>
-              <p className="mb-3 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                {project.period}
-              </p>
-              <p className="mb-4 flex-1 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                {project.overview}
-              </p>
-              <div className="mb-4 flex flex-wrap gap-1">
-                {project.technologies.slice(0, 4).map((tech) => (
+                {project.category && (
                   <span
-                    key={tech}
-                    className="rounded-full border px-2 py-0.5 text-xs"
-                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-accent)' }}
+                    className="mb-2 w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
+                      color: 'var(--color-accent)',
+                    }}
                   >
-                    {tech}
+                    {project.category}
                   </span>
-                ))}
-              </div>
-              <Link
-                to={`/projects/${project.id}`}
-                className="text-sm font-medium transition-opacity hover:opacity-80"
-                style={{ color: 'var(--color-accent)' }}
-              >
-                View case study →
-              </Link>
+                )}
+                <h3 className="mb-2 font-semibold" style={{ color: 'var(--color-text)' }}>
+                  {project.title}
+                </h3>
+                <p className="mb-3 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  {project.period}
+                </p>
+                <p className="mb-4 flex-1 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                  {project.overview}
+                </p>
+                <div className="mb-4 flex flex-wrap gap-1">
+                  {project.technologies.slice(0, 4).map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded-[var(--radius-pill)] border px-2 py-0.5 text-xs"
+                      style={{ borderColor: 'var(--color-border)', color: 'var(--color-accent)' }}
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+                <Link
+                  to={`/projects/${project.id}`}
+                  className="text-sm font-medium transition-opacity hover:opacity-80"
+                  style={{ color: 'var(--color-accent)' }}
+                >
+                  View case study →
+                </Link>
               </div>
             </article>
           ))}
         </div>
-        </div>
+
+        <ImpactMetricsStrip />
       </RoleTransition>
-    </section>
+    </SectionShell>
   )
 }

@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Hero } from '../components/sections/Hero'
-import { MetricsSection } from '../components/sections/MetricsSection'
+import { EngineeringSignalSection } from '../components/sections/EngineeringSignalSection'
 import { AboutSection } from '../components/sections/AboutSection'
 import { ContactSection } from '../components/layout/Navbar'
 
@@ -16,6 +16,14 @@ function SectionLoader() {
   return <div className="min-h-[20vh]" aria-hidden="true" />
 }
 
+// V2-P3: order follows src/config/sectionOrder.ts (signal -> work -> experience
+// -> about -> lab -> stack -> ask) for the 4 sections this phase rebuilds.
+// MetricsSection is deliberately NOT rendered here anymore — its old content
+// (years-experience, manual-entry-reduction, etc.) restated the same
+// achievements now covered authoritatively by ProjectsSection's impact-metrics
+// strip, which uiContentRules explicitly warns against ("repeating the same
+// achievement in multiple sections"). The component/config are left intact
+// (AdminPage still manages them) in case they're repurposed later.
 export function HomePage() {
   return (
     <main
@@ -24,11 +32,13 @@ export function HomePage() {
       style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)' }}
     >
       <Hero />
-      <MetricsSection />
+      <EngineeringSignalSection />
+      <Suspense fallback={<SectionLoader />}>
+        <ProjectsSection />
+        <ExperienceSection />
+      </Suspense>
       <AboutSection />
       <Suspense fallback={<SectionLoader />}>
-        <ExperienceSection />
-        <ProjectsSection />
         <ResearchLabSection />
         <SkillsSection />
         <EducationSection />
