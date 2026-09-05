@@ -1,65 +1,59 @@
 import { portfolioConfig } from '../../config'
+import { SectionHeader } from '../ui/SectionHeader'
+import { SectionShell } from '../ui/SectionShell'
 
+/**
+ * V2 §Background — education kept deliberately compact and visually
+ * secondary to the engineering story (uiContentRules: not a primary
+ * section). A simple stacked list, not the timeline treatment Experience
+ * gets.
+ */
 export function EducationSection() {
   const { education } = portfolioConfig
 
   return (
-    <section id="education" className="px-6 py-16">
-      <div className="mx-auto max-w-5xl">
-        <h2 className="mb-8 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Education
-        </h2>
-
-        <ol className="relative border-l pl-8" style={{ borderColor: 'var(--color-border)' }}>
-          {education.map((edu) => (
-            <li key={edu.id} className="mb-10 last:mb-0">
-              <span
-                className="absolute -left-2 flex h-4 w-4 items-center justify-center rounded-full"
-                style={{ backgroundColor: 'var(--color-accent)' }}
-                aria-hidden
-              />
-              <article
-                className="rounded-xl border p-6"
-                style={{
-                  borderColor: 'var(--color-border)',
-                  backgroundColor: 'var(--color-surface)',
-                }}
-              >
-                <time
-                  className="text-xs font-medium"
-                  style={{ color: 'var(--color-accent)' }}
-                  dateTime={edu.period}
-                >
-                  {edu.period}
-                </time>
-                <h3 className="mt-1 text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
-                  {edu.degree}
-                </h3>
-                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                  {edu.institution} · {edu.location}
-                </p>
-                {edu.gpa && (
-                  <p className="mt-2 text-sm" style={{ color: 'var(--color-text)' }}>
-                    GPA: {edu.gpa}
-                  </p>
-                )}
-                {edu.research && (
-                  <p className="mt-2 text-sm italic" style={{ color: 'var(--color-text-muted)' }}>
-                    Research: {edu.research}
-                  </p>
-                )}
-                {edu.highlights && (
-                  <ul className="mt-3 list-disc space-y-1 pl-5 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                    {edu.highlights.map((h) => (
-                      <li key={h}>{h}</li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            </li>
-          ))}
-        </ol>
+    <SectionShell id="education">
+      <SectionHeader slug="education" title="Education" />
+      <div className="space-y-4">
+        {education.map((edu) => (
+          <article
+            key={edu.id}
+            className="rounded-[var(--radius-base)] border p-4"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
+            <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+                {edu.degree}
+              </h3>
+              <time className="text-xs" style={{ color: 'var(--color-text-muted)' }} dateTime={edu.period}>
+                {edu.period}
+              </time>
+            </div>
+            <p className="mt-0.5 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              {edu.institution}
+              {edu.gpa ? ` · ${edu.gpa}` : ''}
+            </p>
+            {edu.research && (
+              <p className="mt-2 text-xs italic" style={{ color: 'var(--color-text-muted)' }}>
+                Research: {edu.research}
+              </p>
+            )}
+            {edu.focus && edu.focus.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {edu.focus.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-[var(--radius-pill)] border px-2 py-0.5 text-[11px]"
+                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
+          </article>
+        ))}
       </div>
-    </section>
+    </SectionShell>
   )
 }

@@ -3,22 +3,21 @@
  * (docs/design/portfolio-v2-design-spec.md §1 "Section Headers": `01 / TITLE`).
  *
  * This is the FINAL intended section order for the V2 information
- * architecture — including slots for sections that are still content-gated
- * and haven't adopted <SectionHeader> yet (Selected Work, Experience,
- * Research Lab — see docs/design/portfolio-v2-design-spec.md §2.4/§2.5/§2.7).
- * Reserving their slot here means a later phase can add their header
- * without renumbering anything that already shipped.
- *
- * Hero and the closing Contact/Footer are deliberately not numbered —
- * numbering applies to the main content sections between them.
+ * architecture. Hero and the closing Contact/Footer are deliberately not
+ * numbered — numbering applies to the main content sections between them.
+ * Education/Certifications sit after the core engineering story (P5) —
+ * kept visually secondary per uiContentRules, not "background noise" but
+ * not competing with Selected Work/Experience for attention either.
  */
 export const SECTION_ORDER = [
-  'signal', // §2.3 Engineering Signal (today: SkillsSection, pending content split)
-  'work', // §2.4 Selected Work (ProjectsSection) — content-gated, no header yet
-  'experience', // §2.5 Experience Timeline — content-gated, no header yet
+  'signal', // §2.3 Engineering Signal
+  'work', // §2.4 Selected Work
+  'experience', // §2.5 Experience Timeline
   'about', // §2.6 How I Engineer
-  'lab', // §2.7 Research Lab — content-gated, no header yet
-  'stack', // §2.8 Engineering Stack — pending content split from Skills
+  'lab', // §2.7 Research Lab
+  'stack', // §2.8 Engineering Stack
+  'education', // Background — kept compact/secondary
+  'certifications', // Background — kept compact/secondary
   'ask', // §2.9 Ask Kuldeep
 ] as const
 
