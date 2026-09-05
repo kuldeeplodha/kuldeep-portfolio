@@ -35,14 +35,20 @@ test.describe('Blog', () => {
 
   test('navigation to blog works from homepage (desktop and mobile)', async ({ page, isMobile }) => {
     await page.goto('/');
+    // V2-P1 nav restructure: on desktop, Blog lives in the "More" menu with
+    // role="menuitem" (not "link"); the mobile menu keeps a plain flat list.
+    let blogLink;
     if (isMobile) {
       await page.getByRole('button', { name: 'Toggle menu' }).click();
+      blogLink = page.getByRole('link', { name: 'Blog', exact: true });
+    } else {
+      await page.getByRole('button', { name: 'More' }).click();
+      blogLink = page.getByRole('menuitem', { name: 'Blog', exact: true });
     }
-    
-    const blogLink = page.getByRole('link', { name: 'Blog', exact: true });
+
     await expect(blogLink).toBeVisible();
     await blogLink.click();
-    
+
     await expect(page).toHaveURL(/.*\/blog$/);
     await expect(page.getByRole('heading', { name: 'Blog', level: 1, exact: true })).toBeVisible();
   });

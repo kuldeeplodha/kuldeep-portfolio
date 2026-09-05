@@ -1,6 +1,8 @@
 import { portfolioConfig } from '../../config'
 import { useRole } from '../../hooks/useRole'
 import { RoleTransition } from '../ui/RoleTransition'
+import { SectionHeader } from '../ui/SectionHeader'
+import { SectionShell } from '../ui/SectionShell'
 
 export function AboutSection() {
   const { profile } = portfolioConfig
@@ -16,20 +18,16 @@ export function AboutSection() {
           : 'Software engineering is the foundation. Data is the material. Machine learning and AI are the direction — a coherent journey, not three separate careers.'
 
   return (
-    <section id="about" className="px-6 py-16">
+    <SectionShell id="about" narrow>
       <RoleTransition>
-        <div className="mx-auto max-w-3xl">
-        <h2 className="mb-4 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          About
-        </h2>
+        <SectionHeader slug="about" title="About" />
         <p className="mb-4 text-base leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
           {profile.summary}
         </p>
         <p className="text-base leading-relaxed" style={{ color: 'var(--color-text)' }}>
           {story}
         </p>
-        </div>
       </RoleTransition>
-    </section>
+    </SectionShell>
   )
 }
