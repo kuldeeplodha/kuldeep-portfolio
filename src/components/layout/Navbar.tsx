@@ -4,10 +4,12 @@ import { portfolioConfig, getResumeForVariant } from '../../config'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
 import { useRole } from '../../hooks/useRole'
 
+// Anchor ids are unchanged from V1.6 (role.navEmphasis + existing e2e/section
+// ids key off these) — only the visible labels move to V2 terminology.
 const NAV_ITEMS = [
   { id: 'home', label: 'Home' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'research', label: 'Research' },
+  { id: 'projects', label: 'Work' },
+  { id: 'research', label: 'Lab' },
   { id: 'experience', label: 'Experience' },
   { id: 'skills', label: 'Skills' },
   { id: 'education', label: 'Education' },
@@ -16,11 +18,20 @@ const NAV_ITEMS = [
   { id: 'contact', label: 'Contact' },
 ]
 
-// Leaner desktop IA (V1.6 §2.1): 4 primary links stay on the bar, the rest
-// move into the "More" menu. Blog + Resume are kept as standalone CTAs.
-const PRIMARY_IDS = ['projects', 'experience', 'skills', 'contact']
-const PRIMARY_ITEMS = NAV_ITEMS.filter((item) => PRIMARY_IDS.includes(item.id))
-const MORE_ITEMS = NAV_ITEMS.filter((item) => !PRIMARY_IDS.includes(item.id) && item.id !== 'home')
+// V2 IA (docs/design/portfolio-v2-design-spec.md §2.1): primary bar is
+// Work / Experience / Lab / About, in that order. Ask Kuldeep + Resume are
+// standalone secondary CTAs. Everything else (Skills/Education/Contact/
+// Blog) is demoted into the "More" menu — Blog stays reachable there.
+const PRIMARY_IDS = ['projects', 'experience', 'research', 'about'] as const
+const PRIMARY_ITEMS = PRIMARY_IDS.map((id) => NAV_ITEMS.find((item) => item.id === id)!)
+
+type MoreItem = { id: string; label: string; to?: string }
+const MORE_ITEMS: MoreItem[] = [
+  { id: 'skills', label: 'Skills' },
+  { id: 'education', label: 'Education' },
+  { id: 'contact', label: 'Contact' },
+  { id: 'blog', label: 'Blog', to: '/blog' },
+]
 
 function navLinkStyle(active: boolean) {
   return {
@@ -142,9 +153,13 @@ export function Navbar() {
                   <Link
                     key={item.id}
                     role="menuitem"
-                    to={{ pathname: '/', hash: item.id, search: location.search }}
+                    to={item.to ?? { pathname: '/', hash: item.id, search: location.search }}
                     className="block rounded-[calc(var(--radius-base)-4px)] px-3 py-2 text-sm transition-colors nav-hover"
-                    style={navLinkStyle(role.navEmphasis.includes(item.id))}
+                    style={
+                      item.id === 'blog'
+                        ? { color: location.pathname.startsWith('/blog') ? 'var(--color-text)' : 'var(--color-text-muted)' }
+                        : navLinkStyle(role.navEmphasis.includes(item.id))
+                    }
                     onClick={() => setMoreOpen(false)}
                   >
                     {item.label}
@@ -155,15 +170,11 @@ export function Navbar() {
           </li>
           <li>
             <Link
-              to="/blog"
-              className="rounded-[var(--radius-base)] px-3 py-2 text-sm transition-colors nav-hover"
-              style={{
-                color: location.pathname.startsWith('/blog')
-                  ? 'var(--color-text)'
-                  : 'var(--color-text-muted)',
-              }}
+              to={{ pathname: '/', hash: 'ask', search: location.search }}
+              className="rounded-[var(--radius-base)] px-3 py-2 text-sm font-medium transition-colors nav-hover"
+              style={navLinkStyle(role.navEmphasis.includes('ask'))}
             >
-              Blog
+              Ask Kuldeep
             </Link>
           </li>
           <li>

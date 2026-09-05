@@ -19,7 +19,8 @@ test.describe('Portfolio', () => {
     if (isMobile) {
       await page.getByRole('button', { name: 'Toggle menu' }).click()
     }
-    await page.getByRole('link', { name: 'Projects' }).click()
+    // V2-P1 nav restructure: "Projects" is labeled "Work" now (same #projects anchor).
+    await page.getByRole('link', { name: 'Work', exact: true }).click()
     await expect(page.locator('#projects')).toBeInViewport()
   })
 

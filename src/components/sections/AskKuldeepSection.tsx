@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { getAIProvider } from '../../lib/ai/provider'
+import { SectionHeader } from '../ui/SectionHeader'
+import { SectionShell } from '../ui/SectionShell'
 
 const SUGGESTED = [
   'What backend technologies does Kuldeep use?',
@@ -27,16 +29,14 @@ export function AskKuldeepSection() {
   }
 
   return (
-    <section id="ask" className="px-6 py-16">
-      <div className="mx-auto max-w-3xl">
-        <h2 className="mb-4 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Ask Kuldeep
-        </h2>
-        <p className="mb-6 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-          Answers are grounded in portfolio data only — no external LLM or API keys required.
-        </p>
+    <SectionShell id="ask" narrow>
+      <SectionHeader
+        slug="ask"
+        title="Ask Kuldeep"
+        description="Answers are grounded in portfolio data only — no external LLM or API keys required."
+      />
 
-        <form
+      <form
           onSubmit={(e) => {
             e.preventDefault()
             handleAsk(query)
@@ -103,7 +103,6 @@ export function AskKuldeepSection() {
             {answer}
           </div>
         )}
-      </div>
-    </section>
+    </SectionShell>
   )
 }
