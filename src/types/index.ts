@@ -41,10 +41,18 @@ export interface ThemeTokens {
 }
 
 export interface HeroConfig {
+  /** Small uppercase label above the headline, e.g. "SENIOR SOFTWARE DEVELOPER • LEAD" */
+  eyebrow: string
   headline: string
   subtitle: string
+  /** High-signal keyword chips shown under the description (V2 §2.2 focus keywords) */
+  focus: string[]
   primaryCta: string
+  /** Always an in-page anchor, e.g. '#projects' */
+  primaryCtaTarget: string
   secondaryCta?: string
+  /** '#anchor' for an in-page scroll, or 'resume' to trigger the resume download */
+  secondaryCtaTarget?: string
 }
 
 export interface RoleConfig {
@@ -156,6 +164,13 @@ export interface AIKnowledgeEntry {
   source: string
 }
 
+/** One step in the "software → data → ML → AI" career evolution (V2 §Career Journey). */
+export interface CareerJourneyStep {
+  period: string
+  title: string
+  description: string
+}
+
 export interface PortfolioConfig {
   profile: Profile
   roles: Record<RoleId, RoleConfig>
@@ -168,4 +183,5 @@ export interface PortfolioConfig {
   research: Research[]
   metrics: Metric[]
   aiKnowledge: AIKnowledgeEntry[]
+  careerJourney: CareerJourneyStep[]
 }
