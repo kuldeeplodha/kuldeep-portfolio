@@ -9,6 +9,10 @@ on:
         type: string
         default: ''
 
+concurrency:
+  group: visual-baselines-${{ github.event.inputs.branch || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   update-visual-baselines:
     runs-on: ubuntu-latest
