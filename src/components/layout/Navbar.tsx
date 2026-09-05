@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { portfolioConfig, getResumeForVariant } from '../../config'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
 import { useRole } from '../../hooks/useRole'
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
 export function Navbar() {
   const { profile } = portfolioConfig
   const { role } = useRole()
+  const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
   const resume = getResumeForVariant(role.resumeVariant)
 
@@ -36,8 +38,8 @@ export function Navbar() {
         className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4"
         aria-label="Main navigation"
       >
-        <a
-          href="#home"
+        <Link
+          to={{ pathname: '/', hash: 'home', search: location.search }}
           className="flex shrink-0 items-center gap-2.5 min-w-0"
           style={{ color: 'var(--color-text)' }}
         >
@@ -67,13 +69,13 @@ export function Navbar() {
             <span className="lg:hidden">{profile.navDisplayName ?? profile.name}</span>
             <span className="hidden lg:inline">{profile.name}</span>
           </span>
-        </a>
+        </Link>
 
         <ul className="hidden items-center gap-5 lg:flex">
           {NAV_ITEMS.map((item) => (
             <li key={item.id}>
-              <a
-                href={`#${item.id}`}
+              <Link
+                to={{ pathname: '/', hash: item.id, search: location.search }}
                 className="rounded-md px-2 py-2 text-sm transition-opacity hover:opacity-80"
                 style={{
                   color: role.navEmphasis.includes(item.id)
@@ -82,9 +84,22 @@ export function Navbar() {
                 }}
               >
                 {item.label}
-              </a>
+              </Link>
             </li>
           ))}
+          <li>
+            <Link
+              to="/blog"
+              className="rounded-md px-2 py-2 text-sm transition-opacity hover:opacity-80"
+              style={{
+                color: location.pathname.startsWith('/blog')
+                  ? 'var(--color-text)'
+                  : 'var(--color-text-muted)',
+              }}
+            >
+              Blog
+            </Link>
+          </li>
           <li>
             <a
               href={resume.path}
@@ -122,16 +137,30 @@ export function Navbar() {
           <ul className="space-y-3">
             {NAV_ITEMS.map((item) => (
               <li key={item.id}>
-                <a
-                  href={`#${item.id}`}
+                <Link
+                  to={{ pathname: '/', hash: item.id, search: location.search }}
                   className="block min-h-11 py-3 text-sm leading-none"
                   style={{ color: 'var(--color-text)' }}
                   onClick={() => setMobileOpen(false)}
                 >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
+            <li>
+              <Link
+                to="/blog"
+                className="block min-h-11 py-3 text-sm leading-none"
+                style={{
+                  color: location.pathname.startsWith('/blog')
+                    ? 'var(--color-accent)'
+                    : 'var(--color-text)',
+                }}
+                onClick={() => setMobileOpen(false)}
+              >
+                Blog
+              </Link>
+            </li>
             <li>
               <a
                 href={resume.path}
