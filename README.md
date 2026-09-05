@@ -23,7 +23,7 @@ npm run dev
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start dev server |
-| `npm run build` | Production build (`tsc -b && vite build`) |
+| `npm run build` | Production build (`tsc -b && vite build && node scripts/postbuild.mjs`) |
 | `npm run test` | Run Vitest unit suites |
 | `npm run test:watch` | Vitest in watch mode |
 | `npm run test:e2e` | Playwright end-to-end + accessibility specs |
@@ -99,12 +99,24 @@ configured" and stays disabled.
 
 > **Note:** On a static GitHub Pages site this remains a client-side gate. Hashing keeps your password out of the bundle, but it is deterrence-grade — not true server authentication. Do not treat it as such and do not store sensitive data behind it.
 
+## Blog
+
+The portfolio includes a static, markdown-driven blog accessible at `/blog` (and individual posts at `/blog/:slug`).
+
+- **Content:** Posts are authored in markdown in `src/content/blog/*.md` with simple frontmatter metadata.
+- **Rendering & Security:** Markdown is parsed via `marked` and sanitized with `DOMPurify` to ensure safe HTML rendering.
+- **Performance:** Blog routes and parser dependencies are lazily loaded via `React.lazy` and `Suspense`, keeping the homepage bundle lean.
+- **SEO & Social Previews:** `scripts/postbuild.mjs` prerenders static HTML for `/blog` and each `/blog/<slug>`, injecting distinct `<title>`, `<meta name="description">`, canonical URLs, and OpenGraph tags, plus updates `sitemap.xml` and generates `404.html` for deep linking.
+
+For instructions on creating, formatting, and verifying posts, see the [**Blog Authoring Guide**](docs/BLOG_AUTHORING.md).
+
 ## Architecture & docs
 
 - `docs/ARCHITECTURE.md`, `docs/CONTENT_MODEL.md` — system overview & content model
 - [`docs/CONFIG_VALIDATION.md`](docs/CONFIG_VALIDATION.md) — validation registry & storage lifecycle (V1.3)
 - [`docs/AUTOMATED_QA.md`](docs/AUTOMATED_QA.md) — coverage, a11y reporting, perf budgets, visual regression (V1.4)
-- `docs/decisions/` — ADRs (config panel V2, validation registry, automated QA)
+- [`docs/BLOG_AUTHORING.md`](docs/BLOG_AUTHORING.md) — blog authoring guide & static prerender workflow (V1.5)
+- `docs/decisions/` — ADRs (config panel V2, validation registry, automated QA, V1.5 blog)
 
 ## Future work
 
@@ -115,7 +127,7 @@ configured" and stays disabled.
 - [x] Research Lab section with distinctive visuals
 - [x] Skills visualization (clusters, not percentages)
 - [x] E2E tests with Playwright
-- [x] Automated QA V1.4: coverage floors + a11y reporting merged to main
-- [~] Automated QA V1.4: gzip performance budgets & visual regression (in progress)
+- [x] Automated QA V1.4: coverage floors, a11y reporting, perf budgets, visual regression
+- [x] Markdown blog with static prerendering (`/blog`, `/blog/:slug`) (V1.5)
 - [ ] Serverless LLM backend abstraction
 - [ ] Remaining admin tabs (skills, education, certifications, research, aiKnowledge)
