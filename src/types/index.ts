@@ -94,6 +94,8 @@ export interface Experience {
 export interface Project {
   id: string
   title: string
+  /** Honest category label, e.g. "Machine Learning · Deep Learning" (V2 §2.4) */
+  category?: string
   period: string
   overview: string
   problem?: string
@@ -171,6 +173,55 @@ export interface CareerJourneyStep {
   description: string
 }
 
+/** One tile in the "Engineering Signal" grid (V2 §2.3), from home.valueProposition.items. */
+export interface EngineeringSignalItem {
+  title: string
+  description: string
+}
+
+/** One numbered point in "How I Engineer" (V2 §2.6), from content.philosophy.items. */
+export interface PhilosophyItem {
+  title: string
+  description: string
+}
+
+/** One tile in the impact-metrics strip (V2 §2.4), from top-level content.impact.items. */
+export interface ImpactMetricItem {
+  metric: string
+  label: string
+  context: string
+}
+
+/** One domain of ownership within a role, e.g. EMR/Billing/CRM (V2 §2.5). */
+export interface ExperienceDomain {
+  name: string
+  description: string
+}
+
+/**
+ * A single role in the premium experience timeline (V2 §2.5), from
+ * content.experience. Fields are optional because the three real roles
+ * carry different shapes (the current lead role has domains/integrations/
+ * leadership/selectedHighlights; the two prior roles have highlights/impact
+ * instead) — do not assume every field is present.
+ */
+export interface ExperienceStoryEntry {
+  id: string
+  company: string
+  role: string
+  period: string
+  location: string
+  current: boolean
+  summary: string
+  highlights?: string[]
+  selectedHighlights?: string[]
+  domains?: ExperienceDomain[]
+  integrations?: string[]
+  leadership?: string[]
+  technology: string[]
+  impact?: { value: string; label: string }[]
+}
+
 export interface PortfolioConfig {
   profile: Profile
   roles: Record<RoleId, RoleConfig>
@@ -184,4 +235,8 @@ export interface PortfolioConfig {
   metrics: Metric[]
   aiKnowledge: AIKnowledgeEntry[]
   careerJourney: CareerJourneyStep[]
+  engineeringSignal: EngineeringSignalItem[]
+  philosophy: { title: string; items: PhilosophyItem[] }
+  impactMetrics: { title: string; description: string; items: ImpactMetricItem[] }
+  experienceStory: ExperienceStoryEntry[]
 }
