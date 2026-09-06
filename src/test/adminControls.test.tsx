@@ -7,6 +7,7 @@ import { createDefaultEntity } from '../lib/admin/defaultTemplates'
 import { validateFullConfig } from '../lib/config/exportImport'
 import { portfolioConfig } from '../config'
 import { AdminPage } from '../pages/AdminPage'
+import { activateDevBypass } from '../lib/admin/cms'
 import { MemoryRouter } from 'react-router-dom'
 
 describe('EntityToolbar component', () => {
@@ -173,10 +174,14 @@ describe('defaultTemplates and schema validation', () => {
 })
 
 describe('AdminPage integrated V2 controls', () => {
+  // V2.2 P4: /admin is now gated by CmsAuthGate (a real JWT). The dev-only
+  // bypass (Vitest's import.meta.env.DEV defaults to true, same as `vite
+  // dev`) unlocks it without mocking a backend — see src/test/cms.test.ts.
   beforeEach(() => {
     try {
       window.localStorage?.clear()
-      window.sessionStorage?.setItem('kuldeep-portfolio-admin-session', 'authenticated')
+      window.sessionStorage?.clear()
+      activateDevBypass()
     } catch {}
   })
 

@@ -1,8 +1,8 @@
 // V2.2 P2: thin client for the FastAPI/Turso content backend (Alex's V2.2-P1
-// scaffold, backend/). This is a SEPARATE auth system from lib/admin/auth.ts
-// (the existing client-side hash gate for the static-config panel) — the CMS
-// endpoints are real server-side JWT-protected routes, so the token here is
-// meaningful bearer auth, not just a local unlock flag.
+// scaffold, backend/). The CMS endpoints are real server-side JWT-protected
+// routes, so the token here is meaningful bearer auth. V2.2 P4 promoted this
+// same token to gate the whole /admin page (CmsAuthGate) — the old
+// client-side SHA-256 hash gate (lib/admin/auth.ts) is gone.
 //
 // Known gap (flagged to Alex/god, see hive outbox): the backend only exposes
 // GET (list) and POST (create) for /api/admin/blogs and /api/admin/case-studies.
@@ -34,6 +34,34 @@ export function clearCmsToken(): void {
 
 export function isCmsAuthenticated(): boolean {
   return Boolean(getCmsToken())
+}
+
+// V2.2 P4: dev-only escape hatch for the unified /admin gate. Lets a
+// contributor open /admin and edit the static-config sections (Profile,
+// Experience, Projects, …) without a FastAPI backend running locally.
+// Gated on `import.meta.env.DEV`, which Vite hard-codes to `false` in a
+// production build (and Vitest defaults to `true`) — so this can never
+// reach the deployed site, only `vite dev` and unit tests. It does NOT
+// mint a JWT: the Blog Posts / Case Studies tabs still go through their
+// own real cmsLogin(), since editing server-side content always needs a
+// working backend.
+const DEV_BYPASS_KEY = 'kuldeep-portfolio-admin-dev-bypass'
+
+export function activateDevBypass(): void {
+  if (!import.meta.env.DEV) return
+  if (typeof sessionStorage === 'undefined') return
+  sessionStorage.setItem(DEV_BYPASS_KEY, 'active')
+}
+
+export function isDevBypassActive(): boolean {
+  if (!import.meta.env.DEV) return false
+  if (typeof sessionStorage === 'undefined') return false
+  return sessionStorage.getItem(DEV_BYPASS_KEY) === 'active'
+}
+
+export function clearDevBypass(): void {
+  if (typeof sessionStorage === 'undefined') return
+  sessionStorage.removeItem(DEV_BYPASS_KEY)
 }
 
 export class CmsApiError extends Error {

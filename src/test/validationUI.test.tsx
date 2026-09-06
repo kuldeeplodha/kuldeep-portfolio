@@ -6,6 +6,7 @@ import { getFieldInputClass } from '../lib/admin/validationStyles'
 import { ValidationStatusBar } from '../components/admin/ValidationStatusBar'
 import { DiagnosticImportModal } from '../components/admin/DiagnosticImportModal'
 import { AdminPage } from '../pages/AdminPage'
+import { activateDevBypass } from '../lib/admin/cms'
 import { MemoryRouter } from 'react-router-dom'
 import type { ValidationIssue, ValidationSummary } from '../lib/config/validationRegistry'
 
@@ -352,10 +353,13 @@ describe('DiagnosticImportModal component', () => {
 })
 
 describe('AdminPage Validation Integration', () => {
+  // V2.2 P4: single-JWT gate via CmsAuthGate — dev bypass unlocks it in
+  // Vitest (import.meta.env.DEV defaults to true) without a mocked backend.
   beforeEach(() => {
     try {
       window.localStorage?.clear()
-      window.sessionStorage?.setItem('kuldeep-portfolio-admin-session', 'authenticated')
+      window.sessionStorage?.clear()
+      activateDevBypass()
     } catch {}
   })
 

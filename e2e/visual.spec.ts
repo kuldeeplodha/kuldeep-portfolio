@@ -92,8 +92,11 @@ test('admin login page', async ({ page }) => {
 // ─── Admin configuration panel ────────────────────────────────────────────────
 
 test('admin configuration panel', async ({ page }) => {
+  await page.route('**/api/auth/login', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'fake-jwt', expiresIn: 86400 }) }),
+  )
   await page.goto('/admin')
-  await page.getByLabel('Password').fill('test-admin-password')
+  await page.getByLabel('Admin password').fill('test-admin-password')
   await page.getByRole('button', { name: 'Sign in' }).click()
   await expect(page.locator('h1')).toContainText('Configuration Panel')
   await page.waitForLoadState('networkidle')

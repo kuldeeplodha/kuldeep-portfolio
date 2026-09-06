@@ -1,23 +1,33 @@
 import { useEffect, useState } from 'react'
 import { adminInputClass } from '../AdminLayout'
-import { cmsLogin, cmsVerify, clearCmsToken, isCmsAuthenticated, CmsApiError } from '../../../lib/admin/cms'
+import {
+  activateDevBypass,
+  cmsLogin,
+  cmsVerify,
+  clearCmsToken,
+  isCmsAuthenticated,
+  isDevBypassActive,
+  CmsApiError,
+} from '../../../lib/admin/cms'
 
 interface CmsAuthGateProps {
   children: React.ReactNode
 }
 
-// Gates access to the content-authoring tabs (Blog Posts / Case Studies)
-// behind a real server-issued JWT — distinct from AdminGate's client-side
-// hash check, which only protects the static-config panel. Verifies any
-// stored token on mount so a stale/expired one doesn't render the CMS UI
-// only to have every request bounce with 401.
+// Gates access to a real server-issued JWT. V2.2 P4 promoted this to the
+// single gate for the whole /admin page (it used to protect only the
+// content-authoring tabs, with AdminPage.tsx wrapped by a separate
+// client-side hash check — that gate is gone; see docs/CICD_PLAN.md).
+// Verifies any stored token on mount so a stale/expired one doesn't render
+// the admin UI only to have every request bounce with 401.
 export function CmsAuthGate({ children }: CmsAuthGateProps) {
   // Lazy initializer decides the starting state synchronously (no stored
   // token = nothing to verify), so the effect below only ever needs to run
   // when there IS a token to check, and never has to setState on mount itself.
-  const [status, setStatus] = useState<'checking' | 'authed' | 'unauthed'>(() =>
-    isCmsAuthenticated() ? 'checking' : 'unauthed',
-  )
+  const [status, setStatus] = useState<'checking' | 'authed' | 'unauthed'>(() => {
+    if (isDevBypassActive()) return 'authed'
+    return isCmsAuthenticated() ? 'checking' : 'unauthed'
+  })
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -95,6 +105,18 @@ export function CmsAuthGate({ children }: CmsAuthGateProps) {
           {submitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
+      {import.meta.env.DEV && (
+        <button
+          type="button"
+          onClick={() => {
+            activateDevBypass()
+            setStatus('authed')
+          }}
+          className="mt-4 text-sm text-slate-400 underline hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded"
+        >
+          Continue without backend (dev only)
+        </button>
+      )}
     </div>
   )
 }

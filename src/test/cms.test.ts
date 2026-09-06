@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   CmsApiError,
+  activateDevBypass,
+  clearDevBypass,
   cmsLogin,
   cmsVerify,
   clearCmsToken,
@@ -9,6 +11,7 @@ import {
   estimateReadingTimeMinutes,
   getCmsToken,
   isCmsAuthenticated,
+  isDevBypassActive,
   listAdminBlogs,
   slugify,
   updateBlog,
@@ -155,5 +158,38 @@ describe('cms client', () => {
     sessionStorage.setItem('kuldeep-portfolio-cms-jwt', 'jwt-abc')
     clearCmsToken()
     expect(getCmsToken()).toBeNull()
+  })
+})
+
+// V2.2 P4: the dev-only bypass that unlocks the unified /admin gate without
+// a running backend. Vitest's `import.meta.env.DEV` defaults to true, same
+// as `vite dev` — this is what the bypass is actually for.
+describe('dev bypass (import.meta.env.DEV only)', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('is inactive until activated', () => {
+    expect(isDevBypassActive()).toBe(false)
+  })
+
+  it('activateDevBypass flips isDevBypassActive on', () => {
+    activateDevBypass()
+    expect(isDevBypassActive()).toBe(true)
+  })
+
+  it('clearDevBypass turns it back off', () => {
+    activateDevBypass()
+    clearDevBypass()
+    expect(isDevBypassActive()).toBe(false)
+  })
+
+  it('no-ops outside DEV (a production build never exposes this)', () => {
+    vi.stubEnv('DEV', false)
+    activateDevBypass()
+    expect(isDevBypassActive()).toBe(false)
   })
 })
