@@ -23,11 +23,11 @@ export function TagsInput({ label, value, onChange, placeholder }: TagsInputProp
   return (
     <div>
       <span className="mb-1 block text-sm text-slate-400">{label}</span>
-      <div className="flex flex-wrap gap-1.5 rounded-lg border border-slate-600 bg-slate-800/50 p-2">
+      <div className="flex flex-wrap gap-1.5 rounded-[var(--radius-base)] border border-slate-600 bg-slate-800/50 p-2">
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-md bg-slate-700/70 px-2 py-1 text-xs text-slate-200"
+            className="inline-flex items-center gap-1 rounded-[var(--radius-base)] bg-slate-700/70 px-2 py-1 text-xs text-slate-200"
           >
             {tag}
             <button

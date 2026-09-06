@@ -32,7 +32,7 @@ export function CareerJourney() {
             </div>
             {index < careerJourney.length - 1 && (
               <div
-                className="mx-2 hidden h-0.5 w-4 shrink-0 rounded-full sm:block"
+                className="mx-2 hidden h-0.5 w-4 shrink-0 rounded-[var(--radius-pill)] sm:block"
                 style={{ backgroundColor: 'var(--color-border)' }}
                 aria-hidden
               />

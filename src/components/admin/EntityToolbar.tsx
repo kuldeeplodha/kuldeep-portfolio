@@ -29,7 +29,7 @@ export function EntityToolbar({
     <div className="space-y-3 border-b border-slate-800 pb-4 pt-1">
       {/* Top Header Row: Counter & Add Button */}
       <div className="flex items-center justify-between gap-3">
-        <span className="rounded-md bg-slate-800 px-2.5 py-1 font-mono text-xs font-medium text-slate-300">
+        <span className="rounded-[var(--radius-base)] bg-slate-800 px-2.5 py-1 font-mono text-xs font-medium text-slate-300">
           {totalCount > 0 ? `${currentIndex + 1} of ${totalCount}` : '0 items'}
         </span>
 
@@ -37,7 +37,7 @@ export function EntityToolbar({
           type="button"
           onClick={onAdd}
           aria-label={`Add new ${sectionTitle}`}
-          className="flex shrink-0 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="flex shrink-0 min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
         >
           <span aria-hidden className="mr-1.5 font-bold">+</span>
           <span>Add {sectionTitle}</span>
@@ -46,13 +46,13 @@ export function EntityToolbar({
 
       {/* Action Row: Reordering & Item Actions */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center rounded-lg border border-slate-700 bg-slate-800/80 p-0.5">
+        <div className="flex items-center rounded-[var(--radius-base)] border border-slate-700 bg-slate-800/80 p-0.5">
           <button
             type="button"
             disabled={isFirst || totalCount <= 1}
             onClick={onMoveUp}
             aria-label={`Move ${labelName} up`}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-base)] px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             <span aria-hidden className="mr-1">↑</span>
             <span>Up</span>
@@ -63,7 +63,7 @@ export function EntityToolbar({
             disabled={isLast || totalCount <= 1}
             onClick={onMoveDown}
             aria-label={`Move ${labelName} down`}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-base)] px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             <span aria-hidden className="mr-1">↓</span>
             <span>Down</span>
@@ -74,7 +74,7 @@ export function EntityToolbar({
           type="button"
           onClick={onDuplicate}
           aria-label={`Duplicate ${labelName}`}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-base)] border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
         >
           <span aria-hidden className="mr-1.5">⎘</span>
           <span>Duplicate</span>
@@ -84,7 +84,7 @@ export function EntityToolbar({
           type="button"
           onClick={onDelete}
           aria-label={`Delete ${labelName}`}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-rose-800/60 bg-rose-950/40 px-3.5 py-2 text-xs font-medium text-rose-300 hover:bg-rose-900/60 hover:text-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-400"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-base)] border border-rose-800/60 bg-rose-950/40 px-3.5 py-2 text-xs font-medium text-rose-300 hover:bg-rose-900/60 hover:text-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-400"
         >
           <span aria-hidden className="mr-1.5">🗑</span>
           <span>Delete</span>

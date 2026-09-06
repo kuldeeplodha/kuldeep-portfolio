@@ -59,13 +59,13 @@ export function HeroBackground({ roleId }: HeroBackgroundProps) {
     return (
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <div
-          className="absolute -right-20 -top-20 h-80 w-80 rounded-full opacity-[0.06]"
+          className="absolute -right-20 -top-20 h-80 w-80 rounded-[var(--radius-pill)] opacity-[0.06]"
           style={{
             background: 'radial-gradient(circle, var(--color-accent) 0%, transparent 70%)',
           }}
         />
         <div
-          className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full opacity-[0.04]"
+          className="absolute -bottom-10 -left-10 h-60 w-60 rounded-[var(--radius-pill)] opacity-[0.04]"
           style={{
             background: 'radial-gradient(circle, var(--color-accent-muted, var(--color-accent)) 0%, transparent 70%)',
           }}

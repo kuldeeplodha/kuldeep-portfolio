@@ -7,7 +7,7 @@ import { NotFoundPage } from './NotFoundPage'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>()
-  const { theme } = useRole()
+  useRole()
 
   const project = portfolioConfig.projects.find((p) => p.id === projectId)
 
@@ -26,69 +26,56 @@ export function ProjectDetailPage() {
   }
 
   return (
-    <main
-      className="min-h-screen px-4 py-12 sm:px-6"
-      style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)' }}
-    >
-      <div className="mx-auto max-w-3xl">
-        <Link
-          to="/#projects"
-          className="mb-8 inline-block text-sm transition-opacity hover:opacity-80"
-          style={{ color: 'var(--color-accent)' }}
-        >
-          ← Back to projects
-        </Link>
+    <main className="container mx-auto max-w-3xl px-4 py-16" style={{ minHeight: '80vh' }}>
+      <Link to="/#projects" className="mb-8 inline-flex items-center text-sm font-medium hover:underline focus:outline-none focus:ring-2" style={{ color: 'var(--color-accent)' }}>
+        ← Back to projects
+      </Link>
 
-        {project.category && (
-          <span
-            className="mb-3 inline-block rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
-              color: 'var(--color-accent)',
-            }}
-          >
-            {project.category}
-          </span>
-        )}
-        <p className="mb-2 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-          {project.period}
-        </p>
-        <h1 className="mb-6 text-3xl font-bold">{project.title}</h1>
-        <p className="mb-8 text-base leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-          {project.overview}
-        </p>
+      <article>
+        <header className="mb-10">
+          <h1 className="mb-4 text-4xl md:text-5xl font-bold tracking-tight" style={{ color: 'var(--color-text)' }}>
+            {project.title}
+          </h1>
 
-        {/* V2.1 P2 (spec §31/32): case-study section order — Problem,
-            Context (the existing "Approach" field — real content, no
-            rename of its meaning, just its position), Architecture (the
-            existing pipeline data, relabeled — see below), Outcome, Future
-            Improvements, Technology last. Sections spec calls for that have
-            no backing field (My Contribution / Engineering Challenges /
-            Technical Decisions / Optimization as their own headings) are
-            OMITTED per spec §32 rather than invented. */}
-        {project.problem && (
-          <section className="mb-8">
-            <h2 className="mb-2 text-lg font-semibold">The Problem</h2>
-            <p style={{ color: 'var(--color-text-muted)' }}>{project.problem}</p>
-          </section>
-        )}
+          <div className="flex flex-wrap items-center gap-4 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+            <time>{project.period}</time>
+            {project.category && (
+              <div className="flex flex-wrap gap-2">
+                <span
+                  className="rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
+                    color: 'var(--color-accent)',
+                  }}
+                >
+                  {project.category}
+                </span>
+              </div>
+            )}
+          </div>
+        </header>
 
-        {project.approach && (
-          <section className="mb-8">
-            <h2 className="mb-2 text-lg font-semibold">Context</h2>
-            <p style={{ color: 'var(--color-text-muted)' }}>{project.approach}</p>
-          </section>
-        )}
+        <div className="blog-content max-w-none" style={{ color: 'var(--color-text)' }}>
+          <p>{project.overview}</p>
 
-        {/* "Architecture" — the existing pipeline steps ARE the real,
-            per-project data-flow architecture (spec §33 wants a diagram
-            only where real architecture info exists; this data has existed
-            since before V2 and is genuinely per-project, not decorative). */}
-        <section className="mb-8">
-          <h2 className="mb-4 text-lg font-semibold">Architecture</h2>
+          {project.problem && (
+            <>
+              <h2>The Problem</h2>
+              <p>{project.problem}</p>
+            </>
+          )}
+
+          {project.approach && (
+            <>
+              <h2>Context</h2>
+              <p>{project.approach}</p>
+            </>
+          )}
+
+          <h2>Architecture</h2>
           <div
-            className="overflow-x-auto rounded-[var(--radius-card)] border p-4 sm:p-6"
-            style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
+            className="overflow-x-auto rounded-[var(--radius-card)] border p-4 sm:p-6 not-prose"
+            style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)', marginTop: '1.25em' }}
             tabIndex={0}
             aria-label="Architecture / pipeline steps"
           >
@@ -110,53 +97,53 @@ export function ProjectDetailPage() {
               ))}
             </div>
           </div>
-        </section>
 
-        {project.result && (
-          <section className="mb-8">
-            <h2 className="mb-2 text-lg font-semibold">Outcome</h2>
-            <p style={{ color: 'var(--color-text-muted)' }}>{project.result}</p>
-          </section>
-        )}
+          {project.result && (
+            <>
+              <h2>Outcome</h2>
+              <p>{project.result}</p>
+            </>
+          )}
 
-        {project.futureImprovements && (
-          <section className="mb-8">
-            <h2 className="mb-2 text-lg font-semibold">Future Improvements</h2>
-            <p style={{ color: 'var(--color-text-muted)' }}>{project.futureImprovements}</p>
-          </section>
-        )}
+          {project.futureImprovements && (
+            <>
+              <h2>Future Improvements</h2>
+              <p>{project.futureImprovements}</p>
+            </>
+          )}
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">Technology</h2>
-          <div className="flex flex-wrap gap-2">
+          <h2>Technology</h2>
+          <div className="flex flex-wrap gap-2 not-prose" style={{ marginTop: '1.25em' }}>
             {project.technologies.map((tech) => (
               <span
                 key={tech}
                 className="rounded-[var(--radius-pill)] border px-3 py-1 text-sm"
-                style={{ borderColor: 'var(--color-border)' }}
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
               >
                 {tech}
               </span>
             ))}
           </div>
-        </section>
 
-        {project.githubUrl && isValidSafeUrl(project.githubUrl) ? (
-          <a
-            href={project.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block rounded-[var(--radius-base)] px-6 py-3 text-sm font-semibold"
-            style={{ backgroundColor: 'var(--color-accent)', color: theme.background }}
-          >
-            View on GitHub
-          </a>
-        ) : (
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-            GitHub link: not configured (placeholder in config)
-          </p>
-        )}
-      </div>
+          <div style={{ marginTop: '3em' }}>
+            {project.githubUrl && isValidSafeUrl(project.githubUrl) ? (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded-[var(--radius-base)] px-6 py-3 text-sm font-semibold !text-white no-underline hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: 'var(--color-accent)' }}
+              >
+                View on GitHub
+              </a>
+            ) : (
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                GitHub link: not configured (placeholder in config)
+              </p>
+            )}
+          </div>
+        </div>
+      </article>
     </main>
   )
 }

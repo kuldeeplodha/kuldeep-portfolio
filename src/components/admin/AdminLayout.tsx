@@ -67,7 +67,7 @@ interface AdminCardProps {
 
 export function AdminCard({ title, description, children }: AdminCardProps) {
   return (
-    <section className="rounded-xl border border-slate-700/80 bg-slate-900/60 p-6 shadow-lg shadow-black/20 scroll-mt-28">
+    <section className="rounded-[var(--radius-card)] border border-slate-700/80 bg-slate-900/60 p-6 shadow-lg shadow-black/20 scroll-mt-28">
       <h2 className="mb-1 text-base font-semibold text-white">{title}</h2>
       {description && <p className="mb-5 text-sm text-slate-400">{description}</p>}
       {!description && <div className="mb-5" />}
@@ -77,4 +77,4 @@ export function AdminCard({ title, description, children }: AdminCardProps) {
 }
 
 export const adminInputClass =
-  'w-full rounded-lg border border-slate-600 bg-slate-800/50 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400'
+  'w-full rounded-[var(--radius-base)] border border-slate-600 bg-slate-800/50 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400'

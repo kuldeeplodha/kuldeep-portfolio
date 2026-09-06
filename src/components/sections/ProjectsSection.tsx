@@ -69,25 +69,25 @@ export function ProjectsSection() {
             // matching how the other section cards already work.
             <article
               key={project.id}
-              className={`role-card hover-lift group flex flex-col overflow-hidden border p-0 transition-colors duration-300 hover:border-[var(--color-accent)]${
+              className={`flex flex-col gap-3 overflow-hidden rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)] transition-shadow hover:shadow-[var(--shadow-glass-lg)] hover-lift${
                 project.featured ? ' md:col-span-2' : ''
               }`}
-              style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
+              style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-alt, var(--color-surface))' }}
             >
               {project.imageUrl && (
-                <div className="aspect-video w-full overflow-hidden">
+                <div className="aspect-video w-full overflow-hidden rounded-[var(--radius-base)]">
                   <img
                     src={project.imageUrl}
                     alt=""
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                   />
                 </div>
               )}
-              <div className="flex flex-1 flex-col p-6">
-                <div className="mb-2 flex flex-wrap items-center gap-2">
+              <div className="flex flex-1 flex-col mt-2">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
                   {project.featured && (
                     <span
-                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide"
                       style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)' }}
                     >
                       Featured
@@ -95,9 +95,9 @@ export function ProjectsSection() {
                   )}
                   {project.category && (
                     <span
-                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide"
                       style={{
-                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
+                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
                         color: 'var(--color-accent)',
                       }}
                     >
@@ -106,23 +106,26 @@ export function ProjectsSection() {
                   )}
                 </div>
                 <h3
-                  className={`mb-2 font-semibold ${project.featured ? 'text-lg sm:text-xl' : ''}`}
+                  className="mb-1 text-xl font-semibold"
                   style={{ color: 'var(--color-text)' }}
                 >
                   {project.title}
                 </h3>
-                <p className="mb-3 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                <p className="mb-3 text-sm" style={{ color: 'var(--color-text-muted)' }}>
                   {project.period}
                 </p>
-                <p className="mb-4 flex-1 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                <p className="mb-4 flex-1 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
                   {project.overview}
                 </p>
-                <div className="mb-4 flex flex-wrap gap-1">
+                <div className="mb-4 flex flex-wrap gap-2">
                   {project.technologies.slice(0, 4).map((tech) => (
                     <span
                       key={tech}
-                      className="rounded-[var(--radius-pill)] border px-2 py-0.5 text-xs"
-                      style={{ borderColor: 'var(--color-border)', color: 'var(--color-accent)' }}
+                      className="rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
+                        color: 'var(--color-accent)',
+                      }}
                     >
                       {tech}
                     </span>
@@ -130,13 +133,10 @@ export function ProjectsSection() {
                 </div>
                 <Link
                   to={`/projects/${project.id}`}
-                  className="inline-flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-80"
+                  className="mt-2 text-sm font-medium hover:underline w-max"
                   style={{ color: 'var(--color-accent)' }}
                 >
-                  Explore case study
-                  <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-1">
-                    →
-                  </span>
+                  Explore case study →
                 </Link>
               </div>
             </article>

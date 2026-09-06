@@ -34,7 +34,7 @@ export function RoleScopeEditor({
               key={role}
               type="button"
               onClick={() => toggle(role)}
-              className="rounded-lg border px-3 py-1.5 text-xs font-medium transition-all"
+              className="rounded-[var(--radius-base)] border px-3 py-1.5 text-xs font-medium transition-all"
               style={{
                 borderColor: active ? '#22d3ee' : '#334155',
                 backgroundColor: active ? 'rgba(34, 211, 238, 0.15)' : 'transparent',
@@ -48,7 +48,7 @@ export function RoleScopeEditor({
         <button
           type="button"
           onClick={() => toggle('system')}
-          className="rounded-lg border px-3 py-1.5 text-xs font-medium transition-all"
+          className="rounded-[var(--radius-base)] border px-3 py-1.5 text-xs font-medium transition-all"
           style={{
             borderColor: value.includes('system') ? '#34d399' : '#334155',
             backgroundColor: value.includes('system') ? 'rgba(52, 211, 153, 0.15)' : 'transparent',
@@ -69,7 +69,7 @@ export function RoleBadges({ roles }: { roles: RoleId[] }) {
       {roles.map((role) => (
         <span
           key={role}
-          className="rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+          className="rounded-[var(--radius-base)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
           style={{
             backgroundColor: 'rgba(34, 211, 238, 0.12)',
             color: '#22d3ee',

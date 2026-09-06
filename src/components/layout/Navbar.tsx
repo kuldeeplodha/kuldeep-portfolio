@@ -126,11 +126,11 @@ export function Navbar() {
             <img
               src={profile.avatarUrl}
               alt=""
-              className="h-8 w-8 shrink-0 rounded-full object-cover ring-2 ring-[var(--color-accent)]"
+              className="h-8 w-8 shrink-0 rounded-[var(--radius-pill)] object-cover ring-2 ring-[var(--color-accent)]"
             />
           ) : (
             <span
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-pill)] text-xs font-bold"
               style={{
                 backgroundColor: 'var(--color-accent)',
                 color: 'var(--color-bg)',

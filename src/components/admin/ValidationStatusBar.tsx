@@ -26,7 +26,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
   if (summary.errorCount > 0) {
     return (
       <div
-        className="mb-6 rounded-xl border border-red-500/50 bg-red-950/40 p-4 shadow-lg shadow-black/20"
+        className="mb-6 rounded-[var(--radius-card)] border border-red-500/50 bg-red-950/40 p-4 shadow-lg shadow-black/20"
         role="alert"
         aria-live="polite"
       >
@@ -50,7 +50,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
             <button
               type="button"
               onClick={handleJumpToNextError}
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-[var(--radius-base)] bg-red-500 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-red-400"
             >
               <span>Jump to Next Error</span>
               <span aria-hidden="true">⏭️</span>
@@ -59,7 +59,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
               type="button"
               onClick={() => setIsDrawerOpen((prev) => !prev)}
               aria-expanded={isDrawerOpen}
-              className="inline-flex min-h-[36px] items-center rounded-lg border border-red-500/40 bg-red-900/30 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="inline-flex min-h-[36px] items-center rounded-[var(--radius-base)] border border-red-500/40 bg-red-900/30 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-red-400"
             >
               {isDrawerOpen ? 'Hide Error List' : `View All Errors (${summary.errorCount})`}
             </button>
@@ -77,7 +77,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
                   <button
                     type="button"
                     onClick={() => onNavigateToIssue(err.section, err.itemId, err.field)}
-                    className="flex w-full items-start justify-between gap-2 rounded-lg border border-red-500/20 bg-red-900/20 p-2 text-left hover:border-red-500/40 hover:bg-red-900/30 focus:outline-none focus:ring-1 focus:ring-red-400"
+                    className="flex w-full items-start justify-between gap-2 rounded-[var(--radius-base)] border border-red-500/20 bg-red-900/20 p-2 text-left hover:border-red-500/40 hover:bg-red-900/30 focus:outline-none focus:ring-1 focus:ring-red-400"
                   >
                     <div>
                       <span className="font-semibold text-red-200 uppercase tracking-wide text-[10px] bg-red-900/60 px-1.5 py-0.5 rounded mr-1.5">
@@ -105,7 +105,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
   if (summary.warningCount > 0) {
     return (
       <div
-        className="mb-6 rounded-xl border border-amber-500/40 bg-amber-950/20 p-4 shadow-sm"
+        className="mb-6 rounded-[var(--radius-card)] border border-amber-500/40 bg-amber-950/20 p-4 shadow-sm"
         role="status"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -127,7 +127,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
             type="button"
             onClick={() => setIsDrawerOpen((prev) => !prev)}
             aria-expanded={isDrawerOpen}
-            className="inline-flex min-h-[36px] items-center rounded-lg border border-amber-500/30 bg-amber-900/20 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-900/40 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="inline-flex min-h-[36px] items-center rounded-[var(--radius-base)] border border-amber-500/30 bg-amber-900/20 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-900/40 focus:outline-none focus:ring-2 focus:ring-amber-400"
           >
             {isDrawerOpen ? 'Hide Recommendations' : `Review Recommendations (${summary.warningCount})`}
           </button>
@@ -141,7 +141,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
                   <button
                     type="button"
                     onClick={() => onNavigateToIssue(warn.section, warn.itemId, warn.field)}
-                    className="flex w-full items-start justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-900/20 p-2 text-left hover:border-amber-500/40 hover:bg-amber-900/30 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                    className="flex w-full items-start justify-between gap-2 rounded-[var(--radius-base)] border border-amber-500/20 bg-amber-900/20 p-2 text-left hover:border-amber-500/40 hover:bg-amber-900/30 focus:outline-none focus:ring-1 focus:ring-amber-400"
                   >
                     <div>
                       <span className="font-semibold text-amber-200 uppercase tracking-wide text-[10px] bg-amber-900/60 px-1.5 py-0.5 rounded mr-1.5">
@@ -168,7 +168,7 @@ export function ValidationStatusBar({ summary, onNavigateToIssue }: ValidationSt
 
   return (
     <div
-      className="mb-6 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 text-xs text-emerald-300"
+      className="mb-6 flex items-center justify-between rounded-[var(--radius-card)] border border-emerald-500/30 bg-emerald-950/20 px-4 py-3 text-xs text-emerald-300"
       role="status"
     >
       <div className="flex items-center gap-2">

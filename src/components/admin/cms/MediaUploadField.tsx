@@ -23,13 +23,13 @@ export function MediaUploadField({ label, value, onChange, hint }: MediaUploadFi
         {label}
       </label>
       {value && (
-        <div className="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-2">
-          <img src={value} alt="" className="h-16 w-16 rounded-md object-cover" />
+        <div className="flex items-center gap-3 rounded-[var(--radius-base)] border border-slate-700 bg-slate-800/40 p-2">
+          <img src={value} alt="" className="h-16 w-16 rounded-[var(--radius-base)] object-cover" />
           <span className="truncate text-xs text-slate-400">{value}</span>
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="ml-auto shrink-0 rounded-md border border-slate-600 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="ml-auto shrink-0 rounded-[var(--radius-base)] border border-slate-600 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             Remove
           </button>

@@ -45,7 +45,7 @@ export function AdminGate({ children }: AdminGateProps) {
       style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)' }}
     >
       <form
-        className="w-full max-w-sm rounded-2xl border p-8"
+        className="w-full max-w-sm rounded-[var(--radius-card)] border p-8"
         style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
         onSubmit={async (e) => {
           e.preventDefault()
@@ -74,7 +74,7 @@ export function AdminGate({ children }: AdminGateProps) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
-          className="mb-4 w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus-visible:ring-2"
+          className="mb-4 w-full rounded-[var(--radius-base)] border px-3 py-2.5 text-sm focus:outline-none focus-visible:ring-2"
           style={{
             borderColor: 'var(--color-border)',
             backgroundColor: 'var(--color-bg)',
@@ -88,7 +88,7 @@ export function AdminGate({ children }: AdminGateProps) {
         )}
         <button
           type="submit"
-          className="w-full rounded-lg py-2.5 text-sm font-semibold"
+          className="w-full rounded-[var(--radius-base)] py-2.5 text-sm font-semibold"
           style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)' }}
         >
           Sign in

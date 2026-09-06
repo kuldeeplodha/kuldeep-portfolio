@@ -132,15 +132,15 @@ export function AskKuldeepSection() {
                 lines) so the section doesn't jump when the real answer
                 replaces it. */}
             <div
-              className="mb-3 h-3 w-24 rounded-full"
+              className="mb-3 h-3 w-24 rounded-[var(--radius-pill)]"
               style={{ backgroundColor: 'var(--color-border)' }}
             />
             <div
-              className="mb-2 h-3 w-full rounded-full"
+              className="mb-2 h-3 w-full rounded-[var(--radius-pill)]"
               style={{ backgroundColor: 'var(--color-border)' }}
             />
             <div
-              className="h-3 w-2/3 rounded-full"
+              className="h-3 w-2/3 rounded-[var(--radius-pill)]"
               style={{ backgroundColor: 'var(--color-border)' }}
             />
           </div>
