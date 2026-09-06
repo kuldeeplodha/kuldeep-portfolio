@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from backend.main import app
+from main import app
 
 def test_login_invalid():
     with TestClient(app) as client:

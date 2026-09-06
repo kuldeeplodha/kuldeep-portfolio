@@ -1,7 +1,7 @@
 import os
 import time
 from fastapi import APIRouter, Depends, HTTPException
-from ..auth import get_current_admin
+from auth import get_current_admin
 import cloudinary.utils
 
 router = APIRouter()
