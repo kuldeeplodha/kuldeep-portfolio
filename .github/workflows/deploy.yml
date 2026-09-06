@@ -32,6 +32,7 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_API_BASE_URL: https://kuldeep-portfolio-kuldeep-b93a.vercel.app
           # Missing/empty secret resolves to '' -> admin stays in its safe
           # "not configured" state; no workflow failure.
           VITE_ADMIN_PASSWORD_HASH: ${{ secrets.VITE_ADMIN_PASSWORD_HASH }}
