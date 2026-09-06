@@ -130,8 +130,11 @@ test.describe('V2-P6 states', () => {
     await input.fill('zzz nonsense query unrelated to anything zzz')
     await page.getByRole('button', { name: 'Ask' }).click()
 
+    // V2.1 P3: the displayed empty-state copy changed to the "engineering
+    // note" framing (matching engine / trigger condition unchanged — see
+    // e2e/v21-p3-signature.spec.ts for direct coverage of this).
     const answer = page.locator('#ask [role="status"][aria-live="polite"]')
-    await expect(answer).toContainText('I do not have that information')
+    await expect(answer).toContainText('No matching engineering note found')
   })
 
   test('an unknown project id shows a not-found state instead of a silent redirect', async ({
