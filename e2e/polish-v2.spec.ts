@@ -57,7 +57,8 @@ test.describe('V2-P6 responsive', () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 800 })
     await page.goto('/projects/gesture-recognition')
-    const pipeline = page.getByLabel('Pipeline steps')
+    // V2.1 P2: aria-label renamed "Pipeline steps" → "Architecture / pipeline steps".
+    const pipeline = page.getByLabel('Architecture / pipeline steps')
     await expect(pipeline).toBeVisible()
     const { scrollWidth, clientWidth } = await pipeline.evaluate((el) => ({
       scrollWidth: el.scrollWidth,

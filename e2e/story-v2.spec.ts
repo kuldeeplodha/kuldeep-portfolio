@@ -27,7 +27,8 @@ test.describe('Professional story (V2-P3)', () => {
   }) => {
     await page.goto('/')
     const work = page.locator('#projects')
-    await expect(work.getByRole('heading', { name: 'Selected Work', level: 2 })).toBeVisible()
+    // V2.1 P2: retitled "Selected Work" → "Selected Engineering Work" (spec §27).
+    await expect(work.getByRole('heading', { name: 'Selected Engineering Work', level: 2 })).toBeVisible()
     await expect(work.getByText('Machine Learning · Deep Learning')).toBeVisible()
 
     await expect(work.getByRole('heading', { name: 'Engineering with measurable outcomes.' })).toBeVisible()

@@ -19,14 +19,13 @@ function SectionLoader() {
 // Order follows src/config/sectionOrder.ts (signal -> work -> experience ->
 // about -> lab -> stack -> ask).
 //
-// MetricsSection (V2-P3) and SkillsSection (V2-P4) are deliberately NOT
-// rendered here anymore. MetricsSection's old content restated the same
-// achievements now covered authoritatively by ProjectsSection's impact-metrics
-// strip. SkillsSection is superseded by EngineeringSignalSection (categories)
-// + EngineeringStackSection (the full technology matrix) — both uiContentRules
-// violations (repeating content / a redundant skills listing) if left in
-// alongside their replacements. Both components and their config are left
-// intact (AdminPage still manages them) in case they're repurposed later.
+// V2.1 P2: the MetricsSection and SkillsSection *components* (unrendered
+// since V2-P3/P4 — see git history) were deleted outright, reconciling them
+// into the one categorical EngineeringStackSection per spec §38-40 and
+// removing dead code rather than leaving zombie components around. Their
+// underlying config (portfolioConfig.skills / .metrics) and admin-editing
+// UI are untouched — that data model is still part of the AdminPage CMS
+// surface, which this phase does not touch.
 export function HomePage() {
   return (
     <main

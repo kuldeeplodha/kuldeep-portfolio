@@ -51,7 +51,16 @@ export function ProjectsSection() {
   return (
     <SectionShell id="projects" muted>
       <RoleTransition>
-        <SectionHeader slug="work" title="Selected Work" />
+        <SectionHeader
+          slug="work"
+          title="Selected Engineering Work"
+          description="Systems built around real-world constraints."
+        />
+        {/* V2.1 P2 (spec §29/30): a bento-style grid where one project (the
+            `featured` flag — an editorial pick, not a claim about the
+            project) spans 2 columns on larger screens; everything else
+            unchanged (same card, same hover-lift, same full-width-on-mobile
+            behavior spec §29 asks for). */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
             // V2.1 P1 (spec §57/59): glass shadows are reserved for the
@@ -60,7 +69,9 @@ export function ProjectsSection() {
             // matching how the other section cards already work.
             <article
               key={project.id}
-              className="role-card hover-lift group flex flex-col overflow-hidden border p-0 transition-colors duration-300 hover:border-[var(--color-accent)]"
+              className={`role-card hover-lift group flex flex-col overflow-hidden border p-0 transition-colors duration-300 hover:border-[var(--color-accent)]${
+                project.featured ? ' md:col-span-2' : ''
+              }`}
               style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
             >
               {project.imageUrl && (
@@ -73,18 +84,31 @@ export function ProjectsSection() {
                 </div>
               )}
               <div className="flex flex-1 flex-col p-6">
-                {project.category && (
-                  <span
-                    className="mb-2 w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
-                      color: 'var(--color-accent)',
-                    }}
-                  >
-                    {project.category}
-                  </span>
-                )}
-                <h3 className="mb-2 font-semibold" style={{ color: 'var(--color-text)' }}>
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  {project.featured && (
+                    <span
+                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                      style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)' }}
+                    >
+                      Featured
+                    </span>
+                  )}
+                  {project.category && (
+                    <span
+                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 12%, transparent)',
+                        color: 'var(--color-accent)',
+                      }}
+                    >
+                      {project.category}
+                    </span>
+                  )}
+                </div>
+                <h3
+                  className={`mb-2 font-semibold ${project.featured ? 'text-lg sm:text-xl' : ''}`}
+                  style={{ color: 'var(--color-text)' }}
+                >
                   {project.title}
                 </h3>
                 <p className="mb-3 text-xs" style={{ color: 'var(--color-text-muted)' }}>
@@ -106,10 +130,13 @@ export function ProjectsSection() {
                 </div>
                 <Link
                   to={`/projects/${project.id}`}
-                  className="text-sm font-medium transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-80"
                   style={{ color: 'var(--color-accent)' }}
                 >
-                  View case study →
+                  Explore case study
+                  <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-1">
+                    →
+                  </span>
                 </Link>
               </div>
             </article>

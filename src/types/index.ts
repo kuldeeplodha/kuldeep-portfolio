@@ -96,6 +96,9 @@ export interface Project {
   title: string
   /** Honest category label, e.g. "Machine Learning · Deep Learning" (V2 §2.4) */
   category?: string
+  /** V2.1 P2 (spec §30): purely an editorial/visual flag for the "one
+   * larger featured card" treatment — not a claim about the project itself. */
+  featured?: boolean
   period: string
   overview: string
   problem?: string
