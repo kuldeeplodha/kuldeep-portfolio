@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Reveal } from './Reveal'
+import { GRID_PADDING, GRID_WIDTH, GRID_WIDTH_NARROW } from './grid'
 
 interface SectionShellProps {
   id: string
@@ -24,10 +25,10 @@ export function SectionShell({ id, children, muted, narrow, className }: Section
   return (
     <section
       id={id}
-      className={`px-4 py-16 sm:px-6 sm:py-20${className ? ` ${className}` : ''}`}
+      className={`${GRID_PADDING} py-16 sm:py-20${className ? ` ${className}` : ''}`}
       style={muted ? { backgroundColor: 'var(--color-surface)' } : undefined}
     >
-      <Reveal className={narrow ? 'mx-auto max-w-3xl' : 'mx-auto max-w-5xl'}>{children}</Reveal>
+      <Reveal className={`mx-auto ${narrow ? GRID_WIDTH_NARROW : GRID_WIDTH}`}>{children}</Reveal>
     </section>
   )
 }

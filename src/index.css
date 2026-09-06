@@ -4,9 +4,14 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* V1.6 UI Modernization — unified radius scale (docs/design/ui-v1.6-design-spec.md §1) */
-  --radius-base: 16px;
-  --radius-card: 24px;
+  /* V2.1 P1 — unified radius scale (docs/design/portfolio-v2.1-spec.md §56:
+     "prefer 8/12/16/pill; avoid 24-32px on every element"). radius-base was
+     16px/radius-card 24px under V1.6 — both landed outside the spec's
+     preferred scale and made every card feel oversized. Values only:
+     every component already reads these through var(), so this is the
+     single edit that re-tunes radius sitewide. */
+  --radius-base: 12px;
+  --radius-card: 16px;
   --radius-pill: 9999px;
 
   /* V1.6 UI Modernization — glassmorphism elevation scale */
@@ -115,54 +120,21 @@
     border: 0;
   }
 
-  /* ── Per-role visual language ── */
-
-  [data-layout='terminal'] h1,
-  [data-layout='terminal'] h2 {
-    font-family: var(--font-mono);
-    letter-spacing: -0.02em;
-  }
-
-  [data-layout='terminal'] .role-card {
-    border-radius: 0.25rem;
-    border-left: 3px solid var(--color-accent);
-  }
-
-  [data-layout='neural'] h1 {
-    background: linear-gradient(135deg, var(--color-text) 0%, var(--color-accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  [data-layout='neural'] .role-card {
-    border-radius: 1rem;
-    box-shadow: 0 0 24px color-mix(in srgb, var(--color-accent) 15%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
-  }
-
-  [data-layout='dashboard'] .role-card {
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-    border: 1px solid var(--color-border);
-  }
-
-  [data-layout='dashboard'] h2 {
-    font-weight: 800;
-    letter-spacing: -0.03em;
-  }
-
-  [data-layout='hybrid'] .role-card {
-    border-radius: 0.5rem;
-    background: linear-gradient(
-      135deg,
-      var(--color-surface) 0%,
-      color-mix(in srgb, var(--color-accent) 5%, var(--color-surface)) 100%
-    );
-  }
-
-  [data-layout='hybrid'] h1 {
-    font-weight: 700;
+  /* ── Per-role visual language ──
+     V2.1 P1 (spec §8/9/52/87): the four roles previously rendered as four
+     visually unrelated websites — terminal got its own border-radius and a
+     mono h1, neural got a glowing gradient-text h1 and a neon card border,
+     dashboard got its own radius/shadow/weight, hybrid got its own radius
+     and a gradient card background. That's exactly what §9 calls out
+     ("Software → terminal website, AI → neon neural website...").
+     Reduced to ONE shared design system: every role uses the same
+     typography, radius (var(--radius-card) everywhere), spacing, and card
+     treatment. Role switching is left to change CONTENT (still fully
+     driven by role.hero.* etc. — untouched here) and a SUBTLE accent
+     border on cards only, matching spec §52's "role accents ... must
+     remain subtle, do not change the entire UI". */
+  .role-card {
+    border-left: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
   }
 
   /* V2-P5 Blog polish — hand-rolled article typography. The `.blog-content`

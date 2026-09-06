@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { portfolioConfig, getResumeForVariant } from '../../config'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
 import { useRole } from '../../hooks/useRole'
+import { GRID_PADDING, GRID_WIDTH } from '../ui/grid'
 
 // Anchor ids are unchanged from V1.6 (role.navEmphasis + existing e2e/section
 // ids key off these) — only the visible labels move to V2 terminology.
@@ -80,13 +81,32 @@ export function Navbar() {
     }
   }, [moreOpen])
 
+  // V2.1 P1 (spec: "mobile menu: Escape-close, scroll-lock, keyboard, large
+  // targets"). Large targets (min-h-11) and keyboard reachability (plain
+  // links) already existed; Escape-close and scroll-lock did not.
+  useEffect(() => {
+    if (!mobileOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMobileOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [mobileOpen])
+
   return (
     <header className="sticky top-3 z-50 px-3 sm:top-4 sm:px-4">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
       <nav
-        className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-[var(--radius-pill)] border px-4 py-2.5 shadow-[var(--shadow-glass-sm)] backdrop-blur-xl sm:px-5"
+        className={`mx-auto flex ${GRID_WIDTH} items-center justify-between gap-3 rounded-[var(--radius-pill)] border px-4 py-2.5 shadow-[var(--shadow-glass-sm)] backdrop-blur-xl sm:px-5`}
         style={{
           borderColor: 'color-mix(in srgb, var(--color-border) 55%, transparent)',
           backgroundColor: 'color-mix(in srgb, var(--color-bg) 78%, transparent)',
@@ -222,7 +242,7 @@ export function Navbar() {
       {mobileOpen && (
         <div
           id="mobile-menu"
-          className="menu-pop-in mx-auto mt-2 max-w-5xl rounded-[var(--radius-card)] border px-6 py-4 shadow-[var(--shadow-glass-md)] backdrop-blur-xl lg:hidden"
+          className={`menu-pop-in mx-auto mt-2 ${GRID_WIDTH} rounded-[var(--radius-card)] border px-6 py-4 shadow-[var(--shadow-glass-md)] backdrop-blur-xl lg:hidden`}
           style={{
             borderColor: 'color-mix(in srgb, var(--color-border) 55%, transparent)',
             backgroundColor: 'color-mix(in srgb, var(--color-bg) 92%, transparent)',
@@ -278,7 +298,11 @@ export function ContactSection() {
   const resume = getResumeForVariant(role.resumeVariant)
 
   return (
-    <section id="contact" className="px-6 py-16" style={{ backgroundColor: 'var(--color-surface)' }}>
+    <section
+      id="contact"
+      className={`${GRID_PADDING} py-16`}
+      style={{ backgroundColor: 'var(--color-surface)' }}
+    >
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="mb-4 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
           Contact
@@ -289,7 +313,7 @@ export function ContactSection() {
         <div className="flex flex-wrap justify-center gap-4">
           <a
             href={`mailto:${profile.email}`}
-            className="inline-block rounded-lg px-6 py-3 text-sm font-semibold"
+            className="inline-block rounded-[var(--radius-base)] px-6 py-3 text-sm font-semibold"
             style={{
               backgroundColor: 'var(--color-accent)',
               color: 'var(--color-bg)',
@@ -300,7 +324,7 @@ export function ContactSection() {
           <a
             href={resume.path}
             download={resume.filename}
-            className="inline-block rounded-lg border px-6 py-3 text-sm font-semibold"
+            className="inline-block rounded-[var(--radius-base)] border px-6 py-3 text-sm font-semibold"
             style={{
               borderColor: 'var(--color-border)',
               color: 'var(--color-text)',

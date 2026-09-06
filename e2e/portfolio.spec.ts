@@ -11,7 +11,10 @@ test.describe('Portfolio', () => {
     await page.goto('/')
     await page.getByRole('tab', { name: 'AI / ML' }).click()
     await expect(page).toHaveURL(/role=ai/)
-    await expect(page.locator('h1')).toContainText(/intelligent systems/i)
+    // V2.1 P1: the hero's <h1> is now the persistent identity (name), not
+    // the per-role headline — see e2e/hero-v2.spec.ts for the full
+    // software-primary-identity + per-role-content coverage.
+    await expect(page.getByText(/intelligent systems/i)).toBeVisible()
   })
 
   test('navigation anchors work', async ({ page, isMobile }) => {
