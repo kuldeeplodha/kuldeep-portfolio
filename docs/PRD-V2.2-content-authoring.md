@@ -6,7 +6,7 @@
 - **Status:** Ready for Engineering Review
 - **Target Release:** Portfolio V2.2
 - **Reference Tasks:** `V22-EPIC`, `V22-PRD`, `V22-INFRA-PLAN`
-- **Architecture Baseline:** Cloudflare Pages + D1 (SQLite) + R2 Object Storage (Zero Budget / Free Tier)
+- **Architecture Baseline:** Cloudflare Pages + D1 (SQLite) + Cloudinary Free Tier (100% Card-Free / Zero Budget)
 - **Dependencies:** ADR-006 (Blog Architecture), `docs/research/v2.2-cms-db-research.md`, PR #37 (Parked JSON Import)
 
 ---
@@ -16,8 +16,8 @@
 ### 1.1 Context & Human Objectives
 In Portfolio V1.5 and V2.1, blogs and case studies were tied to static Markdown files (`src/content/blog/*.md`) and hardcoded TypeScript config arrays (`src/config/projects.ts`). Updating long-form content or publishing new case studies required an IDE, manual file creation, and a full git commit / CI deployment cycle. Furthermore, no media upload pipeline existed—images had to be manually placed in `public/` or `src/assets/`.
 
-The human operator approved the **Cloudflare Pages + D1 + R2** architecture (zero-cost free tier with instant edge publishing) and requested:
-1. **In-Panel Authoring:** Dedicated sections in the `/admin` configuration panel to CREATE, EDIT, PUBLISH, and DELETE both **Blogs** and **Case Studies**, with rich **Media Uploads** (images & video) stored in Cloudflare R2.
+The human operator approved the **Cloudflare Pages + D1 + Cloudinary** architecture. This combination guarantees a **100% card-free path** (no credit card required anywhere) while providing instant edge publishing:
+1. **In-Panel Authoring:** Dedicated sections in the `/admin` configuration panel to CREATE, EDIT, PUBLISH, and DELETE both **Blogs** and **Case Studies**, with rich **Media Uploads** (images & video) stored and transformed in Cloudinary.
 2. **Homepage Showcase (3 + 3):** The main landing page dynamically displays the latest 3 Case Studies + latest 3 Blog Posts, with direct links to dedicated archive pages.
 3. **Dedicated Archive Pages:** Separate public archive listings: `/blog` (all articles) and `/case-studies` (all engineering case studies).
 4. **Individual Read/Detail Pages:** Full reader views for each item: `/blog/:slug` and `/case-studies/:slug`.
@@ -25,14 +25,14 @@ The human operator approved the **Cloudflare Pages + D1 + R2** architecture (zer
 6. **Zero-Downtime Migration:** Seamlessly migrate existing static markdown blogs into the D1 database store.
 
 ### 1.2 Core Constraints & Invariants
-- **Strict Free-Tier Budget ($0 / No Credit Card Trap):**
-  Must strictly stay within Cloudflare free-tier quotas:
-  - Cloudflare Pages: Unlimited bandwidth & deployments.
-  - Cloudflare D1: 5 GB SQLite database, 5M row reads/day, 100k row writes/day.
-  - Cloudflare R2: 10 GB storage, 0 egress fees, 1M Class A operations/mo.
-  - Cloudflare Workers/Pages Functions: 100k requests/day.
+- **Strict Card-Free / Zero-Budget Invariant ($0 / No Card Trap):**
+  Must strictly operate within completely card-free free tiers:
+  - **Cloudflare Pages:** Unlimited bandwidth & deployments ($0, no card).
+  - **Cloudflare D1:** 5 GB edge SQLite database, 5M row reads/day, 100k row writes/day ($0, no card).
+  - **Cloudinary Free Tier:** 10 GB managed media storage, 20 GB CDN bandwidth, 25 monthly credits ($0, no card required).
+  - **Cloudflare Workers/Pages Functions:** 100k requests/day ($0, no card).
 - **Fail-Closed Security Gate:**
-  All media uploads must be authenticated via the admin session, type-validated against strict magic-byte signatures, and served via sanitized URLs. All markdown bodies must pass DOMPurify sanitization.
+  All media uploads must be authenticated via the admin session, type-validated against strict magic-byte signatures, and served via sanitized HTTPS URLs. All markdown bodies must pass DOMPurify sanitization.
 - **Zero Runtime Dependencies on the Client:**
   Frontend rendering reuses existing lightweight utilities (`marked` + `DOMPurify`); backend APIs run natively on Cloudflare Pages Functions.
 
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   relevant_roles TEXT NOT NULL DEFAULT '["software","ai","data","system"]', -- JSON array of RoleId
   reading_time_minutes INTEGER NOT NULL DEFAULT 1,
   featured_media_url TEXT,
-  media_urls TEXT NOT NULL DEFAULT '[]' -- JSON array of R2 media URLs
+  media_urls TEXT NOT NULL DEFAULT '[]' -- JSON array of Cloudinary media URLs
 );
 
 CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS case_studies (
   github_url TEXT,
   live_url TEXT,
   featured_media_url TEXT,
-  media_urls TEXT NOT NULL DEFAULT '[]' -- JSON array of attached images/videos
+  media_urls TEXT NOT NULL DEFAULT '[]' -- JSON array of Cloudinary images/videos
 );
 
 CREATE INDEX IF NOT EXISTS idx_case_studies_slug ON case_studies(slug);
@@ -146,16 +146,19 @@ CREATE INDEX IF NOT EXISTS idx_case_studies_status_published ON case_studies(sta
 CREATE TABLE IF NOT EXISTS media_assets (
   id TEXT PRIMARY KEY,
   filename TEXT NOT NULL,
-  r2_key TEXT UNIQUE NOT NULL,
-  public_url TEXT NOT NULL,
-  mime_type TEXT NOT NULL,
-  size_bytes INTEGER NOT NULL,
+  public_id TEXT UNIQUE NOT NULL, -- Cloudinary public ID
+  secure_url TEXT NOT NULL,       -- Cloudinary secure HTTPS delivery URL
+  format TEXT NOT NULL,           -- png, jpg, webp, mp4, etc.
+  resource_type TEXT NOT NULL CHECK (resource_type IN ('image', 'video', 'raw')),
+  bytes INTEGER NOT NULL,
+  width INTEGER,
+  height INTEGER,
   uploaded_at TEXT NOT NULL,
   parent_type TEXT CHECK (parent_type IN ('blog', 'case_study', 'general')),
   parent_id TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_media_assets_r2_key ON media_assets(r2_key);
+CREATE INDEX IF NOT EXISTS idx_media_assets_public_id ON media_assets(public_id);
 ```
 
 ### 3.2 TypeScript Interfaces (`src/types/content.ts`)
@@ -212,10 +215,13 @@ export interface CaseStudyEntity {
 export interface MediaAssetEntity {
   id: string
   filename: string
-  r2Key: string
-  publicUrl: string
-  mimeType: string
-  sizeBytes: number
+  publicId: string
+  secureUrl: string
+  format: string
+  resourceType: 'image' | 'video' | 'raw'
+  bytes: number
+  width?: number
+  height?: number
   uploadedAt: string
   parentType?: 'blog' | 'case_study' | 'general'
   parentId?: string
@@ -224,37 +230,47 @@ export interface MediaAssetEntity {
 
 ---
 
-## 4. Media Storage Architecture on Cloudflare R2
+## 4. Media Storage Architecture on Cloudinary (Card-Free)
 
-### 4.1 Storage & Quotas
-- Cloudflare R2 bucket: `kuldeep-portfolio-media`.
-- 10 GB free storage, **zero egress bandwidth fees**.
-- Public Domain: Served via a custom domain (e.g. `https://media.kuldeeplodha.com`) or standard R2 public dev bucket (`https://pub-<id>.r2.dev`).
+### 4.1 Storage & Quotas (100% Free / No Card Required)
+- **Service:** Cloudinary Free Plan.
+- **Capacity:** 10 GB managed media storage, 20 GB CDN bandwidth per month.
+- **Credits:** 25 monthly credits (1 credit = 1 GB storage or 1 GB bandwidth or 1,000 transformations).
+- **Optimization:** Automatic format conversion and quality compression (`f_auto,q_auto`) applied by default to minimize credit consumption.
 
-### 4.2 File Validation Rules
+### 4.2 Upload Architecture
+Media upload is supported via two secure patterns:
+1. **Authenticated Cloudflare Pages Function Proxy (`/api/media/upload` — Recommended):**
+   - The admin browser submits the file to `/api/media/upload` with admin session authorization.
+   - The Pages Function validates file size and mime-type, signs the upload using Cloudinary API secrets (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` stored in Cloudflare environment secrets), and streams to Cloudinary.
+   - Prevents exposing upload credentials to unauthenticated users.
+2. **Direct Browser Upload via Unsigned Preset (Alternative Low-Latency Option):**
+   - Browser uploads directly to `https://api.cloudinary.com/v1_1/<cloud_name>/auto/upload` using an unsigned upload preset restricted to specific folder paths (`portfolio/uploads`).
+   - On completion, client records the asset in D1 via `/api/media/register`.
+
+### 4.3 File Validation Rules
 1. **Allowed Mime Types:**
    - **Images (Max 10 MB):** `image/jpeg`, `image/png`, `image/webp`, `image/gif`, `image/svg+xml`.
    - **Videos (Max 50 MB):** `video/mp4`, `video/webm`.
-2. **Larger Video Policy:** Videos exceeding 50 MB are blocked from direct R2 upload to preserve free quota. The editor provides a YouTube/Vimeo embed helper snippet instead.
+2. **Larger Video Policy:** Videos exceeding 50 MB are blocked from direct upload to preserve Cloudinary credit quotas. The editor provides a YouTube/Vimeo embed helper snippet instead.
 3. **Magic-Byte Inspection:** The upload worker inspects the first 512 bytes to verify magic numbers, preventing renamed executables or disguised scripts.
-4. **Key Format:** `uploads/{YYYY}/{MM}/{uuid}-{sanitized-filename}`.
 
-### 4.3 Media Upload Flow
+### 4.4 Media Upload Flow
 
 ```
-[ Admin Browser ]                          [ Cloudflare Pages Function ]               [ Cloudflare R2 ]
+[ Admin Browser ]                          [ Cloudflare Pages Function ]               [ Cloudinary CDN ]
         │                                                │                                     │
         │── 1. POST /api/media/upload (multipart) ─────►│                                     │
         │      (Header: Authorization / Session)         │                                     │
         │                                                │── 2. Authenticate admin             │
         │                                                │── 3. Validate size & magic bytes    │
-        │                                                │── 4. R2.put(key, body, headers) ───►│
-        │                                                │◄─ 5. Upload Success ────────────────│
+        │                                                │── 4. Upload to Cloudinary API ─────►│
+        │                                                │◄─ 5. Return secure_url, public_id ──│
         │                                                │── 6. INSERT into media_assets       │
-        │◄─ 7. Return { url, key, mimeType, size } ──────│                                     │
+        │◄─ 7. Return { secureUrl, publicId, ... } ──────│                                     │
         │                                                │                                     │
    8. Insert Markdown:                                   │                                     │
-      ![caption](https://media.../uuid.png)              │                                     │
+      ![caption](https://res.cloudinary.com/.../f_auto)  │                                     │
 ```
 
 ---
@@ -281,7 +297,7 @@ The existing `/admin` route will be expanded with three top-level navigation tab
      - Excerpt textarea (100–300 chars, validation counter).
      - Tags chip selector (type to add, click to delete).
      - Relevant Roles multi-select (using existing `RoleScopeEditor`).
-     - Featured Image dropzone (drag image or pick from R2 library).
+     - Featured Image dropzone (drag image or pick from Cloudinary media library).
      - Published Date picker (defaults to current date upon publish).
 
 ### 5.2 Case Studies Authoring Flow
@@ -290,7 +306,7 @@ Because technical case studies require deeper rigor than unstructured blog posts
 2. **Structured Sections (Markdown-enabled textareas):**
    - **The Problem:** The operational/business bottleneck and quantitative constraints.
    - **Context & Constraints:** Legacy stack, timeline, team setup, and architectural requirements.
-   - **Architecture & Technical Design:** Data pipelines, API workflows, system diagrams (with drag-and-drop R2 diagram upload).
+   - **Architecture & Technical Design:** Data pipelines, API workflows, system diagrams (with drag-and-drop Cloudinary diagram upload).
    - **Outcome & Measurable Impact:** Quantifiable achievements (e.g. `60%+ latency reduction`), metrics, and business value.
    - **Technology Stack:** Tag selector (Python, Django, PostgreSQL, Docker, etc.).
    - **Links:** GitHub repository URL and Live Demo URL (gated by `isValidSafeUrl`).
@@ -370,7 +386,7 @@ During initial cutover, `getAllBlogPosts()` will query D1 via `/api/blogs`. If t
 - **PR #37 ([`docs/PRD-V2.1-json-content-import.md`](https://github.com/kuldeeplodha/kuldeep-portfolio/pull/37)):**
   Gated strictly around **structured resume config** (`PortfolioConfig`: profile, experience timeline, skills, education, role themes, philosophy, metrics).
 - **PRD-006 (V2.2 Content Authoring):**
-  Gated around **narrative content & media** (`blog_posts`, `case_studies`, `media_assets`) stored dynamically in Cloudflare D1/R2.
+  Gated around **narrative content & media** (`blog_posts`, `case_studies`, `media_assets`) stored dynamically in Cloudflare D1 and Cloudinary.
 
 ### 9.2 Decision & Recommendation
 **PR #37 remains active and is NOT superseded.**
@@ -386,9 +402,10 @@ During initial cutover, `getAllBlogPosts()` will query D1 via `/api/blogs`. If t
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│ Phase 0: Cloudflare Infrastructure & Deployment (Alex / DevOps)         │
-│ - Human setup: Cloudflare account (free), create D1 db & R2 bucket     │
-│ - Connect repo to Cloudflare Pages; configure wrangler.toml            │
+│ Phase 0: Cloudflare & Cloudinary Setup (Alex / DevOps)                 │
+│ - Human setup: Free Cloudflare account + Free Cloudinary account       │
+│ - Connect repo to Cloudflare Pages; configure D1 database              │
+│ - Add Cloudinary credentials to Pages environment secrets              │
 └──────────────────────────────────┬─────────────────────────────────────┘
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -400,7 +417,7 @@ During initial cutover, `getAllBlogPosts()` will query D1 via `/api/blogs`. If t
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Phase 2: Cloudflare Pages Functions API Layer (Dev)                    │
 │ - Public GET endpoints (/api/blogs, /api/case-studies)                 │
-│ - Authenticated admin endpoints (CRUD + R2 media upload stream)        │
+│ - Authenticated admin endpoints (CRUD + Cloudinary media upload stream)│
 └──────────────────────────────────┬─────────────────────────────────────┘
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -412,13 +429,13 @@ During initial cutover, `getAllBlogPosts()` will query D1 via `/api/blogs`. If t
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Phase 4: Admin Panel Authoring & Media Library UI (Dev/UX)             │
-│ - Split-view Markdown editor, case study editor, R2 media dropzone     │
+│ - Split-view Markdown editor, case study editor, Cloudinary dropzone   │
 │ - Role multi-select, live preview, publish/draft toggle                │
 └──────────────────────────────────┬─────────────────────────────────────┘
                                    ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │ Phase 5: QA, Security Verification, & DNS Cutover (QA/Sec/DevOps)      │
-│ - Imagine QA (regression, a11y, 3+3 layout), Peter Security (R2/upload)│
+│ - Imagine QA (regression, a11y, 3+3 layout), Peter Security (uploads)  │
 │ - Final DNS cutover to Cloudflare Pages                                │
 └────────────────────────────────────────────────────────────────────────┘
 ```
@@ -433,8 +450,8 @@ During initial cutover, `getAllBlogPosts()` will query D1 via `/api/blogs`. If t
 - [ ] **AC-3 (Live Markdown Preview):** Split-view editor provides instant live preview with sanitized HTML rendering matching site typography.
 - [ ] **AC-4 (Slug Integrity):** Slugs are auto-generated from titles, enforce alphanumeric lowercase hyphenated format, and check for unique collisions.
 
-### 11.2 Media Uploads (R2)
-- [ ] **AC-5 (Image Upload):** Admin can upload images (`jpeg`, `png`, `webp`, `gif`, `svg`) up to 10 MB. Image is stored in R2 and returns a permanent public URL.
+### 11.2 Media Uploads (Cloudinary)
+- [ ] **AC-5 (Image Upload):** Admin can upload images (`jpeg`, `png`, `webp`, `gif`, `svg`) up to 10 MB. Asset is stored in Cloudinary and returns a permanent HTTPS URL with `f_auto,q_auto`.
 - [ ] **AC-6 (Video Upload & Guard):** Admin can upload MP4/WebM videos up to 50 MB. Videos exceeding 50 MB are blocked with a clear message suggesting external embed.
 - [ ] **AC-7 (Media Insertion):** Uploading media directly inserts the appropriate Markdown tag (`![alt](url)` or video tag) at the editor cursor.
 
@@ -450,7 +467,7 @@ During initial cutover, `getAllBlogPosts()` will query D1 via `/api/blogs`. If t
 ### 11.5 Migration & Zero-Cost Compliance
 - [ ] **AC-13 (Blog Migration):** Existing 3 markdown posts are seeded into D1 with zero data loss or slug changes.
 - [ ] **AC-14 (Hybrid Fallback):** If D1 is temporarily unavailable, static bundled posts serve as a fallback without breaking the site.
-- [ ] **AC-15 (Free Tier Guarantee):** All architectural components (Pages, D1, R2, Functions) operate 100% within free quotas with zero recurring monthly costs.
+- [ ] **AC-15 (100% Card-Free Guarantee):** All architectural components (Cloudflare Pages, D1, Cloudinary Free Tier, Functions) operate 100% card-free with zero recurring monthly costs.
 - [ ] **AC-16 (Security & A11y):** All new pages meet WCAG 2.1 AA; uploads are protected against unauthorized access and arbitrary file execution.
 
 ---
@@ -458,8 +475,8 @@ During initial cutover, `getAllBlogPosts()` will query D1 via `/api/blogs`. If t
 ## 12. Open Questions for the Human
 
 1. **Custom Domain Cutover:**
-   Will your custom domain (`kuldeeplodha.com`) be connected directly to Cloudflare Pages (requires pointing DNS nameservers to Cloudflare), or should we deploy initially to the free `*.pages.dev` subdomain?
+   Will your custom domain (`kuldeeplodha.com`) be connected directly to Cloudflare Pages (requires pointing DNS nameservers to Cloudflare), or should we deploy to `*.pages.dev` initially?
 2. **Video Hosting Preference:**
-   For videos over 50 MB (e.g. long demo recordings), do you prefer embedding from YouTube (unlisted) or Vimeo, or would you like to keep all media strictly under the 50 MB R2 limit?
+   For videos over 50 MB (e.g. long demo recordings), do you prefer embedding from YouTube (unlisted) or Vimeo, or would you like to keep all media strictly under the 50 MB limit in Cloudinary?
 3. **Author Metadata:**
    Should all articles and case studies default to "Kuldeep Lodha", or would you like an optional "Author" field for future co-authored technical papers or guest contributors?
