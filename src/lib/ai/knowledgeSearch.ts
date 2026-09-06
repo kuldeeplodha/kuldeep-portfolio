@@ -46,13 +46,22 @@ export function searchKnowledge(
     .sort((a, b) => b.score - a.score)
 }
 
+/**
+ * Exported so the UI (AskKuldeepSection) can distinguish a genuine "no
+ * match" outcome from an answered one by identity, rather than
+ * re-implementing or guessing at this copy — used to render an explicit
+ * empty state instead of styling a non-answer like a normal response.
+ */
+export const NO_RESULT_MESSAGE =
+  'I do not have that information in the portfolio knowledge base. Please check the Experience, Projects, or Skills sections, or contact Kuldeep directly.'
+
 export function generateAnswer(
   query: string,
   entries: AIKnowledgeEntry[],
 ): string {
   const results = searchKnowledge(query, entries)
   if (results.length === 0) {
-    return 'I do not have that information in the portfolio knowledge base. Please check the Experience, Projects, or Skills sections, or contact Kuldeep directly.'
+    return NO_RESULT_MESSAGE
   }
 
   const top = results[0]

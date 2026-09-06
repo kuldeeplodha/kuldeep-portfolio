@@ -48,10 +48,18 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const moreRef = useRef<HTMLLIElement>(null)
+  const moreTriggerRef = useRef<HTMLButtonElement>(null)
   const resume = getResumeForVariant(role.resumeVariant)
 
+  // V2-P6 a11y: standard disclosure-menu keyboard behavior — move focus
+  // into the menu on open, and back to the trigger button on close (click
+  // outside, Escape, or picking an item), so keyboard users never lose
+  // their place.
   useEffect(() => {
     if (!moreOpen) return
+
+    const firstItem = moreRef.current?.querySelector<HTMLElement>('[role="menuitem"]')
+    firstItem?.focus()
 
     function handlePointerDown(event: MouseEvent) {
       if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
@@ -59,7 +67,10 @@ export function Navbar() {
       }
     }
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setMoreOpen(false)
+      if (event.key === 'Escape') {
+        setMoreOpen(false)
+        moreTriggerRef.current?.focus()
+      }
     }
     document.addEventListener('mousedown', handlePointerDown)
     document.addEventListener('keydown', handleKeyDown)
@@ -129,6 +140,7 @@ export function Navbar() {
           ))}
           <li className="relative" ref={moreRef}>
             <button
+              ref={moreTriggerRef}
               type="button"
               className="flex items-center gap-1 rounded-[var(--radius-base)] px-3 py-2 text-sm transition-colors nav-hover"
               style={navLinkStyle(MORE_ITEMS.some((item) => role.navEmphasis.includes(item.id)))}

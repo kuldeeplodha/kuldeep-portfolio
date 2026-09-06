@@ -21,7 +21,7 @@ export function ResearchLabSection() {
       <SectionHeader slug="lab" title="Research Lab" description={researchIntro} />
 
       <article
-        className="rounded-[var(--radius-card)] border border-dashed p-6 sm:p-8"
+        className="hover-lift rounded-[var(--radius-card)] border border-dashed p-6 sm:p-8"
         style={{ borderColor: 'var(--color-accent)', backgroundColor: 'var(--color-surface)' }}
       >
         <div className="mb-3 flex flex-wrap items-center gap-3">

@@ -49,15 +49,21 @@ export function Hero() {
           <h1
             id="hero-heading"
             className={`mb-4 font-bold leading-tight ${
-              roleId === 'software'
-                ? 'font-mono text-2xl sm:text-3xl md:text-4xl'
-                : roleId === 'ai'
-                  ? 'text-2xl sm:text-3xl md:text-5xl'
-                  : roleId === 'data'
-                    ? 'text-3xl sm:text-4xl md:text-5xl tracking-tight'
-                    : 'text-2xl sm:text-3xl md:text-5xl'
+              roleId === 'software' ? 'font-mono' : roleId === 'data' ? 'tracking-tight' : ''
             }`}
-            style={{ color: roleId === 'ai' ? undefined : 'var(--color-text)' }}
+            style={{
+              color: roleId === 'ai' ? undefined : 'var(--color-text)',
+              // Fluid type scale (V2-P6 polish) — replaces the old fixed
+              // breakpoint ladder (text-2xl/3xl/4xl/5xl) with a continuous
+              // clamp() so the headline scales smoothly from 320px up
+              // instead of jumping at each breakpoint. Mono (software role)
+              // reads wider per character, so it gets a slightly smaller
+              // ceiling than the other three roles.
+              fontSize:
+                roleId === 'software'
+                  ? 'clamp(1.5rem, 1.1rem + 2vw, 2.75rem)'
+                  : 'clamp(1.5rem, 1rem + 3vw, 3.5rem)',
+            }}
           >
             {role.hero.headline}
           </h1>

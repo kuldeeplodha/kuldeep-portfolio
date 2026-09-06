@@ -1,22 +1,15 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getBlogPostBySlug, getAllBlogPosts } from '../lib/blog';
 import { renderMarkdown } from '../lib/blog/renderMarkdown';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { NotFoundPage } from './NotFoundPage';
 
 export function BlogDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getBlogPostBySlug(slug) : undefined;
 
-  useEffect(() => {
-    if (post) {
-      document.title = `${post.title} | Blog`;
-      const metaDescription = document.querySelector('meta[name="description"]');
-      if (metaDescription) {
-        metaDescription.setAttribute('content', post.excerpt);
-      }
-    }
-  }, [post]);
+  useDocumentMeta(post ? `${post.title} | Blog` : undefined, post?.excerpt);
 
   const renderedContent = useMemo(() => {
     if (!post) return '';

@@ -19,7 +19,7 @@ export function CertificationsSection() {
         {filteredCertifications.map((cert) => (
           <li
             key={cert.id}
-            className="rounded-[var(--radius-base)] border p-3"
+            className="hover-lift rounded-[var(--radius-base)] border p-3"
             style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
           >
             <h3 className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>

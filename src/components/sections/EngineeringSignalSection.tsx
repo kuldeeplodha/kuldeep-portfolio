@@ -21,7 +21,7 @@ export function EngineeringSignalSection() {
         {engineeringSignal.map((item) => (
           <article
             key={item.title}
-            className="rounded-[var(--radius-card)] border p-5"
+            className="hover-lift rounded-[var(--radius-card)] border p-5"
             style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
           >
             <h3 className="mb-2 text-base font-semibold" style={{ color: 'var(--color-text)' }}>

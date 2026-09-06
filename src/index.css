@@ -70,6 +70,19 @@
     background-color: color-mix(in srgb, var(--color-text) 6%, transparent);
   }
 
+  /* V2-P6 global polish — single reusable hover primitive for cards
+     (design-spec: hover translateY(-2px)). Applied to every card-like
+     surface across sections instead of hand-rolled per-section hover
+     styles. The global prefers-reduced-motion rule above already zeroes
+     out the transition for users who ask for it. */
+  .hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
   /* V1.6 UI Modernization — CSS-only enter animation for the nav "More"
      dropdown and mobile menu (deliberately no framer-motion here: both live
      in the eagerly-loaded index chunk, which is already at the gzip budget
