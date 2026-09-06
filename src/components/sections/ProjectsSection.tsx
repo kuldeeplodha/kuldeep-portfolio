@@ -56,7 +56,7 @@ export function ProjectsSection() {
           {projects.map((project) => (
             <article
               key={project.id}
-              className="role-card group flex flex-col overflow-hidden border p-0 shadow-[var(--shadow-glass-md)] transition-all duration-300 hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-glass-lg)]"
+              className="role-card hover-lift group flex flex-col overflow-hidden border p-0 shadow-[var(--shadow-glass-md)] transition-all duration-300 hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-glass-lg)]"
               style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
             >
               {project.imageUrl && (

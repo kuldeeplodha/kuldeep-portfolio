@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { portfolioConfig } from '../../config'
 import { getAIProvider } from '../../lib/ai/provider'
+import { NO_RESULT_MESSAGE } from '../../lib/ai/knowledgeSearch'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
 
@@ -80,7 +81,48 @@ export function AskKuldeepSection() {
           ))}
         </div>
 
-        {answer && (
+        {loading && (
+          <div
+            data-testid="ask-loading"
+            className="animate-pulse rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)]"
+            style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
+            role="status"
+            aria-label="Looking that up"
+          >
+            {/* Skeleton preserves the answer card's layout (heading line +
+                two text lines) so the section doesn't jump when the real
+                answer replaces it. */}
+            <div
+              className="mb-3 h-3 w-24 rounded-full"
+              style={{ backgroundColor: 'var(--color-border)' }}
+            />
+            <div
+              className="mb-2 h-3 w-full rounded-full"
+              style={{ backgroundColor: 'var(--color-border)' }}
+            />
+            <div
+              className="h-3 w-2/3 rounded-full"
+              style={{ backgroundColor: 'var(--color-border)' }}
+            />
+          </div>
+        )}
+
+        {!loading && answer && answer === NO_RESULT_MESSAGE && (
+          <div
+            className="rounded-[var(--radius-card)] border border-dashed p-6"
+            style={{
+              borderColor: 'var(--color-border)',
+              backgroundColor: 'var(--color-surface)',
+              color: 'var(--color-text-muted)',
+            }}
+            role="status"
+            aria-live="polite"
+          >
+            <p className="text-sm leading-relaxed">{answer}</p>
+          </div>
+        )}
+
+        {!loading && answer && answer !== NO_RESULT_MESSAGE && (
           <div
             className="rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)]"
             style={{

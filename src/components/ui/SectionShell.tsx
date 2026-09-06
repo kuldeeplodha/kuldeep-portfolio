@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Reveal } from './Reveal'
 
 interface SectionShellProps {
   id: string
@@ -14,6 +15,10 @@ interface SectionShellProps {
  * Consistent grid/max-width container + spacing rhythm for section shells
  * (docs/design/portfolio-v2-design-spec.md §1). Wraps existing section
  * content — it does not replace or reinterpret it.
+ *
+ * V2-P6: also wraps content in the shared `Reveal` primitive so every
+ * section gets the same scroll-triggered fade+translateY treatment for
+ * free, instead of each section hand-rolling its own animation.
  */
 export function SectionShell({ id, children, muted, narrow, className }: SectionShellProps) {
   return (
@@ -22,7 +27,7 @@ export function SectionShell({ id, children, muted, narrow, className }: Section
       className={`px-4 py-16 sm:px-6 sm:py-20${className ? ` ${className}` : ''}`}
       style={muted ? { backgroundColor: 'var(--color-surface)' } : undefined}
     >
-      <div className={narrow ? 'mx-auto max-w-3xl' : 'mx-auto max-w-5xl'}>{children}</div>
+      <Reveal className={narrow ? 'mx-auto max-w-3xl' : 'mx-auto max-w-5xl'}>{children}</Reveal>
     </section>
   )
 }

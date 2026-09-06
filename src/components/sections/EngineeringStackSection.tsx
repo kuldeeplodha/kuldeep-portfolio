@@ -18,7 +18,7 @@ export function EngineeringStackSection() {
         {engineeringStack.map((category) => (
           <div
             key={category.id}
-            className="rounded-[var(--radius-base)] border p-5"
+            className="hover-lift rounded-[var(--radius-base)] border p-5"
             style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
           >
             <h3

@@ -1,7 +1,9 @@
-import { Link, useParams, Navigate } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { portfolioConfig } from '../config'
 import { isValidSafeUrl } from '../lib/config/exportImport'
 import { useRole } from '../hooks/useRole'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
+import { NotFoundPage } from './NotFoundPage'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -9,8 +11,18 @@ export function ProjectDetailPage() {
 
   const project = portfolioConfig.projects.find((p) => p.id === projectId)
 
+  // Per-project <title>/description (V2-P6 SEO). Skipped when there's no
+  // project — the not-found render below keeps the site-wide default.
+  useDocumentMeta(
+    project ? `${project.title} | Kuldeep Lodha` : undefined,
+    project?.overview,
+  )
+
   if (!project) {
-    return <Navigate to="/#projects" replace />
+    // V2-P6: a silent redirect to the homepage swallowed the fact that the
+    // link was actually broken (a stale share link, a typo'd id). Render an
+    // explicit not-found state instead, same as the route-level 404.
+    return <NotFoundPage />
   }
 
   return (

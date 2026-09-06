@@ -18,7 +18,7 @@ export function EducationSection() {
         {education.map((edu) => (
           <article
             key={edu.id}
-            className="rounded-[var(--radius-base)] border p-4"
+            className="hover-lift rounded-[var(--radius-base)] border p-4"
             style={{ borderColor: 'var(--color-border)' }}
           >
             <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
