@@ -54,9 +54,13 @@ export function ProjectsSection() {
         <SectionHeader slug="work" title="Selected Work" />
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
+            // V2.1 P1 (spec §57/59): glass shadows are reserved for the
+            // navbar/floating menus/Ask Kuldeep input, not every card —
+            // depth here comes from the border + subtle hover-lift instead,
+            // matching how the other section cards already work.
             <article
               key={project.id}
-              className="role-card hover-lift group flex flex-col overflow-hidden border p-0 shadow-[var(--shadow-glass-md)] transition-all duration-300 hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-glass-lg)]"
+              className="role-card hover-lift group flex flex-col overflow-hidden border p-0 transition-colors duration-300 hover:border-[var(--color-accent)]"
               style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
             >
               {project.imageUrl && (

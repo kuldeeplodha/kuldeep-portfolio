@@ -4,6 +4,7 @@ import { useRole } from '../../hooks/useRole'
 import { RoleSwitcher } from '../ui/RoleSwitcher'
 import { CareerJourney } from '../ui/CareerJourney'
 import { HeroBackground } from '../ui/HeroBackground'
+import { GRID_PADDING, GRID_WIDTH } from '../ui/grid'
 
 /** Resolves a hero CTA's href — 'resume' downloads the resume, anything else is an in-page anchor. */
 function ctaHref(target: string, resumePath: string): string {
@@ -18,12 +19,37 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 md:py-28"
+      className={`relative overflow-hidden ${GRID_PADDING} py-16 sm:py-20 md:py-28`}
       style={{ background: theme.heroGradient }}
       aria-labelledby="hero-heading"
     >
       <HeroBackground roleId={roleId} />
-      <div className="relative z-10 mx-auto max-w-5xl">
+      <div className={`relative z-10 mx-auto ${GRID_WIDTH}`}>
+        {/* V2.1 P1 (spec §7/§10): a persistent, role-independent identity
+            block — name + the fully-attested "Senior Software Developer /
+            Backend Engineer / Technical Lead" title (Kelly's
+            v2.1-content-check.md) — is now the hero's one obvious focal
+            point, ahead of and unaffected by whichever role perspective is
+            active. This is the software-primary repositioning the audit
+            called for: AI/ML and Data content (below) read as additional
+            competencies of this identity, not competing identities. */}
+        <h1
+          id="hero-heading"
+          className="mb-2 font-bold leading-[1.05]"
+          style={{
+            color: 'var(--color-text)',
+            fontSize: 'clamp(2.5rem, 1.7rem + 3.5vw, 5.5rem)',
+          }}
+        >
+          {profile.name}
+        </h1>
+        <p
+          className="mb-8 font-mono text-sm font-semibold uppercase tracking-[0.15em] sm:text-base"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
+          Senior Software Developer · Backend Engineer · Technical Lead
+        </p>
+
         <m.div
           key={roleId}
           initial={{ opacity: 0, y: 12 }}
@@ -40,33 +66,18 @@ export function Hero() {
           >
             {role.hero.eyebrow}
           </p>
+          {/* The per-role headline is secondary supporting content now —
+              still fully data-driven from role.hero.headline (P2), just no
+              longer the page's h1 (that's the persistent name above). */}
           <p
-            className="mb-4 text-sm font-medium"
-            style={{ color: 'var(--color-text-muted)' }}
-          >
-            {profile.name} · {profile.title} · {profile.location}
-          </p>
-          <h1
-            id="hero-heading"
-            className={`mb-4 font-bold leading-tight ${
-              roleId === 'software' ? 'font-mono' : roleId === 'data' ? 'tracking-tight' : ''
-            }`}
+            className="mb-4 max-w-2xl font-semibold leading-snug"
             style={{
-              color: roleId === 'ai' ? undefined : 'var(--color-text)',
-              // Fluid type scale (V2-P6 polish) — replaces the old fixed
-              // breakpoint ladder (text-2xl/3xl/4xl/5xl) with a continuous
-              // clamp() so the headline scales smoothly from 320px up
-              // instead of jumping at each breakpoint. Mono (software role)
-              // reads wider per character, so it gets a slightly smaller
-              // ceiling than the other three roles.
-              fontSize:
-                roleId === 'software'
-                  ? 'clamp(1.5rem, 1.1rem + 2vw, 2.75rem)'
-                  : 'clamp(1.5rem, 1rem + 3vw, 3.5rem)',
+              color: 'var(--color-text)',
+              fontSize: 'clamp(1.25rem, 1rem + 1.2vw, 1.875rem)',
             }}
           >
             {role.hero.headline}
-          </h1>
+          </p>
           {/* uiContentRules.limits.heroParagraphs = 1 */}
           <p className="mb-6 max-w-2xl text-lg" style={{ color: 'var(--color-text-muted)' }}>
             {role.hero.subtitle}
@@ -90,7 +101,7 @@ export function Hero() {
           <div className="mb-10 flex flex-wrap gap-4">
             <a
               href={ctaHref(role.hero.primaryCtaTarget, resume.path)}
-              className="rounded-lg px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+              className="rounded-[var(--radius-base)] px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
               style={{ backgroundColor: 'var(--color-accent)', color: theme.background }}
             >
               {role.hero.primaryCta}
@@ -99,7 +110,7 @@ export function Hero() {
               <a
                 href={ctaHref(role.hero.secondaryCtaTarget, resume.path)}
                 download={role.hero.secondaryCtaTarget === 'resume' ? resume.filename : undefined}
-                className="rounded-lg border px-6 py-3 text-sm font-semibold transition-colors hover:opacity-90"
+                className="rounded-[var(--radius-base)] border px-6 py-3 text-sm font-semibold transition-colors hover:opacity-90"
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text)' }}
               >
                 {role.hero.secondaryCta}

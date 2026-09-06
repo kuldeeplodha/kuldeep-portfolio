@@ -84,7 +84,7 @@ export function AskKuldeepSection() {
         {loading && (
           <div
             data-testid="ask-loading"
-            className="animate-pulse rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)]"
+            className="animate-pulse rounded-[var(--radius-card)] border p-6"
             style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
             role="status"
             aria-label="Looking that up"
@@ -124,7 +124,7 @@ export function AskKuldeepSection() {
 
         {!loading && answer && answer !== NO_RESULT_MESSAGE && (
           <div
-            className="rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)]"
+            className="rounded-[var(--radius-card)] border p-6"
             style={{
               borderColor: 'var(--color-border)',
               backgroundColor: 'var(--color-surface)',
