@@ -3,13 +3,34 @@ import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
 
 /**
- * V2 §2.7 Research Lab — technical-notebook aesthetic (monospace type,
- * status tag, dashed border) built honestly around the ONE real research
- * entry (MS thesis). Kelly's content audit flagged multi-"experiment"
- * framing here as very-high fabrication risk — do not add fake entries,
- * dates, or results. "Currently Exploring" lists real interest areas, not
- * completed experiments.
+ * V2.1 P3 (spec §35-37) Research Lab — engineering-notebook aesthetic
+ * (monospace metadata, thin borders, editorial type, restrained motion —
+ * explicitly NOT a hacker-terminal look) built honestly around the ONE
+ * real research entry (MS thesis). Kelly's content audit flagged
+ * multi-"experiment" framing as very-high fabrication risk: no numbered
+ * "EXPERIMENT 00N" cards, no fake DB-optimization/API-perf/caching
+ * entries. Per the dispatch's own guidance ("if the section feels thin
+ * with one card, design it to stand on its own"), this renders as one
+ * larger feature panel — a metadata sidebar + the real write-up — rather
+ * than a small card that reads like a placeholder. "Currently Exploring"
+ * lists real interest areas, explicitly not framed as completed work.
  */
+function MetaRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p
+        className="mb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.15em]"
+        style={{ color: 'var(--color-text-muted)' }}
+      >
+        {label}
+      </p>
+      <p className="font-mono text-sm" style={{ color: 'var(--color-text)' }}>
+        {value}
+      </p>
+    </div>
+  )
+}
+
 export function ResearchLabSection() {
   const { research, researchIntro, currentlyExploring } = portfolioConfig
   const featured = research[0]
@@ -21,49 +42,51 @@ export function ResearchLabSection() {
       <SectionHeader slug="lab" title="Research Lab" description={researchIntro} />
 
       <article
-        className="hover-lift rounded-[var(--radius-card)] border border-dashed p-6 sm:p-8"
-        style={{ borderColor: 'var(--color-accent)', backgroundColor: 'var(--color-surface)' }}
+        className="hover-lift overflow-hidden rounded-[var(--radius-card)] border"
+        style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
       >
-        <div className="mb-3 flex flex-wrap items-center gap-3">
-          {featured.type && (
-            <span
-              className="font-mono text-xs font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--color-accent)' }}
-            >
-              {featured.type}
-            </span>
-          )}
-          <span
-            className="rounded-[var(--radius-pill)] px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wide"
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
-              color: 'var(--color-accent)',
-            }}
+        <div className="grid gap-0 lg:grid-cols-[220px_1fr]">
+          {/* Metadata sidebar — the notebook aesthetic's labeled key/value
+              rows, using only real fields (status, type, areas). */}
+          <div
+            className="flex flex-col gap-5 border-b p-6 lg:border-b-0 lg:border-r"
+            style={{ borderColor: 'var(--color-border)' }}
           >
-            {featured.status}
-          </span>
-        </div>
-
-        <h3 className="mb-3 text-lg font-semibold sm:text-xl" style={{ color: 'var(--color-text)' }}>
-          {featured.title}
-        </h3>
-        <p className="mb-5 text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-          {featured.description}
-        </p>
-
-        {featured.areas && featured.areas.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {featured.areas.map((area) => (
-              <span
-                key={area}
-                className="rounded-[var(--radius-pill)] border px-3 py-1 font-mono text-xs"
-                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
-              >
-                {area}
-              </span>
-            ))}
+            <MetaRow label="Status" value={featured.status} />
+            {featured.type && <MetaRow label="Type" value={featured.type} />}
           </div>
-        )}
+
+          <div className="p-6 sm:p-8">
+            <h3 className="mb-3 text-xl font-semibold sm:text-2xl" style={{ color: 'var(--color-text)' }}>
+              {featured.title}
+            </h3>
+            <p className="mb-6 max-w-2xl text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              {featured.description}
+            </p>
+
+            {featured.areas && featured.areas.length > 0 && (
+              <>
+                <p
+                  className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.15em]"
+                  style={{ color: 'var(--color-text-muted)' }}
+                >
+                  Focus areas
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {featured.areas.map((area) => (
+                    <span
+                      key={area}
+                      className="rounded-[var(--radius-pill)] border px-3 py-1 font-mono text-xs"
+                      style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+                    >
+                      {area}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </article>
 
       {/* Currently Exploring — real interest areas, explicitly not framed as completed work. */}
