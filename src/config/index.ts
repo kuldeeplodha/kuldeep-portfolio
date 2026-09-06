@@ -14,6 +14,7 @@ import { experienceStory } from './experienceStory'
 import { engineeringStack } from './engineeringStack'
 import { currentlyExploring } from './currentlyExploring'
 import { askKuldeepContent } from './askKuldeepContent'
+import { contactContent, footerContent } from './contactContent'
 import type { PortfolioConfig } from '../types'
 
 export const portfolioConfig: PortfolioConfig = {
@@ -37,6 +38,8 @@ export const portfolioConfig: PortfolioConfig = {
   researchIntro,
   currentlyExploring,
   askKuldeepContent,
+  contactContent,
+  footerContent,
 }
 
 export * from './profile'
@@ -55,4 +58,5 @@ export * from './experienceStory'
 export * from './engineeringStack'
 export * from './currentlyExploring'
 export * from './askKuldeepContent'
+export * from './contactContent'
 export * from './resumes'

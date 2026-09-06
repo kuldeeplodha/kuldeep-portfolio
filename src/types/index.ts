@@ -265,4 +265,8 @@ export interface PortfolioConfig {
   researchIntro: string
   currentlyExploring: { title: string; items: CurrentlyExploringItem[] }
   askKuldeepContent: { title: string; description: string; suggestedQuestions: string[]; responseHeading: string }
+  /** V2.1 P4 (spec §46), verbatim from content.contact. */
+  contactContent: { title: string; description: string }
+  /** V2.1 P4 (spec §47), verbatim from content.footer. */
+  footerContent: { text: string; subtext: string; copyright: string }
 }
