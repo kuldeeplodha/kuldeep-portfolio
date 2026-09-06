@@ -58,27 +58,39 @@ export function ProjectDetailPage() {
           {project.overview}
         </p>
 
+        {/* V2.1 P2 (spec §31/32): case-study section order — Problem,
+            Context (the existing "Approach" field — real content, no
+            rename of its meaning, just its position), Architecture (the
+            existing pipeline data, relabeled — see below), Outcome, Future
+            Improvements, Technology last. Sections spec calls for that have
+            no backing field (My Contribution / Engineering Challenges /
+            Technical Decisions / Optimization as their own headings) are
+            OMITTED per spec §32 rather than invented. */}
         {project.problem && (
           <section className="mb-8">
-            <h2 className="mb-2 text-lg font-semibold">Problem</h2>
+            <h2 className="mb-2 text-lg font-semibold">The Problem</h2>
             <p style={{ color: 'var(--color-text-muted)' }}>{project.problem}</p>
           </section>
         )}
 
         {project.approach && (
           <section className="mb-8">
-            <h2 className="mb-2 text-lg font-semibold">Approach</h2>
+            <h2 className="mb-2 text-lg font-semibold">Context</h2>
             <p style={{ color: 'var(--color-text-muted)' }}>{project.approach}</p>
           </section>
         )}
 
+        {/* "Architecture" — the existing pipeline steps ARE the real,
+            per-project data-flow architecture (spec §33 wants a diagram
+            only where real architecture info exists; this data has existed
+            since before V2 and is genuinely per-project, not decorative). */}
         <section className="mb-8">
-          <h2 className="mb-4 text-lg font-semibold">Pipeline</h2>
+          <h2 className="mb-4 text-lg font-semibold">Architecture</h2>
           <div
             className="overflow-x-auto rounded-[var(--radius-card)] border p-4 sm:p-6"
             style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
             tabIndex={0}
-            aria-label="Pipeline steps"
+            aria-label="Architecture / pipeline steps"
           >
             <div className="flex min-w-max flex-nowrap items-center gap-2">
               {project.pipeline.map((step, i) => (
@@ -100,21 +112,6 @@ export function ProjectDetailPage() {
           </div>
         </section>
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">Technologies</h2>
-          <div className="flex flex-wrap gap-2">
-            {project.technologies.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-[var(--radius-pill)] border px-3 py-1 text-sm"
-                style={{ borderColor: 'var(--color-border)' }}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </section>
-
         {project.result && (
           <section className="mb-8">
             <h2 className="mb-2 text-lg font-semibold">Outcome</h2>
@@ -128,6 +125,21 @@ export function ProjectDetailPage() {
             <p style={{ color: 'var(--color-text-muted)' }}>{project.futureImprovements}</p>
           </section>
         )}
+
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-semibold">Technology</h2>
+          <div className="flex flex-wrap gap-2">
+            {project.technologies.map((tech) => (
+              <span
+                key={tech}
+                className="rounded-[var(--radius-pill)] border px-3 py-1 text-sm"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+        </section>
 
         {project.githubUrl && isValidSafeUrl(project.githubUrl) ? (
           <a

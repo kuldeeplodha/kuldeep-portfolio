@@ -3,10 +3,13 @@ import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
 
 /**
- * V2 §2.8 Engineering Stack — categorized technology matrix. Deliberately
- * NO percentage bars or proficiency levels; only real technologies, grouped.
- * Supersedes the old SkillsSection (still present in the codebase but no
- * longer rendered on the homepage — see HomePage.tsx).
+ * V2 §2.8 / V2.1 §38-40 Engineering Stack — categorized technology matrix.
+ * Deliberately NO percentage bars or proficiency levels; only real
+ * technologies, grouped. This is now the SOLE public-facing skills display
+ * — the old SkillsSection and MetricsSection components were deleted in
+ * V2.1-P2 as dead code (see HomePage.tsx). Content already excludes the
+ * spec's illustrative-only examples (FastAPI, Redis, Twilio, "Payment
+ * systems") per Kelly's v2.1-content-check.md.
  */
 export function EngineeringStackSection() {
   const { engineeringStack } = portfolioConfig

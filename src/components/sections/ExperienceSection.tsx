@@ -43,11 +43,17 @@ export function ExperienceSection() {
                   aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${exp.company}`}
                 />
 
+                {/* V2.1 P2 (spec §26 "current role should have slightly
+                    stronger visual emphasis"): a subtle accent-tinted
+                    surface on the current role only, on top of the shared
+                    hover/expand states — not a new decorative treatment. */}
                 <div
                   className="role-card border transition-shadow"
                   style={{
                     borderColor: isExpanded ? 'var(--color-accent)' : 'var(--color-border)',
-                    backgroundColor: 'var(--color-surface)',
+                    backgroundColor: exp.current
+                      ? 'color-mix(in srgb, var(--color-accent) 4%, var(--color-surface))'
+                      : 'var(--color-surface)',
                   }}
                 >
                   <button
@@ -100,8 +106,14 @@ export function ExperienceSection() {
                     <div id={`exp-panel-${exp.id}`} className="border-t px-6 pb-6 pt-4" style={{ borderColor: 'var(--color-border)' }}>
                       {bullets.length > 0 && (
                         <>
+                          {/* V2.1 P2 (spec §25's Engineering/Leadership/Systems
+                              grouping): these are engineering-flavored bullets
+                              for every role (verified against the real
+                              content — building/optimizing/architecting), so
+                              "Engineering" is an accurate heading, not a
+                              reframe of different content. */}
                           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
-                            Highlights
+                            Engineering
                           </h4>
                           <ul className="mb-4 list-disc space-y-2 pl-5 text-sm" style={{ color: 'var(--color-text-muted)' }}>
                             {bullets.map((bullet) => (
@@ -113,8 +125,11 @@ export function ExperienceSection() {
 
                       {exp.domains && exp.domains.length > 0 && (
                         <>
+                          {/* V2.1 P2 (spec §25): renamed "Domains" → "Systems"
+                              — same real data (EMR/Billing/CRM), the exact
+                              category name the spec uses for this grouping. */}
                           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
-                            Domains
+                            Systems
                           </h4>
                           <div className="mb-4 flex flex-wrap gap-2">
                             {exp.domains.map((domain) => (

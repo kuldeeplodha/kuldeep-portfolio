@@ -5,6 +5,13 @@ export const projects: Project[] = [
     id: 'gesture-recognition',
     title: 'Gesture Recognition Using Neural Networks',
     category: 'Machine Learning · Deep Learning',
+    // V2.1 P2: editorial "featured" pick for Selected Engineering Work's
+    // one-larger-card treatment (spec §30) — the 3 real projects are
+    // comparable in scope, so this is a visual/ordering choice (oldest of
+    // the three, combines both CNN and RNN architectures), not a claim
+    // that it's more real or more impactful than the other two. Flagged to
+    // god rather than decided silently.
+    featured: true,
     period: "Oct '23 – Nov '23",
     overview:
       'Developed a deep learning system for recognizing hand gestures using convolutional and recurrent neural networks.',

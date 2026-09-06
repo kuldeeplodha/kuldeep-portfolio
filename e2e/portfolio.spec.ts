@@ -30,7 +30,10 @@ test.describe('Portfolio', () => {
   test('project case study page loads', async ({ page }) => {
     await page.goto('/projects/gesture-recognition')
     await expect(page.locator('h1')).toContainText('Gesture Recognition')
-    await expect(page.getByRole('heading', { name: 'Pipeline' })).toBeVisible()
+    // V2.1 P2: "Pipeline" heading renamed to "Architecture" (spec §31/33 —
+    // same underlying per-project pipeline data, now framed as the
+    // project's architecture/data-flow diagram).
+    await expect(page.getByRole('heading', { name: 'Architecture' })).toBeVisible()
   })
 
   test('Ask Kuldeep returns grounded answer', async ({ page }) => {
