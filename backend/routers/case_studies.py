@@ -59,3 +59,41 @@ async def create_case_study(cs: CaseStudy, admin: dict = Depends(get_current_adm
     )
     await client.close()
     return cs
+
+@router.get("/case-studies/{slug}")
+async def get_case_study_by_slug(slug: str):
+    client = get_db()
+    result = await client.execute("SELECT * FROM case_studies WHERE slug = ? AND status = 'published'", [slug])
+    await client.close()
+    if not result.rows:
+        raise HTTPException(status_code=404, detail="Case study not found")
+    return cs_row_to_dict(result.rows[0])
+
+@router.put("/admin/case-studies/{id}")
+async def update_case_study(id: str, cs: CaseStudy, admin: dict = Depends(get_current_admin)):
+    client = get_db()
+    check = await client.execute("SELECT id FROM case_studies WHERE id = ?", [id])
+    if not check.rows:
+        await client.close()
+        raise HTTPException(status_code=404, detail="Case study not found")
+    
+    await client.execute(
+        """UPDATE case_studies SET 
+        slug = ?, title = ?, subtitle = ?, summary = ?, client_or_org = ?, period = ?, category = ?, status = ?, featured = ?, published_at = ?, updated_at = ?, technologies = ?, relevant_roles = ?, problem = ?, context = ?, architecture = ?, outcome = ?, future_improvements = ?, github_url = ?, live_url = ?, featured_media_url = ?, media_urls = ?
+        WHERE id = ?""",
+        [cs.slug, cs.title, cs.subtitle, cs.summary, cs.client_or_org, cs.period, cs.category, cs.status, cs.featured, cs.published_at, cs.updated_at, json.dumps(cs.technologies), json.dumps(cs.relevant_roles), cs.problem, cs.context, cs.architecture, cs.outcome, cs.future_improvements, cs.github_url, cs.live_url, cs.featured_media_url, json.dumps(cs.media_urls), id]
+    )
+    await client.close()
+    return cs
+
+@router.delete("/admin/case-studies/{id}")
+async def delete_case_study(id: str, admin: dict = Depends(get_current_admin)):
+    client = get_db()
+    check = await client.execute("SELECT id FROM case_studies WHERE id = ?", [id])
+    if not check.rows:
+        await client.close()
+        raise HTTPException(status_code=404, detail="Case study not found")
+        
+    await client.execute("DELETE FROM case_studies WHERE id = ?", [id])
+    await client.close()
+    return {"status": "deleted"}
