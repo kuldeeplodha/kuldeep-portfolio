@@ -2,7 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self';" />
+    <!-- V2.2 P2: connect-src widened for the FastAPI content backend (local
+         dev at localhost:8000; see backend/README.md) and Cloudinary's
+         signed-upload endpoint (backend/routers/media.py). The backend's
+         production origin (Vercel) isn't provisioned yet — whoever wires
+         the real deploy in a later V2.2 phase must add it here too, or admin
+         media/content calls will silently fail against a live backend. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' http://localhost:8000 https://api.cloudinary.com;" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kuldeep Lodha — Senior Software Developer</title>
