@@ -4,16 +4,10 @@
       "runtime": "python3.12"
     }
   },
-  "builds": [
+  "rewrites": [
     {
-      "src": "main.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "main.py"
+      "source": "/api/(.*)",
+      "destination": "/main.py"
     }
   ]
 }
