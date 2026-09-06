@@ -11,7 +11,7 @@
 | **Experience** | Standard horizontal/flat layout. | Hard to scan quickly. | Recruiters miss key timeline progression. | Implement premium vertical timeline with scannable bullet constraints (max 5 bullets). | Refactor `ExperienceSection.tsx` into a vertical timeline. |
 | **Projects+Detail** | Generic cards & standard layout. | Lacks engineering depth. | Viewed as simple side-projects. | Transition to "Selected Engineering Work" case-study style. Emphasize architecture and problem-solving. | Update `ProjectsSection.tsx` and `ProjectDetailPage.tsx`. |
 | **How-I-Engineer** | Standard bio text ("About"). | Generic, lacks technical personality. | Fails to show engineering philosophy. | Restructure as numbered points (e.g., 01 - Systems First). | Refactor `AboutSection.tsx` into `HowIEngineerSection.tsx`. |
-| **Research Lab** | Card grid. | Blends in with Projects. | Signature feature is lost. | Adopt technical notebook aesthetic (monospaced numbers, STATUS tags). | Update `ResearchLabSection.tsx`. |
+| **Research Lab** | Card grid. | Blends in with Projects. | Signature feature is lost. | Adopt technical notebook aesthetic. Present ONLY Kuldeep's actual NLP/ML thesis work (no fabricated backend experiments). Frame it as the engineer's research curiosity. | Update `ResearchLabSection.tsx`. |
 | **Stack** | May include % bars or generic lists. | Unprofessional skill indicators. | Lowers perceived seniority. | Categorize into Backend, Data, Architecture, Infra. Remove all percentages/bars. | Refactor `SkillsSection.tsx` to categorical lists. |
 | **Ask Kuldeep** | Existing conversational UI. | May feel disconnected from engineering flow. | Underutilized. | Streamline input + suggested prompt chips. | Update `AskKuldeepSection.tsx`. |
 | **Contact/Footer** | Standard links. | Lacks strong CTA. | Wasted final impression. | Make it a prominent "Let's build something" CTA block. | Update `Footer.tsx` and Contact section. |
@@ -36,15 +36,21 @@
 
 ## 3. Phase Breakdown (Steps 5-24 mapped to 4 Gated Phases)
 
+*Note on Testing:* Expected Playwright breakage across suites. We will regenerate visual baselines via `update-visual-baselines.yml` as part of each phase's merge chain.
+
 - **Phase 1: Foundation (Tokens, Grid, Nav, Hero, JSON Import)**
-  - *JSON Content-Import feature is implemented here to ensure all subsequent UI is driven by `v2-real-content.json`.*
+  - *JSON Content-Import feature is implemented here to ensure all subsequent UI is driven by `v2-real-content.json`. MUST validate against the existing TS interfaces (reject/report on mismatch, never silently coerce).*
   - Incorporates Spec Steps 5-18 (Design Direction, Role Refinement, Hero, Nav, Grid).
+  - *Test Churn:* Nav and Hero suites.
 - **Phase 2: Sections (Experience, Projects, How I Engineer, Stack)**
   - Incorporates Spec Steps 19, 20, 23, 24-32, 38-40 (Section Headers, Experience Timeline, Project Cards, Engineering Stack).
+  - *Test Churn:* Experience, Projects, and generic layout suites.
 - **Phase 3: Signature Features (Research Lab, Ask Kuldeep)**
   - Incorporates Spec Steps 35-37, 43-45 (Research Lab Notebook Aesthetic, Ask Kuldeep integration).
+  - *Test Churn:* Research Lab and Ask Kuldeep component suites.
 - **Phase 4: Polish (Mobile, Accessibility, Motion, Footer, Validation)**
   - Incorporates Spec Steps 46-47 (Contact/Footer), plus overall site polish matching Spec Steps 61-75 (Motion, A11y, Perf).
+  - *Test Churn:* Mobile viewport and A11y suites.
 
 ## 4. SOFTWARE-PRIMARY Repositioning (Explicit Call)
 
