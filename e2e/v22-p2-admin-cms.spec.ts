@@ -13,9 +13,18 @@ function json(route: Route, body: unknown, status = 200) {
   return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
 }
 
+// V2.2 P4 unified /admin under this same JWT gate (previously a separate
+// client-side hash check protected the static-config panel, with this CMS
+// gate only guarding the Blog Posts / Case Studies tabs underneath it).
+// The mocked /api/auth/login here satisfies the outer gate; individual
+// tests below still log in a second time when they open a CMS tab because
+// this route isn't paired with a mocked /api/auth/verify — cmsVerify()'s
+// real (unmocked) network call fails, so the inner CmsAuthGate re-shows its
+// own sign-in form rather than trusting the outer session silently.
 async function loginToAdmin(page: Page) {
+  await page.route('**/api/auth/login', (route) => json(route, { token: 'fake-jwt', expiresIn: 86400 }))
   await page.goto('/admin')
-  await page.getByLabel('Password').fill('test-admin-password')
+  await page.getByLabel('Admin password').fill('test-admin-password')
   await page.getByRole('button', { name: 'Sign in' }).click()
   await expect(page.locator('h1')).toContainText('Configuration Panel')
 }

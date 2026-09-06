@@ -13,13 +13,12 @@ import type {
   Research,
   AIKnowledgeEntry,
 } from '../types'
-import { AdminGate } from '../components/admin/AdminGate'
 import { AdminCard, AdminLayout, adminInputClass } from '../components/admin/AdminLayout'
 import { AttachmentsEditor, ImageField } from '../components/admin/MediaFields'
 import { RoleBadges, RoleScopeEditor } from '../components/admin/RoleScopeEditor'
 import { ConfirmModal } from '../components/admin/ConfirmModal'
 import { EntityToolbar } from '../components/admin/EntityToolbar'
-import { logoutAdmin } from '../lib/admin/auth'
+import { clearCmsToken, clearDevBypass } from '../lib/admin/cms'
 import { RESUME_LABELS, ROLE_IDS, ROLE_LABELS } from '../lib/admin/roleLabels'
 import {
   clearDraft,
@@ -557,7 +556,8 @@ function AdminPanel() {
       sidebar={sidebar}
       dirty={dirty}
       onSignOut={() => {
-        logoutAdmin()
+        clearCmsToken()
+        clearDevBypass()
         window.location.reload()
       }}
       header={
@@ -2047,8 +2047,8 @@ function AdminPanel() {
 
 export function AdminPage() {
   return (
-    <AdminGate>
+    <CmsAuthGate>
       <AdminPanel />
-    </AdminGate>
+    </CmsAuthGate>
   )
 }

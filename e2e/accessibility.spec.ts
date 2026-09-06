@@ -103,8 +103,11 @@ test.describe('Accessibility (A11y) Audit', () => {
   test('admin configuration panel should not have any automatically detectable accessibility issues', async ({
     page,
   }, testInfo) => {
+    await page.route('**/api/auth/login', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'fake-jwt', expiresIn: 86400 }) }),
+    )
     await page.goto('/admin')
-    await page.getByLabel('Password').fill('test-admin-password')
+    await page.getByLabel('Admin password').fill('test-admin-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.locator('h1')).toContainText('Configuration Panel')
     await page.waitForLoadState('networkidle')

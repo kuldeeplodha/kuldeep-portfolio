@@ -45,15 +45,21 @@ test.describe('Portfolio', () => {
 
   test('admin panel requires login', async ({ page }) => {
     await page.goto('/admin')
-    await expect(page.locator('h1')).toContainText('Admin login')
-    await page.getByLabel('Password').fill('test-admin-password')
+    await expect(page.getByRole('heading', { name: 'Connect to the content backend' })).toBeVisible()
+    await page.route('**/api/auth/login', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'fake-jwt', expiresIn: 86400 }) }),
+    )
+    await page.getByLabel('Admin password').fill('test-admin-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.locator('h1')).toContainText('Configuration Panel')
   })
 
   test('admin panel V2 controls allow reordering, adding and deleting with confirm modal', async ({ page, isMobile }) => {
+    await page.route('**/api/auth/login', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'fake-jwt', expiresIn: 86400 }) }),
+    )
     await page.goto('/admin')
-    await page.getByLabel('Password').fill('test-admin-password')
+    await page.getByLabel('Admin password').fill('test-admin-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.locator('h1')).toContainText('Configuration Panel')
 

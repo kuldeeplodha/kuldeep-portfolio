@@ -59,10 +59,10 @@ export default defineConfig({
       // local + CI e2e runs; a caller that sets VITE_BASE_PATH (e.g. to
       // /kuldeep-portfolio/) gets a matching build under that prefix. (T-QA-6)
       VITE_BASE_PATH: process.env.VITE_BASE_PATH || '/',
-      // sha256('test-admin-password') — the e2e suite logs in with the
-      // plaintext form; only the digest reaches the bundle.
-      VITE_ADMIN_PASSWORD_HASH:
-        'f7a03f48c0e2aa2d5e55ca186c20032ddbf53b7f5f93fce387d65c3f83433e8d',
+      // No VITE_API_BASE_URL here: /admin is a production build (DEV is
+      // false, so the dev-bypass button isn't rendered), and every e2e spec
+      // that reaches the gate mocks **/api/auth/login via page.route rather
+      // than hitting a real backend — see e2e/v22-p2-admin-cms.spec.ts.
     },
   },
 })
