@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from .routers import auth, blogs, case_studies, media
-from .database import get_db
+from routers import auth, blogs, case_studies, media
+from database import get_db
 
 load_dotenv()
 

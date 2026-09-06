@@ -1,7 +1,7 @@
 import os
 from fastapi import APIRouter, HTTPException, Depends
-from ..models import LoginRequest
-from ..auth import verify_password, create_access_token, get_current_admin
+from models import LoginRequest
+from auth import verify_password, create_access_token, get_current_admin
 
 router = APIRouter()
 

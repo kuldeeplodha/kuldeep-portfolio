@@ -1,8 +1,8 @@
 import json
 from fastapi import APIRouter, Depends, HTTPException
-from ..database import get_db
-from ..auth import get_current_admin
-from ..models import BlogPost
+from database import get_db
+from auth import get_current_admin
+from models import BlogPost
 
 router = APIRouter()
 
