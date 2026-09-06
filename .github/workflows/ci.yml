@@ -111,3 +111,25 @@ jobs:
           configPath: ./lighthouserc.cjs
           uploadArtifacts: true
           temporaryPublicStorage: true
+
+  backend-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run backend tests
+        run: pytest tests/
+        env:
+          JWT_SECRET: supersecret_for_local_dev
+          CLOUDINARY_API_KEY: your_api_key
+          CLOUDINARY_API_SECRET: your_api_secret
+          CLOUDINARY_CLOUD_NAME: your_cloud_name
+          ADMIN_PASSWORD_HASH: $2b$12$T5oQhnb/D1NsYmY29tLB3OeipoDA1Fs5T9aiFYt8Ybxfd.iK1XS9a
