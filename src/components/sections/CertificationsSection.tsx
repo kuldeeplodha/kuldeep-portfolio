@@ -1,50 +1,48 @@
 import { useRole } from '../../hooks/useRole'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
+import { SectionHeader } from '../ui/SectionHeader'
+import { SectionShell } from '../ui/SectionShell'
 
+/**
+ * V2 §Background — compact certification cards, kept secondary (small,
+ * dense, no large tiles) per uiContentRules.
+ */
 export function CertificationsSection() {
   const { filteredCertifications } = useRole()
 
   if (filteredCertifications.length === 0) return null
 
   return (
-    <section id="certifications" className="px-6 py-16" style={{ backgroundColor: 'var(--color-surface)' }}>
-      <div className="mx-auto max-w-5xl">
-        <h2 className="mb-8 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Certifications
-        </h2>
-        <ul className="grid gap-4 sm:grid-cols-2">
-          {filteredCertifications.map((cert) => (
-            <li
-              key={cert.id}
-              className="rounded-xl border p-5"
-              style={{ borderColor: 'var(--color-border)' }}
-            >
-              <h3 className="font-medium" style={{ color: 'var(--color-text)' }}>
-                {cert.name}
-              </h3>
-              <p className="mt-1 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                {cert.issuer}
-                {cert.date ? ` · ${cert.date}` : ''}
-              </p>
-              {cert.url && isValidSafeUrl(cert.url) ? (
-                <a
-                  href={cert.url}
-                  className="mt-2 inline-block text-xs underline"
-                  style={{ color: 'var(--color-accent)' }}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View certificate
-                </a>
-              ) : (
-                <p className="mt-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                  Certificate URL not configured
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <SectionShell id="certifications" muted>
+      <SectionHeader slug="certifications" title="Certifications" />
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredCertifications.map((cert) => (
+          <li
+            key={cert.id}
+            className="rounded-[var(--radius-base)] border p-3"
+            style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
+          >
+            <h3 className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+              {cert.name}
+            </h3>
+            <p className="mt-0.5 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              {cert.issuer}
+              {cert.date ? ` · ${cert.date}` : ''}
+            </p>
+            {cert.url && isValidSafeUrl(cert.url) && (
+              <a
+                href={cert.url}
+                className="mt-1 inline-block text-xs underline"
+                style={{ color: 'var(--color-accent)' }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View certificate
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </SectionShell>
   )
 }

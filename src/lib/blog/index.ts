@@ -35,13 +35,25 @@ function parseSimpleFrontmatter(raw: string): Record<string, any> {
   return result;
 }
 
+const WORDS_PER_MINUTE = 200;
+
+/** Derives reading time from word count (~200 wpm) when not set in frontmatter. */
+function deriveReadingTimeMinutes(body: string): number {
+  const wordCount = body.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE));
+}
+
 export function getAllBlogPosts(): BlogPost[] {
   return Object.entries(postModules)
     .map(([filepath, module]) => {
       const rawString = typeof module === 'string' ? module : module.default;
       const { meta, body } = parseFrontmatter(rawString);
       if (!meta.slug) throw new Error(`Post ${filepath} missing slug in frontmatter`);
-      return { ...meta, body };
+      return {
+        ...meta,
+        readingTimeMinutes: meta.readingTimeMinutes ?? deriveReadingTimeMinutes(body),
+        body,
+      };
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }

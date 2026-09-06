@@ -1,5 +1,8 @@
 import type { Education, Certification, Research, Metric } from '../types'
 
+// V2 §Education: content.education, verbatim. Fixed a real factual bug found
+// here — the GPA (3.58/4.0) was previously attached to the WRONG degree
+// (Exec PG instead of the MS); the real content model ties it to the MS.
 export const education: Education[] = [
   {
     id: 'ms-ml-ai',
@@ -7,7 +10,9 @@ export const education: Education[] = [
     institution: 'Liverpool John Moores University & UpGrad',
     period: "Jul '24",
     location: 'Liverpool, England',
+    gpa: '3.58 / 4.0',
     research: 'Explainability in Low-Resource and Multilingual NLP Applications',
+    focus: ['Machine Learning', 'Artificial Intelligence', 'Natural Language Processing', 'Deep Learning', 'MLOps', 'Generative AI'],
   },
   {
     id: 'exec-pg-ml',
@@ -15,17 +20,11 @@ export const education: Education[] = [
     institution: 'IIIT Bangalore & UpGrad',
     period: "Mar '23 – May '24",
     location: 'Bengaluru, IN',
-    gpa: '3.58 / 4',
-    highlights: [
-      'Machine Learning, Deep Learning, NLP, MLOps',
-      'CNNs, RNNs, Gesture Recognition',
-      'Encoder-Decoder models, LLMs, Generative AI',
-      'MLflow, Airflow, AWS SageMaker',
-    ],
+    focus: ['Machine Learning', 'Deep Learning', 'NLP', 'MLOps', 'Generative AI', 'Data Science'],
   },
   {
     id: 'btech-cs',
-    degree: 'B.Tech. in Computer Science',
+    degree: 'B.Tech in Computer Science',
     institution: 'Hitkarini College of Engineering & Technology',
     period: "Aug '17 – Jul '21",
     location: 'Jabalpur, IN',
@@ -33,76 +32,60 @@ export const education: Education[] = [
   },
 ]
 
+// V2 §Certifications: content.certifications, verbatim — exactly these 7.
+// Three certifications previously listed here (Building React and Django
+// Apps, Docker Foundations Professional Certificate, Data Analyst Associate)
+// are NOT in the human-provided real content model and have been removed
+// rather than kept as unverified claims.
 export const certifications: Certification[] = [
   {
     id: 'ms-linkedin-sw',
     name: 'Career Essentials in Software Development',
-    issuer: 'Microsoft and LinkedIn',
-    date: 'Feb 2025',
+    issuer: 'Microsoft & LinkedIn',
+    date: '2025',
     sourceVariants: ['software', 'ai_ml', 'data_analyst'],
   },
   {
     id: 'aws-dev',
     name: 'Getting Started as an AWS Developer',
     issuer: 'LinkedIn',
-    date: 'Mar 2025',
+    date: '2025',
     sourceVariants: ['software', 'ai_ml', 'data_analyst'],
-  },
-  {
-    id: 'react-django',
-    name: 'Building React and Django Apps',
-    issuer: 'LinkedIn',
-    date: 'Feb 2025',
-    sourceVariants: ['software'],
-  },
-  {
-    id: 'docker',
-    name: 'Docker Foundations Professional Certificate',
-    issuer: 'Docker',
-    date: 'Mar 2025',
-    sourceVariants: ['software'],
   },
   {
     id: 'vertex-ai',
     name: 'Prompt Design in Vertex AI',
     issuer: 'Google Cloud Skills Boost',
-    date: 'May 2025',
+    date: '2025',
     sourceVariants: ['ai_ml'],
-  },
-  {
-    id: 'datacamp-da',
-    name: 'Data Analyst Associate certificate',
-    issuer: 'DataCamp',
-    date: 'Nov 2024',
-    sourceVariants: ['data_analyst'],
-  },
-  {
-    id: 'excel-coursera',
-    name: 'Excel Skills for Data Analytics and Visualization',
-    issuer: 'Coursera / Macquarie University',
-    date: 'Mar 2024',
-    sourceVariants: ['software', 'ai_ml'],
-  },
-  {
-    id: 'sql-hackerrank',
-    name: 'SQL (Advanced) Certificate',
-    issuer: 'HackerRank',
-    date: 'Feb 2023',
-    sourceVariants: ['software', 'ai_ml', 'data_analyst'],
-  },
-  {
-    id: 'problem-solving',
-    name: 'Problem Solving (Intermediate) Certificate',
-    issuer: 'HackerRank',
-    date: 'Feb 2023',
-    sourceVariants: ['software', 'ai_ml', 'data_analyst'],
   },
   {
     id: 'pyspark',
     name: 'Apache PySpark by Example',
     issuer: 'LinkedIn',
-    date: 'Apr 2025',
-    sourceVariants: ['ai_ml'],
+    date: '2025',
+    sourceVariants: ['ai_ml', 'data_analyst'],
+  },
+  {
+    id: 'excel-coursera',
+    name: 'Excel Skills for Data Analytics and Visualization',
+    issuer: 'Macquarie University / Coursera',
+    date: '2024',
+    sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+  },
+  {
+    id: 'sql-hackerrank',
+    name: 'SQL Advanced',
+    issuer: 'HackerRank',
+    date: '2023',
+    sourceVariants: ['software', 'ai_ml', 'data_analyst'],
+  },
+  {
+    id: 'problem-solving',
+    name: 'Problem Solving — Intermediate',
+    issuer: 'HackerRank',
+    date: '2023',
+    sourceVariants: ['software', 'ai_ml', 'data_analyst'],
   },
 ]
 

@@ -151,4 +151,123 @@
   [data-layout='hybrid'] h1 {
     font-weight: 700;
   }
+
+  /* V2-P5 Blog polish — hand-rolled article typography. The `.blog-content`
+     wrapper previously carried Tailwind Typography's `prose` classes, but
+     that plugin was never installed (ADR-005 zero-dep precedent), so none
+     of it actually applied — headings, code blocks, and lists rendered with
+     zero custom styling. This replaces it with real CSS driven by the same
+     theme tokens as the rest of the site. */
+  .blog-content {
+    line-height: 1.75;
+    font-size: 1.0625rem;
+  }
+
+  .blog-content > * + * {
+    margin-top: 1.25em;
+  }
+
+  .blog-content h1,
+  .blog-content h2,
+  .blog-content h3,
+  .blog-content h4 {
+    margin-top: 2em;
+    margin-bottom: 0.6em;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  .blog-content h1 {
+    font-size: 1.75em;
+  }
+  .blog-content h2 {
+    font-size: 1.5em;
+  }
+  .blog-content h3 {
+    font-size: 1.25em;
+  }
+  .blog-content h4 {
+    font-size: 1.1em;
+  }
+
+  .blog-content p {
+    color: var(--color-text);
+  }
+
+  .blog-content a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .blog-content ul,
+  .blog-content ol {
+    padding-left: 1.5em;
+  }
+  .blog-content ul {
+    list-style: disc;
+  }
+  .blog-content ol {
+    list-style: decimal;
+  }
+  .blog-content li + li {
+    margin-top: 0.4em;
+  }
+
+  .blog-content blockquote {
+    padding-left: 1em;
+    border-left: 3px solid var(--color-accent);
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .blog-content code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-base, 6px);
+    background-color: color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+
+  .blog-content pre {
+    padding: 1em 1.25em;
+    border-radius: var(--radius-card, 12px);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    overflow-x: auto;
+  }
+
+  .blog-content pre code {
+    padding: 0;
+    background-color: transparent;
+    font-size: 0.85em;
+  }
+
+  .blog-content img {
+    border-radius: var(--radius-base, 6px);
+  }
+
+  .blog-content table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+  }
+
+  .blog-content th,
+  .blog-content td {
+    padding: 0.5em 0.75em;
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  .blog-content th {
+    background-color: var(--color-surface);
+    font-weight: 600;
+  }
+
+  .blog-content hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+  }
 }

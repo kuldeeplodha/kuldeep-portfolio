@@ -132,6 +132,8 @@ export interface Education {
   highlights?: string[]
   gpa?: string
   research?: string
+  /** Named focus areas, e.g. "Machine Learning", "MLOps" (V2 §Education) */
+  focus?: string[]
 }
 
 export interface Certification {
