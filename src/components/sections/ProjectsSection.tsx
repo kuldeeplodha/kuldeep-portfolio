@@ -69,7 +69,7 @@ export function ProjectsSection() {
             // matching how the other section cards already work.
             <article
               key={project.id}
-              className={`flex flex-col gap-3 rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)] transition-shadow hover:shadow-[var(--shadow-glass-lg)] hover-lift${
+              className={`flex flex-col gap-3 overflow-hidden rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)] transition-shadow hover:shadow-[var(--shadow-glass-lg)] hover-lift${
                 project.featured ? ' md:col-span-2' : ''
               }`}
               style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-alt, var(--color-surface))' }}
