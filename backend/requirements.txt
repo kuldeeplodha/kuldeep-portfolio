@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+libsql-client
+PyJWT
+bcrypt
+cloudinary
+pytest
+httpx
+python-dotenv
