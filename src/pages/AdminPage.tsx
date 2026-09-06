@@ -38,6 +38,9 @@ import { ValidationStatusBar } from '../components/admin/ValidationStatusBar'
 import { DiagnosticImportModal } from '../components/admin/DiagnosticImportModal'
 import { configDraftReducer, initialConfig, type ConfigSection } from '../lib/admin/configReducer'
 import { createDefaultEntity } from '../lib/admin/defaultTemplates'
+import { CmsAuthGate } from '../components/admin/cms/CmsAuthGate'
+import { BlogsAdminPanel } from '../components/admin/cms/BlogsAdminPanel'
+import { CaseStudiesAdminPanel } from '../components/admin/cms/CaseStudiesAdminPanel'
 
 type AdminTab =
   | 'profile'
@@ -50,6 +53,8 @@ type AdminTab =
   | 'certs'
   | 'research'
   | 'aiKnowledge'
+  | 'blogPosts'
+  | 'caseStudies'
 
 const TAB_META: { id: AdminTab; label: string; icon: string }[] = [
   { id: 'profile', label: 'Profile', icon: '👤' },
@@ -62,7 +67,14 @@ const TAB_META: { id: AdminTab; label: string; icon: string }[] = [
   { id: 'certs', label: 'Certifications', icon: '📜' },
   { id: 'research', label: 'Research', icon: '🔬' },
   { id: 'aiKnowledge', label: 'AI Knowledge', icon: '🧠' },
+  { id: 'blogPosts', label: 'Blog Posts', icon: '📝' },
+  { id: 'caseStudies', label: 'Case Studies', icon: '🗂️' },
 ]
+
+// The two CMS tabs are backed by the V2.2 FastAPI/Turso content backend, not
+// the static-config JSON this page otherwise edits — they render their own
+// panel instead of participating in the config-draft <form>/save/export flow.
+const CMS_TABS: AdminTab[] = ['blogPosts', 'caseStudies']
 
 function filterByRole<T extends { relevantRoles: RoleId[] }>(
   items: T[],
@@ -172,6 +184,8 @@ function AdminPanel() {
       certs: config.certifications.length,
       research: config.research.length,
       aiKnowledge: config.aiKnowledge.length,
+      blogPosts: undefined,
+      caseStudies: undefined,
     }),
     [config],
   )
@@ -546,7 +560,9 @@ function AdminPanel() {
         logoutAdmin()
         window.location.reload()
       }}
-      header={tab !== 'profile' && tab !== 'roles' ? roleFilterHeader : null}
+      header={
+        tab !== 'profile' && tab !== 'roles' && !CMS_TABS.includes(tab) ? roleFilterHeader : null
+      }
     >
       {/* Mobile Horizontal Tab Navigation */}
       <div className="mb-6 flex gap-1.5 overflow-x-auto pb-2 lg:hidden scrollbar-thin" aria-label="Mobile sections">
@@ -599,10 +615,12 @@ function AdminPanel() {
       </div>
 
       <p className="mb-6 text-sm text-slate-400">
-        Pick a section, choose or reorder items, then set which resume page(s) each appears on. Export JSON to publish.
+        {CMS_TABS.includes(tab)
+          ? 'Blog posts and case studies are authored and published directly here — no export step.'
+          : 'Pick a section, choose or reorder items, then set which resume page(s) each appears on. Export JSON to publish.'}
       </p>
 
-      {showQuarantineBanner && getQuarantinedDraft() && (
+      {!CMS_TABS.includes(tab) && showQuarantineBanner && getQuarantinedDraft() && (
         <div
           className="mb-6 rounded-lg border border-amber-600 bg-amber-900/30 p-4 text-sm text-amber-200 flex items-center justify-between"
           role="alert"
@@ -629,6 +647,13 @@ function AdminPanel() {
         </div>
       )}
 
+      {CMS_TABS.includes(tab) ? (
+        <CmsAuthGate>
+          {tab === 'blogPosts' && <BlogsAdminPanel />}
+          {tab === 'caseStudies' && <CaseStudiesAdminPanel />}
+        </CmsAuthGate>
+      ) : (
+        <>
       <ValidationStatusBar
         summary={validationSummary}
         onNavigateToIssue={handleNavigateToIssue}
@@ -1993,6 +2018,8 @@ function AdminPanel() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+        </>
+      )}
 
       {/* Diagnostic Import Modal */}
       {diagnosticData && (
