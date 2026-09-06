@@ -121,6 +121,32 @@ test.describe('Accessibility (A11y) Audit', () => {
   test('blog list page should not have any automatically detectable accessibility issues', async ({
     page,
   }, testInfo) => {
+    // V2.2 P3: /blog is now CMS-backed — mock a couple of published posts
+    // rather than testing the "backend unreachable" error state.
+    await page.route('**/api/blogs', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            id: 'p1',
+            slug: 'post-one',
+            title: 'Post One',
+            excerpt: 'An excerpt.',
+            body: 'Body',
+            status: 'published',
+            published_at: '2026-09-01T00:00:00Z',
+            created_at: '2026-09-01T00:00:00Z',
+            updated_at: '2026-09-01T00:00:00Z',
+            tags: ['engineering'],
+            relevant_roles: [],
+            reading_time_minutes: 3,
+            featured_media_url: null,
+            media_urls: [],
+          },
+        ]),
+      }),
+    )
     await page.goto('/blog')
     await page.waitForLoadState('networkidle')
 
@@ -136,6 +162,31 @@ test.describe('Accessibility (A11y) Audit', () => {
   test('blog detail page should not have any automatically detectable accessibility issues', async ({
     page,
   }, testInfo) => {
+    // V2.2 P3: /blog/:slug is now CMS-backed (CmsBlogDetailPage) — mock a
+    // real published post rather than exercising the NotFoundPage fallback
+    // (which the unmocked, no-backend-in-CI request would otherwise hit).
+    await page.route('**/api/blogs/welcome-to-markdown-blog', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'p1',
+          slug: 'welcome-to-markdown-blog',
+          title: 'Welcome to the new Markdown Blog',
+          excerpt: 'x',
+          body: '## Heading\n\nSome content.',
+          status: 'published',
+          published_at: '2026-09-01T00:00:00Z',
+          created_at: '2026-09-01T00:00:00Z',
+          updated_at: '2026-09-01T00:00:00Z',
+          tags: ['vite'],
+          relevant_roles: [],
+          reading_time_minutes: 4,
+          featured_media_url: null,
+          media_urls: [],
+        }),
+      }),
+    )
     await page.goto('/blog/welcome-to-markdown-blog')
     await page.waitForLoadState('networkidle')
 

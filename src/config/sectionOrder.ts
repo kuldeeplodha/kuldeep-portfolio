@@ -12,12 +12,14 @@
 export const SECTION_ORDER = [
   'signal', // §2.3 Engineering Signal
   'work', // §2.4 Selected Work
+  'case-studies', // V2.2 P3 — CMS-backed "Selected Case Studies" (latest 3)
   'experience', // §2.5 Experience Timeline
   'about', // §2.6 How I Engineer
   'lab', // §2.7 Research Lab
   'stack', // §2.8 Engineering Stack
   'education', // Background — kept compact/secondary
   'certifications', // Background — kept compact/secondary
+  'articles', // V2.2 P3 — CMS-backed "Latest Engineering Articles" (latest 3)
   'ask', // §2.9 Ask Kuldeep
 ] as const
 

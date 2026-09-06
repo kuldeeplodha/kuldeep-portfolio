@@ -18,8 +18,10 @@ test.describe('Professional story (V2-P3)', () => {
     await expect(about.getByRole('heading', { name: 'How I approach engineering' })).toBeVisible()
     await expect(about.getByText('Understand the system')).toBeVisible()
     await expect(about.getByText('Measure the outcome')).toBeVisible()
-    // Exactly 5 numbered points (01-05).
-    await expect(about.getByText('05')).toBeVisible()
+    // Exactly 5 numbered points (01-05). exact:true disambiguates from the
+    // section's own "NN /" numbered header badge (V2.2 P3 shifted "about"
+    // from 04 to 05 in SECTION_ORDER, which now incidentally also reads "05").
+    await expect(about.getByText('05', { exact: true })).toBeVisible()
   })
 
   test('Selected Work shows honestly-categorized project cards and impact metrics', async ({

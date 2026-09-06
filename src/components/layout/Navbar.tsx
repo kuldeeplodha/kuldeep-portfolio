@@ -34,6 +34,10 @@ const MORE_ITEMS: MoreItem[] = [
   { id: 'education', label: 'Education' },
   { id: 'contact', label: 'Contact' },
   { id: 'blog', label: 'Blog', to: '/blog' },
+  // V2.2 P3: case studies are new public content (PRD §6.2) — reachable
+  // from the homepage strip already, added here too so they're discoverable
+  // from every page, matching how Blog already works.
+  { id: 'case-studies', label: 'Case Studies', to: '/case-studies' },
 ]
 
 function navLinkStyle(active: boolean) {
@@ -187,11 +191,20 @@ export function Navbar() {
                   <Link
                     key={item.id}
                     role="menuitem"
-                    to={item.to ?? { pathname: '/', hash: item.id, search: location.search }}
+                    // V2.2 P3: a plain-path item (Blog, Case Studies) must
+                    // carry `search` forward explicitly too, same as the
+                    // hash-anchor items already did — otherwise clicking
+                    // through drops ?role= and silently resets the theme
+                    // (PRD §7.1).
+                    to={
+                      item.to
+                        ? { pathname: item.to, search: location.search }
+                        : { pathname: '/', hash: item.id, search: location.search }
+                    }
                     className="block rounded-[calc(var(--radius-base)-4px)] px-3 py-2 text-sm transition-colors nav-hover"
                     style={
-                      item.id === 'blog'
-                        ? { color: location.pathname.startsWith('/blog') ? 'var(--color-text)' : 'var(--color-text-muted)' }
+                      item.to
+                        ? { color: location.pathname.startsWith(item.to) ? 'var(--color-text)' : 'var(--color-text-muted)' }
                         : navLinkStyle(role.navEmphasis.includes(item.id))
                     }
                     onClick={() => setMoreOpen(false)}
@@ -263,7 +276,7 @@ export function Navbar() {
             ))}
             <li>
               <Link
-                to="/blog"
+                to={{ pathname: '/blog', search: location.search }}
                 className="block min-h-11 py-3 text-sm leading-none"
                 style={{
                   color: location.pathname.startsWith('/blog')
@@ -273,6 +286,20 @@ export function Navbar() {
                 onClick={() => setMobileOpen(false)}
               >
                 Blog
+              </Link>
+            </li>
+            <li>
+              <Link
+                to={{ pathname: '/case-studies', search: location.search }}
+                className="block min-h-11 py-3 text-sm leading-none"
+                style={{
+                  color: location.pathname.startsWith('/case-studies')
+                    ? 'var(--color-accent)'
+                    : 'var(--color-text)',
+                }}
+                onClick={() => setMobileOpen(false)}
+              >
+                Case Studies
               </Link>
             </li>
             <li>
