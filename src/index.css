@@ -42,7 +42,14 @@
   body {
     @apply min-h-screen antialiased;
     font-family: var(--font-sans);
-    transition: background-color 0.45s ease, color 0.45s ease;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html.is-switching-role,
+    html.is-switching-role * {
+      transition: background-color 0.45s ease, border-color 0.45s ease, color 0.45s ease, box-shadow 0.45s ease !important;
+      transition-delay: 0s !important;
+    }
   }
 
   :focus-visible {

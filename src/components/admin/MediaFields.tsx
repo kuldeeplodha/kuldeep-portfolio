@@ -1,7 +1,7 @@
 import type { MediaAttachment } from '../../types'
 
 const fieldClass =
-  'w-full rounded-lg border border-slate-600 bg-slate-800/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400'
+  'w-full rounded-[var(--radius-base)] border border-slate-600 bg-slate-800/50 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400'
 
 interface ImageFieldProps {
   label: string
@@ -23,7 +23,7 @@ export function ImageField({ label, value, onChange, hint }: ImageFieldProps) {
         className={fieldClass}
       />
       {value && (
-        <div className="mt-2 overflow-hidden rounded-lg border border-slate-600">
+        <div className="mt-2 overflow-hidden rounded-[var(--radius-base)] border border-slate-600">
           <img src={value} alt="Preview" className="h-32 w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
         </div>
       )}
@@ -70,7 +70,7 @@ export function AttachmentsEditor({ value = [], onChange }: AttachmentsEditorPro
               type="button"
               onClick={() => remove(i)}
               aria-label={`Remove attachment ${att.label || i + 1}`}
-              className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg px-3 text-sm text-rose-400 hover:bg-rose-400/10 focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-[var(--radius-base)] px-3 text-sm text-rose-400 hover:bg-rose-400/10 focus:outline-none focus:ring-2 focus:ring-rose-400"
             >
               ✕
             </button>
@@ -80,7 +80,7 @@ export function AttachmentsEditor({ value = [], onChange }: AttachmentsEditorPro
       <button
         type="button"
         onClick={add}
-        className="mt-3 min-h-[44px] rounded-lg border border-dashed border-slate-600 px-4 py-2 text-xs text-slate-300 hover:border-cyan-400 hover:text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+        className="mt-3 min-h-[44px] rounded-[var(--radius-base)] border border-dashed border-slate-600 px-4 py-2 text-xs text-slate-300 hover:border-cyan-400 hover:text-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
       >
         + Add attachment
       </button>

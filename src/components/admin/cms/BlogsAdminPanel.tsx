@@ -175,14 +175,14 @@ export function BlogsAdminPanel() {
             <button
               type="button"
               onClick={() => setPreview((p) => !p)}
-              className="rounded-md border border-slate-600 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="rounded-[var(--radius-base)] border border-slate-600 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
             >
               {preview ? 'Edit' : 'Preview'}
             </button>
           </div>
           {preview ? (
             <div
-              className="prose prose-invert prose-sm max-w-none rounded-lg border border-slate-700 bg-slate-800/30 p-4"
+              className="prose prose-invert prose-sm max-w-none rounded-[var(--radius-base)] border border-slate-700 bg-slate-800/30 p-4"
               dangerouslySetInnerHTML={{ __html: renderMarkdown(editing.body) }}
             />
           ) : (
@@ -207,7 +207,7 @@ export function BlogsAdminPanel() {
             type="button"
             disabled={saving || !editing.title || !editing.slug}
             onClick={() => handleSave('draft')}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save draft
           </button>
@@ -215,14 +215,14 @@ export function BlogsAdminPanel() {
             type="button"
             disabled={saving || !editing.title || !editing.slug}
             onClick={() => handleSave('published')}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Publish'}
           </button>
           <button
             type="button"
             onClick={() => setEditing(null)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             Cancel
           </button>
@@ -238,7 +238,7 @@ export function BlogsAdminPanel() {
         <button
           type="button"
           onClick={() => setEditing(emptyBlog())}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
         >
           + New Blog Post
         </button>
@@ -255,7 +255,7 @@ export function BlogsAdminPanel() {
         </p>
       )}
       {!loading && !loadError && posts.length === 0 && (
-        <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+        <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
           <p className="text-sm text-slate-400">No blog posts yet.</p>
         </div>
       )}
@@ -281,14 +281,14 @@ export function BlogsAdminPanel() {
               <button
                 type="button"
                 onClick={() => setEditing(post)}
-                className="rounded-md border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="rounded-[var(--radius-base)] border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => setDeleteTarget(post)}
-                className="rounded-md border border-rose-700/60 px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-900/30 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="rounded-[var(--radius-base)] border border-rose-700/60 px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-900/30 focus:outline-none focus:ring-2 focus:ring-rose-400"
               >
                 Delete
               </button>

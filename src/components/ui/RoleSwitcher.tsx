@@ -24,7 +24,7 @@ export function RoleSwitcher({ currentRole, roles, onRoleChange }: RoleSwitcherP
             onClick={() => onRoleChange(role.id)}
             layout
             whileTap={{ scale: 0.97 }}
-            className="relative rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="relative rounded-[var(--radius-pill)] border px-4 py-2 text-sm font-medium transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             style={{
               borderColor: isActive ? 'var(--color-accent)' : 'var(--color-border)',
               backgroundColor: isActive ? 'var(--color-accent)' : 'transparent',

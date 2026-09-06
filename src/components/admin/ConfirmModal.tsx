@@ -91,7 +91,7 @@ export function ConfirmModal({
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
         aria-describedby="confirm-modal-desc"
-        className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl shadow-black/50"
+        className="w-full max-w-md rounded-[var(--radius-card)] border border-slate-700 bg-slate-900 p-6 shadow-2xl shadow-black/50"
       >
         <h3 id="confirm-modal-title" className="text-lg font-semibold text-white">
           {title}
@@ -104,14 +104,14 @@ export function ConfirmModal({
             ref={cancelBtnRef}
             type="button"
             onClick={onCancel}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-base)] border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-400"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-base)] bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-400"
           >
             {confirmLabel}
           </button>

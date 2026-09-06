@@ -32,7 +32,7 @@ export function ExperienceSection() {
               <article key={exp.id} className="relative pl-8 sm:pl-10 md:pl-14">
                 <button
                   type="button"
-                  className="absolute left-0 top-6 flex h-6 w-6 min-h-11 min-w-11 items-center justify-center rounded-full border-2 sm:left-1 md:left-4"
+                  className="absolute left-0 top-6 flex h-6 w-6 min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-pill)] border-2 sm:left-1 md:left-4"
                   style={{
                     borderColor: isExpanded ? 'var(--color-accent)' : 'var(--color-border)',
                     backgroundColor: isExpanded ? 'var(--color-accent)' : 'var(--color-bg)',

@@ -115,7 +115,7 @@ export function DiagnosticImportModal({
       aria-labelledby="diagnostic-modal-title"
       ref={modalRef}
     >
-      <div className="relative w-full max-w-3xl max-h-[85vh] flex flex-col rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+      <div className="relative w-full max-w-3xl max-h-[85vh] flex flex-col rounded-[var(--radius-card)] border border-slate-700 bg-slate-900 shadow-2xl">
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-800 p-5">
           <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ export function DiagnosticImportModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="rounded-[var(--radius-base)] p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
             aria-label="Close modal"
           >
             ✕
@@ -203,7 +203,7 @@ export function DiagnosticImportModal({
           <button
             type="button"
             onClick={handleDownloadLog}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="inline-flex items-center gap-1.5 rounded-[var(--radius-base)] border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             <span>📥 Download Error Log (.txt)</span>
           </button>
@@ -213,7 +213,7 @@ export function DiagnosticImportModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
                 Close & Return to Editor
               </button>
@@ -222,7 +222,7 @@ export function DiagnosticImportModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="rounded-[var(--radius-base)] border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   Cancel
                 </button>
@@ -230,7 +230,7 @@ export function DiagnosticImportModal({
                   <button
                     type="button"
                     onClick={onConfirmImport}
-                    className="rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    className="rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                   >
                     Proceed with Import
                   </button>

@@ -274,7 +274,7 @@ export function CaseStudiesAdminPanel() {
             type="button"
             disabled={saving || !editing.title || !editing.slug}
             onClick={() => handleSave('draft')}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save draft
           </button>
@@ -282,14 +282,14 @@ export function CaseStudiesAdminPanel() {
             type="button"
             disabled={saving || !editing.title || !editing.slug}
             onClick={() => handleSave('published')}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Publish'}
           </button>
           <button
             type="button"
             onClick={() => setEditing(null)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             Cancel
           </button>
@@ -305,7 +305,7 @@ export function CaseStudiesAdminPanel() {
         <button
           type="button"
           onClick={() => setEditing(emptyCaseStudy())}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
         >
           + New Case Study
         </button>
@@ -322,7 +322,7 @@ export function CaseStudiesAdminPanel() {
         </p>
       )}
       {!loading && !loadError && items.length === 0 && (
-        <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+        <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
           <p className="text-sm text-slate-400">No case studies yet.</p>
         </div>
       )}
@@ -341,7 +341,7 @@ export function CaseStudiesAdminPanel() {
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <StatusBadge status={cs.status} />
                 {Boolean(cs.featured) && (
-                  <span className="rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-cyan-300">
+                  <span className="rounded-[var(--radius-pill)] border border-cyan-500/40 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-cyan-300">
                     Featured
                   </span>
                 )}
@@ -353,14 +353,14 @@ export function CaseStudiesAdminPanel() {
               <button
                 type="button"
                 onClick={() => setEditing(cs)}
-                className="rounded-md border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="rounded-[var(--radius-base)] border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => setDeleteTarget(cs)}
-                className="rounded-md border border-rose-700/60 px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-900/30 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="rounded-[var(--radius-base)] border border-rose-700/60 px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-900/30 focus:outline-none focus:ring-2 focus:ring-rose-400"
               >
                 Delete
               </button>

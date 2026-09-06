@@ -24,6 +24,7 @@ export function useRole() {
     (nextRole: RoleId) => {
       if (nextRole === roleId) return
       setIsTransitioning(true)
+      document.documentElement.classList.add('is-switching-role')
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev)
@@ -36,7 +37,10 @@ export function useRole() {
         },
         { replace: true },
       )
-      window.setTimeout(() => setIsTransitioning(false), 450)
+      window.setTimeout(() => {
+        setIsTransitioning(false)
+        document.documentElement.classList.remove('is-switching-role')
+      }, 450)
     },
     [roleId, setSearchParams],
   )

@@ -483,20 +483,20 @@ function AdminPanel() {
         let badge = null
         if (secErrors.length > 0) {
           badge = (
-            <span className="ml-auto rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-semibold text-red-400 border border-red-500/30 font-mono">
+            <span className="ml-auto rounded-[var(--radius-pill)] bg-red-500/20 px-2 py-0.5 text-xs font-semibold text-red-400 border border-red-500/30 font-mono">
               {secErrors.length} err
             </span>
           )
         } else if (secWarnings.length > 0) {
           badge = (
-            <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-300 border border-amber-500/30 font-mono">
+            <span className="ml-auto rounded-[var(--radius-pill)] bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-300 border border-amber-500/30 font-mono">
               {secWarnings.length} warn
             </span>
           )
         } else if (count !== undefined) {
           badge = (
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-mono font-medium ${
+              className={`rounded-[var(--radius-pill)] px-2 py-0.5 text-xs font-mono font-medium ${
                 isActive ? 'bg-cyan-400/20 text-cyan-300' : 'bg-slate-800 text-slate-400'
               }`}
             >
@@ -510,7 +510,7 @@ function AdminPanel() {
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+            className={`flex w-full items-center justify-between gap-2 rounded-[var(--radius-base)] px-3 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
               isActive
                 ? 'bg-cyan-400/10 text-cyan-400 font-medium'
                 : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
@@ -534,7 +534,7 @@ function AdminPanel() {
         <select
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value as RoleId | 'all')}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          className="rounded-[var(--radius-base)] border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
         >
           <option value="all">All pages</option>
           {ROLE_IDS.filter((r) => r !== 'system').map((r) => (
@@ -545,7 +545,7 @@ function AdminPanel() {
         </select>
       </label>
       {filterRole !== 'all' && (
-        <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs text-cyan-400 font-medium">
+        <span className="rounded-[var(--radius-pill)] bg-cyan-400/10 px-3 py-1 text-xs text-cyan-400 font-medium">
           Editing content for: {ROLE_LABELS[filterRole]}
         </span>
       )}
@@ -577,19 +577,19 @@ function AdminPanel() {
           let mobileBadge = null
           if (secErrors.length > 0) {
             mobileBadge = (
-              <span className="rounded-full bg-red-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-red-400 border border-red-500/30 font-mono">
+              <span className="rounded-[var(--radius-pill)] bg-red-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-red-400 border border-red-500/30 font-mono">
                 {secErrors.length} err
               </span>
             )
           } else if (secWarnings.length > 0) {
             mobileBadge = (
-              <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/30 font-mono">
+              <span className="rounded-[var(--radius-pill)] bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/30 font-mono">
                 {secWarnings.length} warn
               </span>
             )
           } else if (count !== undefined) {
             mobileBadge = (
-              <span className="rounded-full bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400 font-mono">
+              <span className="rounded-[var(--radius-pill)] bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400 font-mono">
                 {count}
               </span>
             )
@@ -600,7 +600,7 @@ function AdminPanel() {
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium min-h-[44px] transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+              className={`flex shrink-0 items-center gap-1.5 rounded-[var(--radius-base)] px-3 py-2 text-xs font-medium min-h-[44px] transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
                 isActive
                   ? 'bg-cyan-950 text-cyan-300 border border-cyan-400/50 font-semibold'
                   : 'bg-slate-900 border border-slate-800 text-slate-300 hover:text-white'
@@ -622,7 +622,7 @@ function AdminPanel() {
 
       {!CMS_TABS.includes(tab) && showQuarantineBanner && getQuarantinedDraft() && (
         <div
-          className="mb-6 rounded-lg border border-amber-600 bg-amber-900/30 p-4 text-sm text-amber-200 flex items-center justify-between"
+          className="mb-6 rounded-[var(--radius-base)] border border-amber-600 bg-amber-900/30 p-4 text-sm text-amber-200 flex items-center justify-between"
           role="alert"
         >
           <span>
@@ -640,7 +640,7 @@ function AdminPanel() {
 
       {importStatus && (
         <div
-          className="mb-6 rounded-lg border border-slate-700 bg-slate-800/50 p-4 text-sm text-slate-300"
+          className="mb-6 rounded-[var(--radius-base)] border border-slate-700 bg-slate-800/50 p-4 text-sm text-slate-300"
           role="status"
         >
           {importStatus}
@@ -743,12 +743,12 @@ function AdminPanel() {
             description="Each entry can appear on different resume pages. Use role scope to control visibility."
           >
             {config.experience.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No experience entries found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('experience')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Experience
                 </button>
@@ -926,12 +926,12 @@ function AdminPanel() {
             description="Projects can differ per resume page — set role scope and add images."
           >
             {config.projects.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No project entries found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('projects')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Project
                 </button>
@@ -1124,7 +1124,7 @@ function AdminPanel() {
                 ))}
               </select>
             </label>
-            <div className="rounded-lg border border-slate-700 bg-slate-800/30 p-4">
+            <div className="rounded-[var(--radius-base)] border border-slate-700 bg-slate-800/30 p-4">
               <p className="mb-2 text-xs uppercase tracking-wide text-slate-400 font-semibold">Live preview context</p>
               <p className="text-sm font-medium text-cyan-400">{selectedRole.label}</p>
               <p className="mt-1 text-xs text-slate-400">
@@ -1216,12 +1216,12 @@ function AdminPanel() {
         {tab === 'metrics' && (
           <AdminCard title="Metrics" description="Stats shown on each resume page — scoped by role.">
             {config.metrics.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No metrics found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('metrics')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Metric
                 </button>
@@ -1331,12 +1331,12 @@ function AdminPanel() {
         {tab === 'skills' && (
           <AdminCard title="Skills" description="Skills grouped by category and scoped by role.">
             {config.skills.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No skill categories found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('skills')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Skill Category
                 </button>
@@ -1426,7 +1426,7 @@ function AdminPanel() {
                             updateSkillCategory({ skills: nextSkills })
                           }}
                           aria-label={`Add skill to ${selectedSkillCategory.name}`}
-                          className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-cyan-400 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                          className="inline-flex min-h-[36px] items-center gap-1 rounded-[var(--radius-base)] border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-cyan-400 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                         >
                           + Add Skill
                         </button>
@@ -1452,7 +1452,7 @@ function AdminPanel() {
                               updateSkillCategory({ skills: nextSkills })
                             }}
                             aria-label={`Remove skill ${skill.name || 'item'}`}
-                            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:border-rose-700 hover:bg-rose-950/30 hover:text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-[var(--radius-base)] border border-slate-700 bg-slate-800 text-slate-400 hover:border-rose-700 hover:bg-rose-950/30 hover:text-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-400"
                           >
                             ✕
                           </button>
@@ -1469,12 +1469,12 @@ function AdminPanel() {
         {tab === 'education' && (
           <AdminCard title="Education" description="Education degrees and details.">
             {config.education.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No education entries found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('education')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Education
                 </button>
@@ -1665,12 +1665,12 @@ function AdminPanel() {
         {tab === 'certs' && (
           <AdminCard title="Certifications" description="Professional certifications.">
             {config.certifications.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No certifications found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('certifications')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Certification
                 </button>
@@ -1779,12 +1779,12 @@ function AdminPanel() {
         {tab === 'research' && (
           <AdminCard title="Research" description="Academic research or publications.">
             {config.research.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No research entries found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('research')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Research
                 </button>
@@ -1862,12 +1862,12 @@ function AdminPanel() {
         {tab === 'aiKnowledge' && (
           <AdminCard title="AI Knowledge Base" description="Grounding data for the Ask Kuldeep AI Assistant.">
             {config.aiKnowledge.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-700 p-8 text-center">
+              <div className="rounded-[var(--radius-base)] border border-dashed border-slate-700 p-8 text-center">
                 <p className="text-sm text-slate-400">No AI knowledge entries found.</p>
                 <button
                   type="button"
                   onClick={() => handleAddEntity('aiKnowledge')}
-                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 >
                   + Add Q&A Entry
                 </button>
@@ -1962,7 +1962,7 @@ function AdminPanel() {
           </AdminCard>
         )}
 
-        <div className="flex flex-wrap gap-3 rounded-xl border border-slate-700 bg-slate-900/40 p-4">
+        <div className="flex flex-wrap gap-3 rounded-[var(--radius-card)] border border-slate-700 bg-slate-900/40 p-4">
           <button
             type="submit"
             disabled={validationSummary.errorCount > 0}
@@ -1971,7 +1971,7 @@ function AdminPanel() {
                 ? `Cannot save draft: Fix ${validationSummary.errorCount} blocking error(s)`
                 : undefined
             }
-            className={`min-h-[44px] min-w-[44px] rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+            className={`min-h-[44px] min-w-[44px] rounded-[var(--radius-base)] px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
               validationSummary.errorCount > 0
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                 : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400 shadow'
@@ -1988,7 +1988,7 @@ function AdminPanel() {
                 ? 'Export is disabled until all blocking errors are resolved.'
                 : undefined
             }
-            className={`min-h-[44px] min-w-[44px] rounded-lg border px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+            className={`min-h-[44px] min-w-[44px] rounded-[var(--radius-base)] border px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
               validationSummary.errorCount > 0
                 ? 'border-slate-800 text-slate-600 bg-slate-900/30 cursor-not-allowed'
                 : 'border-slate-600 text-slate-200 hover:border-cyan-400 hover:text-white'
@@ -1996,14 +1996,14 @@ function AdminPanel() {
           >
             Export JSON
           </button>
-          <label className="flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg border border-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-200 hover:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-400">
+          <label className="flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-[var(--radius-base)] border border-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-200 hover:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-400">
             Import JSON
             <input type="file" accept=".json" onChange={handleImport} className="hidden" />
           </label>
           <button
             type="button"
             onClick={handleReset}
-            className="min-h-[44px] min-w-[44px] rounded-lg border border-slate-600 bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            className="min-h-[44px] min-w-[44px] rounded-[var(--radius-base)] border border-slate-600 bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-100 hover:text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             Reset
           </button>
