@@ -293,9 +293,11 @@ export function Navbar() {
 }
 
 export function ContactSection() {
-  const { profile } = portfolioConfig
+  const { profile, contactContent } = portfolioConfig
   const { role } = useRole()
   const resume = getResumeForVariant(role.resumeVariant)
+  const hasLinkedIn = profile.links.linkedin && isValidSafeUrl(profile.links.linkedin)
+  const hasGitHub = profile.links.github && isValidSafeUrl(profile.links.github)
 
   return (
     <section
@@ -304,11 +306,12 @@ export function ContactSection() {
       style={{ backgroundColor: 'var(--color-surface)' }}
     >
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="mb-4 text-2xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Contact
+        {/* V2.1 P4 (spec §46), real content verbatim (content.contact). */}
+        <h2 className="mb-4 text-2xl font-bold sm:text-3xl" style={{ color: 'var(--color-text)' }}>
+          {contactContent.title}
         </h2>
         <p className="mb-6" style={{ color: 'var(--color-text-muted)' }}>
-          Interested in collaborating? Reach out.
+          {contactContent.description}
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <a
@@ -319,7 +322,7 @@ export function ContactSection() {
               color: 'var(--color-bg)',
             }}
           >
-            {profile.email}
+            Get in touch
           </a>
           <a
             href={resume.path}
@@ -333,37 +336,45 @@ export function ContactSection() {
             Download {resume.label}
           </a>
         </div>
+        <a
+          href={`mailto:${profile.email}`}
+          className="mt-4 inline-block text-sm hover:underline"
+          style={{ color: 'var(--color-text-muted)' }}
+        >
+          {profile.email}
+        </a>
         {profile.showPhone && profile.phone && (
           <p className="mt-4 text-sm" style={{ color: 'var(--color-text-muted)' }}>
             {profile.phone}
           </p>
         )}
-        <div className="mt-6 flex justify-center gap-4 text-sm">
-          {profile.links.linkedin && isValidSafeUrl(profile.links.linkedin) ? (
-            <a
-              href={profile.links.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'var(--color-accent)' }}
-            >
-              LinkedIn
-            </a>
-          ) : (
-            <span style={{ color: 'var(--color-text-muted)' }}>LinkedIn: not configured</span>
-          )}
-          {profile.links.github && isValidSafeUrl(profile.links.github) ? (
-            <a
-              href={profile.links.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'var(--color-accent)' }}
-            >
-              GitHub
-            </a>
-          ) : (
-            <span style={{ color: 'var(--color-text-muted)' }}>GitHub: not configured</span>
-          )}
-        </div>
+        {/* V2.1 P4: gracefully omit LinkedIn/GitHub entirely when no real
+            URL is configured, rather than showing a "not configured"
+            placeholder or a dead "#" link (spec §46's boundary). */}
+        {(hasLinkedIn || hasGitHub) && (
+          <div className="mt-6 flex justify-center gap-4 text-sm">
+            {hasLinkedIn && (
+              <a
+                href={profile.links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--color-accent)' }}
+              >
+                LinkedIn
+              </a>
+            )}
+            {hasGitHub && (
+              <a
+                href={profile.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--color-accent)' }}
+              >
+                GitHub
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </section>
   )

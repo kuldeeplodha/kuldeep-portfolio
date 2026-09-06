@@ -150,11 +150,11 @@ test.describe('V2-P6 SEO', () => {
   test('project detail page sets a per-project document title', async ({ page }) => {
     await page.goto('/projects/gesture-recognition')
     await expect(page).toHaveTitle(/Kuldeep Lodha/)
-    await expect(page).not.toHaveTitle('Kuldeep Lodha — Senior Software Engineer')
+    await expect(page).not.toHaveTitle('Kuldeep Lodha — Senior Software Developer')
   })
 
   test('homepage title matches the site-wide SEO title', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle('Kuldeep Lodha — Senior Software Engineer')
+    await expect(page).toHaveTitle('Kuldeep Lodha — Senior Software Developer')
   })
 })
