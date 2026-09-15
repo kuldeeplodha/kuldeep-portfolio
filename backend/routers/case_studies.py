@@ -1,5 +1,6 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException
+import math
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from database import get_db
 from auth import get_current_admin
 from models import CaseStudy
@@ -35,18 +36,39 @@ def cs_row_to_dict(row):
     }
 
 @router.get("/case-studies")
-async def get_case_studies():
+async def get_case_studies(response: Response, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=50)):
+    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
     client = get_db()
-    result = await client.execute("SELECT * FROM case_studies WHERE status = 'published' ORDER BY published_at DESC")
-    await client.close()
-    return [cs_row_to_dict(row) for row in result.rows]
+    count_res = await client.execute("SELECT COUNT(*) FROM case_studies WHERE status = 'published'")
+    total = count_res.rows[0][0]
+    total_pages = math.ceil(total / limit) if total > 0 else 1
+    offset = (page - 1) * limit
+    result = await client.execute(f"SELECT * FROM case_studies WHERE status = 'published' ORDER BY published_at DESC LIMIT {limit} OFFSET {offset}")
+    return {
+        "items": [cs_row_to_dict(row) for row in result.rows],
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": total_pages,
+        "has_more": page < total_pages
+    }
 
 @router.get("/admin/case-studies")
-async def get_admin_case_studies(admin: dict = Depends(get_current_admin)):
+async def get_admin_case_studies(admin: dict = Depends(get_current_admin), page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=50)):
     client = get_db()
-    result = await client.execute("SELECT * FROM case_studies ORDER BY created_at DESC")
-    await client.close()
-    return [cs_row_to_dict(row) for row in result.rows]
+    count_res = await client.execute("SELECT COUNT(*) FROM case_studies")
+    total = count_res.rows[0][0]
+    total_pages = math.ceil(total / limit) if total > 0 else 1
+    offset = (page - 1) * limit
+    result = await client.execute(f"SELECT * FROM case_studies ORDER BY created_at DESC LIMIT {limit} OFFSET {offset}")
+    return {
+        "items": [cs_row_to_dict(row) for row in result.rows],
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": total_pages,
+        "has_more": page < total_pages
+    }
 
 @router.post("/admin/case-studies")
 async def create_case_study(cs: CaseStudy, admin: dict = Depends(get_current_admin)):
@@ -57,14 +79,13 @@ async def create_case_study(cs: CaseStudy, admin: dict = Depends(get_current_adm
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         [cs.id, cs.slug, cs.title, cs.subtitle, cs.summary, cs.client_or_org, cs.period, cs.category, cs.status, cs.featured, cs.published_at, cs.created_at, cs.updated_at, json.dumps(cs.technologies), json.dumps(cs.relevant_roles), cs.problem, cs.context, cs.architecture, cs.outcome, cs.future_improvements, cs.github_url, cs.live_url, cs.featured_media_url, json.dumps(cs.media_urls)]
     )
-    await client.close()
     return cs
 
 @router.get("/case-studies/{slug}")
-async def get_case_study_by_slug(slug: str):
+async def get_case_study_by_slug(slug: str, response: Response):
+    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
     client = get_db()
     result = await client.execute("SELECT * FROM case_studies WHERE slug = ? AND status = 'published'", [slug])
-    await client.close()
     if not result.rows:
         raise HTTPException(status_code=404, detail="Case study not found")
     return cs_row_to_dict(result.rows[0])
@@ -74,8 +95,7 @@ async def update_case_study(id: str, cs: CaseStudy, admin: dict = Depends(get_cu
     client = get_db()
     check = await client.execute("SELECT id FROM case_studies WHERE id = ?", [id])
     if not check.rows:
-        await client.close()
-        raise HTTPException(status_code=404, detail="Case study not found")
+            raise HTTPException(status_code=404, detail="Case study not found")
     
     await client.execute(
         """UPDATE case_studies SET 
@@ -83,7 +103,6 @@ async def update_case_study(id: str, cs: CaseStudy, admin: dict = Depends(get_cu
         WHERE id = ?""",
         [cs.slug, cs.title, cs.subtitle, cs.summary, cs.client_or_org, cs.period, cs.category, cs.status, cs.featured, cs.published_at, cs.updated_at, json.dumps(cs.technologies), json.dumps(cs.relevant_roles), cs.problem, cs.context, cs.architecture, cs.outcome, cs.future_improvements, cs.github_url, cs.live_url, cs.featured_media_url, json.dumps(cs.media_urls), id]
     )
-    await client.close()
     return cs
 
 @router.delete("/admin/case-studies/{id}")
@@ -91,9 +110,7 @@ async def delete_case_study(id: str, admin: dict = Depends(get_current_admin)):
     client = get_db()
     check = await client.execute("SELECT id FROM case_studies WHERE id = ?", [id])
     if not check.rows:
-        await client.close()
-        raise HTTPException(status_code=404, detail="Case study not found")
+            raise HTTPException(status_code=404, detail="Case study not found")
         
     await client.execute("DELETE FROM case_studies WHERE id = ?", [id])
-    await client.close()
     return {"status": "deleted"}
