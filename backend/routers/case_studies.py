@@ -43,7 +43,7 @@ async def get_case_studies(response: Response, page: int = Query(1, ge=1), limit
     total = count_res.rows[0][0]
     total_pages = math.ceil(total / limit) if total > 0 else 1
     offset = (page - 1) * limit
-    result = await client.execute(f"SELECT * FROM case_studies WHERE status = 'published' ORDER BY published_at DESC LIMIT {limit} OFFSET {offset}")
+    result = await client.execute("SELECT * FROM case_studies WHERE status = 'published' ORDER BY published_at DESC LIMIT ? OFFSET ?", [limit, offset])
     return {
         "items": [cs_row_to_dict(row) for row in result.rows],
         "page": page,
@@ -60,7 +60,7 @@ async def get_admin_case_studies(admin: dict = Depends(get_current_admin), page:
     total = count_res.rows[0][0]
     total_pages = math.ceil(total / limit) if total > 0 else 1
     offset = (page - 1) * limit
-    result = await client.execute(f"SELECT * FROM case_studies ORDER BY created_at DESC LIMIT {limit} OFFSET {offset}")
+    result = await client.execute("SELECT * FROM case_studies ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
     return {
         "items": [cs_row_to_dict(row) for row in result.rows],
         "page": page,

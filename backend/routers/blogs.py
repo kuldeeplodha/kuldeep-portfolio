@@ -33,7 +33,7 @@ async def get_blogs(response: Response, page: int = Query(1, ge=1), limit: int =
     total = count_res.rows[0][0]
     total_pages = math.ceil(total / limit) if total > 0 else 1
     offset = (page - 1) * limit
-    result = await client.execute(f"SELECT * FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT {limit} OFFSET {offset}")
+    result = await client.execute("SELECT * FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT ? OFFSET ?", [limit, offset])
     return {
         "items": [row_to_dict(row) for row in result.rows],
         "page": page,
@@ -50,7 +50,7 @@ async def get_admin_blogs(admin: dict = Depends(get_current_admin), page: int = 
     total = count_res.rows[0][0]
     total_pages = math.ceil(total / limit) if total > 0 else 1
     offset = (page - 1) * limit
-    result = await client.execute(f"SELECT * FROM blog_posts ORDER BY created_at DESC LIMIT {limit} OFFSET {offset}")
+    result = await client.execute("SELECT * FROM blog_posts ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
     return {
         "items": [row_to_dict(row) for row in result.rows],
         "page": page,
