@@ -66,9 +66,9 @@ test.describe('V2.2 P3 public reading experience (mocked backend)', () => {
     await mockContent(page)
     await page.goto('/')
 
-    await expect(page.locator('#case-studies').getByRole('heading', { name: 'Selected Case Studies' })).toBeVisible()
-    await expect(page.locator('#case-studies').getByText('Gesture Recognition Pipeline')).toBeVisible()
-    await expect(page.locator('#case-studies').getByRole('link', { name: 'View All Case Studies →' })).toHaveAttribute(
+    await expect(page.locator('#projects').getByRole('heading', { name: 'Selected Engineering Work' })).toBeVisible()
+    await expect(page.locator('#projects').getByText('Gesture Recognition Pipeline')).toBeVisible()
+    await expect(page.locator('#projects').getByRole('link', { name: /View all case studies/i })).toHaveAttribute(
       'href',
       '/case-studies',
     )
@@ -84,7 +84,7 @@ test.describe('V2.2 P3 public reading experience (mocked backend)', () => {
   test('homepage strips hide gracefully when the backend has nothing published', async ({ page }) => {
     await mockContent(page, { blogs: [], caseStudies: [] })
     await page.goto('/')
-    await expect(page.locator('#case-studies')).toHaveCount(0)
+    await expect(page.locator('#projects')).toHaveCount(0)
     await expect(page.locator('#articles')).toHaveCount(0)
   })
 

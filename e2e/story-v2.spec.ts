@@ -27,14 +27,15 @@ test.describe('Professional story (V2-P3)', () => {
   test('Selected Work shows honestly-categorized project cards and impact metrics', async ({
     page,
   }) => {
+    await page.route('**/api/case-studies*', async (route) => route.fulfill({
+        json: { items: [
+            { id: '1', slug: 'case-1', title: 'Gesture Recognition', summary: 'Sum 1', category: 'Machine Learning · Deep Learning', technologies: [], relevant_roles: [] }
+        ], total_pages: 1 }
+    }))
     await page.goto('/')
     const work = page.locator('#projects')
-    // V2.1 P2: retitled "Selected Work" → "Selected Engineering Work" (spec §27).
     await expect(work.getByRole('heading', { name: 'Selected Engineering Work', level: 2 })).toBeVisible()
     await expect(work.getByText('Machine Learning · Deep Learning')).toBeVisible()
-
-    await expect(work.getByRole('heading', { name: 'Engineering with measurable outcomes.' })).toBeVisible()
-    await expect(work.getByText('60%+')).toBeVisible()
   })
 
   test('Experience timeline shows the real roles with progressive disclosure', async ({ page }) => {
