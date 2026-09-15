@@ -8,6 +8,7 @@ import {
   listPublishedCaseStudies,
   type CmsBlogPost,
   type CmsCaseStudy,
+  type PaginatedResponse
 } from './api'
 
 interface ContentState<T> {
@@ -24,12 +25,12 @@ function matchesRole(relevantRoles: string[], roleId: RoleId): boolean {
   return roleId === 'system' || relevantRoles.length === 0 || relevantRoles.includes(roleId) || relevantRoles.includes('system')
 }
 
-function useList<T>(fetcher: () => Promise<T[]>): ContentState<T[]> {
-  const [state, setState] = useState<ContentState<T[]>>({ data: null, loading: true, error: null })
+function useList<T>(fetcher: (page: number, limit: number) => Promise<PaginatedResponse<T>>, page: number, limit: number): ContentState<PaginatedResponse<T>> {
+  const [state, setState] = useState<ContentState<PaginatedResponse<T>>>({ data: null, loading: true, error: null })
 
   useEffect(() => {
     let cancelled = false
-    fetcher()
+    fetcher(page, limit)
       .then((data) => {
         if (!cancelled) setState({ data, loading: false, error: null })
       })
@@ -51,12 +52,12 @@ function useList<T>(fetcher: () => Promise<T[]>): ContentState<T[]> {
   return state
 }
 
-export function usePublishedBlogs(): ContentState<CmsBlogPost[]> {
-  return useList(listPublishedBlogs)
+export function usePublishedBlogs(page: number = 1, limit: number = 10): ContentState<PaginatedResponse<CmsBlogPost>> {
+  return useList(listPublishedBlogs, page, limit)
 }
 
-export function usePublishedCaseStudies(): ContentState<CmsCaseStudy[]> {
-  return useList(listPublishedCaseStudies)
+export function usePublishedCaseStudies(page: number = 1, limit: number = 10): ContentState<PaginatedResponse<CmsCaseStudy>> {
+  return useList(listPublishedCaseStudies, page, limit)
 }
 
 /** Latest N, role-filtered, newest published_at first — for the homepage strips. */

@@ -1,0 +1,198 @@
+--- src/components/sections/ProjectsSection.tsx
++++ src/components/sections/ProjectsSection.tsx
+@@ -2,10 +2,12 @@
+ import { portfolioConfig } from '../../config'
+ import { useRole } from '../../hooks/useRole'
++import { withRoleQuery } from '../../lib/roleLink'
++import { usePublishedCaseStudies, latestForRole } from '../../lib/content/usePublicContent'
+ import { RoleTransition } from '../ui/RoleTransition'
+ import { SectionHeader } from '../ui/SectionHeader'
+ import { SectionShell } from '../ui/SectionShell'
+ 
+ /**
+  * V2 §2.4 Selected Work — impact metrics strip grouped with the case-study
+  * previews (content.impact, verbatim, already exactly 5 items per
+  * uiContentRules.limits.impactMetrics).
+@@ -43,101 +45,71 @@
+ export function ProjectsSection() {
+-  useRole() // keeps this section's RoleTransition timing in sync with the rest of the page
+-  // Deliberately NOT role-filtered: the real content model has exactly 3
+-  // projects total and none are tagged relevant to the software/data roles,
+-  // which would otherwise leave "Selected Work" empty for those two modes.
+-  // Honest content beats an empty section — show all 3 for every role.
+-  const { projects } = portfolioConfig
++  const { roleId } = useRole()
++  const { data, loading, error } = usePublishedCaseStudies(1, 3)
++  
++  const latest = data ? latestForRole(data.items, roleId, 3) : []
++
++  if (!loading && (error || latest.length === 0)) {
++    // Graceful empty state: just render the shell with the header and impact metrics
++    return (
++      <SectionShell id="projects" muted>
++        <RoleTransition>
++          <SectionHeader
++            slug="work"
++            title="Selected Engineering Work"
++            description="Systems built around real-world constraints."
++          />
++          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>More case studies coming soon.</p>
++          <ImpactMetricsStrip />
++        </RoleTransition>
++      </SectionShell>
++    )
++  }
+ 
+   return (
+     <SectionShell id="projects" muted>
+       <RoleTransition>
+         <SectionHeader
+           slug="work"
+           title="Selected Engineering Work"
+           description="Systems built around real-world constraints."
+         />
+-        {/* V2.1 P2 (spec §29/30): a bento-style grid where one project (the
+-            `featured` flag — an editorial pick, not a claim about the
+-            project) spans 2 columns on larger screens; everything else
+-            unchanged (same card, same hover-lift, same full-width-on-mobile
+-            behavior spec §29 asks for). */}
+-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+-          {projects.map((project) => (
+-            // V2.1 P1 (spec §57/59): glass shadows are reserved for the
+-            // navbar/floating menus/Ask Kuldeep input, not every card —
+-            // depth here comes from the border + subtle hover-lift instead,
+-            // matching how the other section cards already work.
+-            <article
+-              key={project.id}
+-              className={`flex flex-col gap-3 overflow-hidden rounded-[var(--radius-card)] border p-6 shadow-[var(--shadow-glass-md)] transition-shadow hover:shadow-[var(--shadow-glass-lg)] hover-lift${
+-                project.featured ? ' md:col-span-2' : ''
+-              }`}
+-              style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-alt, var(--color-surface))' }}
+-            >
+-              {project.imageUrl && (
+-                <div className="aspect-video w-full overflow-hidden rounded-[var(--radius-base)]">
+-                  <img
+-                    src={project.imageUrl}
+-                    alt=""
+-                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+-                  />
+-                </div>
+-              )}
+-              <div className="flex flex-1 flex-col mt-2">
+-                <div className="mb-3 flex flex-wrap items-center gap-2">
+-                  {project.featured && (
+-                    <span
+-                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide"
+-                      style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-bg)' }}
+-                    >
+-                      Featured
+-                    </span>
+-                  )}
+-                  {project.category && (
+-                    <span
+-                      className="w-max rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide"
+-                      style={{
+-                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
+-                        color: 'var(--color-accent)',
+-                      }}
+-                    >
+-                      {project.category}
+-                    </span>
+-                  )}
+-                </div>
+-                <h3
+-                  className="mb-1 text-xl font-semibold"
+-                  style={{ color: 'var(--color-text)' }}
+-                >
+-                  {project.title}
+-                </h3>
+-                <p className="mb-3 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+-                  {project.period}
+-                </p>
+-                <p className="mb-4 flex-1 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+-                  {project.overview}
+-                </p>
+-                <div className="mb-4 flex flex-wrap gap-2">
+-                  {project.technologies.slice(0, 4).map((tech) => (
+-                    <span
+-                      key={tech}
+-                      className="rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs font-medium"
+-                      style={{
+-                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
+-                        color: 'var(--color-accent)',
+-                      }}
+-                    >
+-                      {tech}
+-                    </span>
+-                  ))}
+-                </div>
+-                <Link
+-                  to={`/projects/${project.id}`}
+-                  className="mt-2 text-sm font-medium hover:underline w-max"
+-                  style={{ color: 'var(--color-accent)' }}
+-                >
+-                  Explore case study →
+-                </Link>
+-              </div>
+-            </article>
+-          ))}
+-        </div>
++        
++        {loading ? (
++          <div className="grid gap-6 md:grid-cols-3" aria-hidden="true">
++            {[0, 1, 2].map((i) => (
++              <div
++                key={i}
++                className="h-40 animate-pulse rounded-[var(--radius-card)] border"
++                style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg)' }}
++              />
++            ))}
++          </div>
++        ) : (
++          <div className="grid gap-6 md:grid-cols-3">
++            {latest.map((project) => (
++              <Link
++                key={project.id}
++                to={withRoleQuery(`/projects/${project.slug}`, roleId)}
++                className="role-card hover-lift group flex flex-col border p-6 transition-colors duration-300 hover:border-[var(--color-accent)]"
++                style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}
++              >
++                <div className="mb-2 flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--color-text-muted)' }}>
++                  <time>{project.period}</time>
++                </div>
++                <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>
++                  {project.title}
++                </h3>
++                <p className="mt-2 flex-1 text-sm" style={{ color: 'var(--color-text-muted)' }}>
++                  {project.summary}
++                </p>
++                {project.category && (
++                  <div className="mt-4 flex flex-wrap gap-1.5">
++                    <span
++                      className="rounded-[var(--radius-pill)] px-2 py-0.5 text-[11px] font-medium"
++                      style={{
++                        backgroundColor: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
++                        color: 'var(--color-accent)',
++                      }}
++                    >
++                      {project.category}
++                    </span>
++                  </div>
++                )}
++              </Link>
++            ))}
++          </div>
++        )}
++        
++        <div className="mt-8">
++          <Link
++            to={withRoleQuery('/case-studies', roleId)}
++            className="text-sm font-medium transition-opacity hover:opacity-80"
++            style={{ color: 'var(--color-accent)' }}
++          >
++            View all case studies →
++          </Link>
++        </div>
+ 
+         <ImpactMetricsStrip />
+       </RoleTransition>

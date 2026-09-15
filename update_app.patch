@@ -1,0 +1,20 @@
+--- src/App.tsx
++++ src/App.tsx
+@@ -25,6 +25,8 @@
+ const CmsBlogDetailPage = lazy(() =>
+   import('./pages/CmsBlogDetailPage').then((m) => ({ default: m.CmsBlogDetailPage })),
+ )
++const CaseStudyListPage = lazy(() =>
++  import('./pages/CaseStudyListPage').then((m) => ({ default: m.CaseStudyListPage })),
++)
+ 
+ function App() {
+   const { isLoading } = useRole()
+@@ -94,6 +96,7 @@
+           <Route path="/blog" element={<CmsBlogListPage />} />
+           <Route path="/blog/:slug" element={<CmsBlogDetailPage />} />
+           <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
++          <Route path="/case-studies" element={<CaseStudyListPage />} />
+           
+           <Route path="/admin" element={<AdminPage />} />
+           <Route path="*" element={<NotFoundPage />} />

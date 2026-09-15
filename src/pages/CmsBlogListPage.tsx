@@ -6,6 +6,7 @@ import { withRoleQuery } from '../lib/roleLink'
 import { usePublishedBlogs } from '../lib/content/usePublicContent'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { GRID_PADDING, GRID_WIDTH } from '../components/ui/grid'
+import { Pagination } from '../components/ui/Pagination'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -24,15 +25,17 @@ const cardVariants = {
 export function CmsBlogListPage() {
   useDocumentMeta('Blog | Kuldeep Lodha', 'Engineering articles and notes.')
   const { roleId } = useRole()
-  const { data, loading, error } = usePublishedBlogs()
+  const [page, setPage] = useState(1)
+  const { data, loading, error } = usePublishedBlogs(page, 10)
   const [tagFilter, setTagFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
 
   const roleFiltered = useMemo(() => {
     if (!data) return []
+    const items = data.items || []
     return roleId === 'system'
-      ? data
-      : data.filter((p) => p.relevant_roles.length === 0 || p.relevant_roles.includes(roleId) || p.relevant_roles.includes('system'))
+      ? items
+      : items.filter((p) => p.relevant_roles.length === 0 || p.relevant_roles.includes(roleId) || p.relevant_roles.includes('system'))
   }, [data, roleId])
 
   const allTags = useMemo(() => {
@@ -170,6 +173,15 @@ export function CmsBlogListPage() {
             </m.article>
           ))}
         </m.div>
+      )}
+
+      {!loading && !error && data && (
+        <Pagination
+          page={data.page}
+          totalPages={data.total_pages}
+          hasMore={data.has_more}
+          onPageChange={setPage}
+        />
       )}
     </main>
   )
