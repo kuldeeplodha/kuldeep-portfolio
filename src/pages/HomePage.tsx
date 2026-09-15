@@ -13,9 +13,6 @@ const CertificationsSection = lazy(() => import('../components/sections/Certific
 const AskKuldeepSection = lazy(() => import('../components/sections/AskKuldeepSection').then(m => ({ default: m.AskKuldeepSection })))
 // V2.2 P3: CMS-backed homepage strips (PRD §6.1) — separate content source
 // from the config-driven sections above.
-const SelectedCaseStudiesSection = lazy(() =>
-  import('../components/sections/SelectedCaseStudiesSection').then((m) => ({ default: m.SelectedCaseStudiesSection })),
-)
 const LatestArticlesSection = lazy(() =>
   import('../components/sections/LatestArticlesSection').then((m) => ({ default: m.LatestArticlesSection })),
 )
@@ -45,7 +42,6 @@ export function HomePage() {
       <EngineeringSignalSection />
       <Suspense fallback={<SectionLoader />}>
         <ProjectsSection />
-        <SelectedCaseStudiesSection />
         <ExperienceSection />
       </Suspense>
       <AboutSection />

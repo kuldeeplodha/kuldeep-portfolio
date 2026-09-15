@@ -46,8 +46,8 @@ test.describe('Blog', () => {
   });
 
   test('blog list page renders and links to posts', async ({ page }) => {
-    await page.route('**/api/blogs', (route) => json(route, [MOCK_POST]));
-    await page.route('**/api/blogs/shipping-the-cms', (route) => json(route, MOCK_POST));
+    await page.route('**/api/blogs*', (route) => json(route, [MOCK_POST]));
+    await page.route('**/api/blogs*/shipping-the-cms', (route) => json(route, MOCK_POST));
 
     await page.goto('/blog');
     await expect(page.getByRole('heading', { name: 'Blog', exact: true })).toBeVisible();
@@ -63,7 +63,7 @@ test.describe('Blog', () => {
   });
 
   test('navigation to blog works from homepage (desktop and mobile)', async ({ page, isMobile }) => {
-    await page.route('**/api/blogs', (route) => json(route, []));
+    await page.route('**/api/blogs*', (route) => json(route, []));
     await page.goto('/');
     // V2-P1 nav restructure: on desktop, Blog lives in the "More" menu with
     // role="menuitem" (not "link"); the mobile menu keeps a plain flat list.
@@ -86,7 +86,7 @@ test.describe('Blog', () => {
   // V1.6 UI Modernization (T-UI-IMPL §2.2): bento grid layout for the post list.
   test('blog list renders posts in a responsive bento grid', async ({ page }) => {
     const posts = [1, 2, 3].map((n) => ({ ...MOCK_POST, id: `p${n}`, slug: `post-${n}`, title: `Post ${n}` }));
-    await page.route('**/api/blogs', (route) => json(route, posts));
+    await page.route('**/api/blogs*', (route) => json(route, posts));
 
     await page.goto('/blog');
 

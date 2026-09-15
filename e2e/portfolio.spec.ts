@@ -28,11 +28,11 @@ test.describe('Portfolio', () => {
   })
 
   test('project case study page loads', async ({ page }) => {
+    await page.route('**/api/case-studies/gesture-recognition', async (route) => route.fulfill({
+        json: { id: '1', slug: 'gesture-recognition', title: 'Gesture Recognition', category: 'ML', context: 'ctx', architecture: 'arch', outcome: 'out', technologies: ['Tech'], media_urls: [], relevant_roles: [] }
+    }))
     await page.goto('/projects/gesture-recognition')
     await expect(page.locator('h1')).toContainText('Gesture Recognition')
-    // V2.1 P2: "Pipeline" heading renamed to "Architecture" (spec §31/33 —
-    // same underlying per-project pipeline data, now framed as the
-    // project's architecture/data-flow diagram).
     await expect(page.getByRole('heading', { name: 'Architecture' })).toBeVisible()
   })
 

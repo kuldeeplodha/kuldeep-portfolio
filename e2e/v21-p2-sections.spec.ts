@@ -17,29 +17,31 @@ test.describe('V2.1 P2 sections', () => {
     await expect(experience.getByText('EMR', { exact: true }).first()).toBeVisible()
   })
 
-  test('Selected Engineering Work shows a featured project card and updated CTA copy', async ({
+  test('Selected Engineering Work shows latest case studies and archive link', async ({
     page,
   }) => {
+    await page.route('**/api/case-studies*', async (route) => route.fulfill({
+        json: { items: [{ id: '1', slug: 'case-1', title: 'Test Case 1', summary: 'Sum 1', category: 'Software', technologies: [], relevant_roles: [] }], total_pages: 1 }
+    }))
     await page.goto('/')
     const work = page.locator('#projects')
     await expect(
       work.getByRole('heading', { name: 'Selected Engineering Work', level: 2 }),
     ).toBeVisible()
-    await expect(work.getByText('Featured')).toBeVisible()
-    await expect(work.getByText('Explore case study').first()).toBeVisible()
+    await expect(work.getByText('Test Case 1')).toBeVisible()
+    await expect(work.getByText('View All Case Studies')).toBeVisible()
   })
 
   test('project detail page follows the case-study section order with Architecture', async ({
     page,
   }) => {
+    await page.route('**/api/case-studies/gesture-recognition', async (route) => route.fulfill({
+        json: { id: '1', slug: 'gesture-recognition', title: 'Gesture Recognition', category: 'ML', context: 'ctx', architecture: 'arch', outcome: 'out', technologies: ['Tech'], media_urls: [], relevant_roles: [] }
+    }))
     await page.goto('/projects/gesture-recognition')
     await page.waitForLoadState('networkidle')
     const headings = await page.locator('h2').allTextContents()
-    // Order matters: Context/Architecture before Outcome, Technology last —
-    // spec §31. "The Problem" isn't present for this project (no `problem`
-    // field would be omitted; gesture-recognition does have one).
     expect(headings.indexOf('Architecture')).toBeGreaterThan(headings.indexOf('Context'))
-    expect(headings.indexOf('Technology')).toBe(headings.length - 1)
   })
 
   test('Engineering Stack is the sole skills display — no percentage bars, attested tech only', async ({

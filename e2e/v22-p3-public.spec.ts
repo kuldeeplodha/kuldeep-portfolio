@@ -55,9 +55,9 @@ const CASE_STUDY_A = {
 }
 
 async function mockContent(page: Page, { blogs = [BLOG_A], caseStudies = [CASE_STUDY_A] } = {}) {
-  await page.route('**/api/blogs', (route) => json(route, blogs))
+  await page.route('**/api/blogs*', (route) => json(route, blogs))
   await page.route(`**/api/blogs/${BLOG_A.slug}`, (route) => json(route, BLOG_A))
-  await page.route('**/api/case-studies', (route) => json(route, caseStudies))
+  await page.route('**/api/case-studies*', (route) => json(route, caseStudies))
   await page.route(`**/api/case-studies/${CASE_STUDY_A.slug}`, (route) => json(route, CASE_STUDY_A))
 }
 
