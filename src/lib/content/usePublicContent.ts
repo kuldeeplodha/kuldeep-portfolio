@@ -46,8 +46,7 @@ function useList<T>(fetcher: (page: number, limit: number) => Promise<PaginatedR
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [fetcher, page, limit])
 
   return state
 }

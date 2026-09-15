@@ -30,14 +30,28 @@ test.describe('V2.3 Case Studies', () => {
 
   test('case studies archive lists items and has pagination', async ({ page }) => {
     await page.route('**/api/case-studies*', async (route) => {
-      await route.fulfill({
-        json: {
-          items: [
-            { id: '2', slug: 'case-2', title: 'Test Case 2', summary: 'Summary 2', period: '2026', category: 'AI', technologies: ['Python'], relevant_roles: [] },
-          ],
-          page: 1, limit: 10, total: 11, total_pages: 2, has_more: true
-        }
-      })
+      const url = new URL(route.request().url())
+      const pageNum = url.searchParams.get('page')
+      
+      if (pageNum === '2') {
+        await route.fulfill({
+          json: {
+            items: [
+              { id: '3', slug: 'case-3', title: 'Test Case 3', summary: 'Summary 3', period: '2026', category: 'AI', technologies: ['Python'], relevant_roles: [] },
+            ],
+            page: 2, limit: 10, total: 11, total_pages: 2, has_more: false
+          }
+        })
+      } else {
+        await route.fulfill({
+          json: {
+            items: [
+              { id: '2', slug: 'case-2', title: 'Test Case 2', summary: 'Summary 2', period: '2026', category: 'AI', technologies: ['Python'], relevant_roles: [] },
+            ],
+            page: 1, limit: 10, total: 11, total_pages: 2, has_more: true
+          }
+        })
+      }
     })
 
     await page.goto('/case-studies')
@@ -46,8 +60,16 @@ test.describe('V2.3 Case Studies', () => {
 
     // check pagination
     await expect(page.locator('text=Page 1 of 2')).toBeVisible()
-    await expect(page.getByRole('button', { name: /next page/i })).not.toBeDisabled()
+    
+    const nextBtn = page.getByRole('button', { name: /next page/i })
+    await expect(nextBtn).not.toBeDisabled()
     await expect(page.getByRole('button', { name: /previous page/i })).toBeDisabled()
+    
+    await nextBtn.click()
+    
+    await expect(page.locator('text=Page 2 of 2')).toBeVisible()
+    await expect(page.locator('text=Test Case 3')).toBeVisible()
+    await expect(page.getByRole('button', { name: /next page/i })).toBeDisabled()
   })
 
   test('case study detail page renders full content', async ({ page }) => {

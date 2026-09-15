@@ -99,4 +99,50 @@ test.describe('Blog', () => {
     const cards = grid.locator('> article');
     await expect(cards).toHaveCount(3);
   });
+
+  test('blog list has pagination', async ({ page }) => {
+    await page.route('**/api/blogs*', async (route) => {
+      const url = new URL(route.request().url())
+      const pageNum = url.searchParams.get('page')
+      
+      if (pageNum === '2') {
+        await route.fulfill({
+          json: {
+            items: [
+              { ...MOCK_POST, id: 'p2', slug: 'post-2', title: 'Test Post 2' },
+            ],
+            page: 2, limit: 10, total: 11, total_pages: 2, has_more: false
+          }
+        })
+      } else {
+        await route.fulfill({
+          json: {
+            items: [
+              { ...MOCK_POST, id: 'p1', slug: 'post-1', title: 'Test Post 1' },
+            ],
+            page: 1, limit: 10, total: 11, total_pages: 2, has_more: true
+          }
+        })
+      }
+    })
+
+    await page.goto('/blog')
+    await expect(page.locator('h1', { hasText: 'Blog' })).toBeVisible()
+    await expect(page.locator('text=Test Post 1')).toBeVisible()
+
+    // check pagination
+    await expect(page.locator('text=Page 1 of 2')).toBeVisible()
+    
+    const nextBtn = page.getByRole('button', { name: /next page/i })
+    await expect(nextBtn).not.toBeDisabled()
+    await expect(page.getByRole('button', { name: /previous page/i })).toBeDisabled()
+    
+    await nextBtn.click()
+    
+    await expect(page.locator('text=Page 2 of 2')).toBeVisible()
+    await expect(page.locator('text=Test Post 2')).toBeVisible()
+    await expect(page.getByRole('button', { name: /next page/i })).toBeDisabled()
+  });
+
 });
+
