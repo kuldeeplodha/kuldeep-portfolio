@@ -45,3 +45,12 @@ class CaseStudy(BaseModel):
     live_url: Optional[str] = None
     featured_media_url: Optional[str] = None
     media_urls: List[str]
+
+from typing import Any, Dict
+
+class SiteContent(BaseModel):
+    section_key: str
+    data: Dict[str, Any]
+    status: str
+    published_at: Optional[str] = None
+    updated_at: str

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from routers import auth, blogs, case_studies, media
+from routers import auth, blogs, case_studies, media, content as content_router
 from database import get_db
 
 load_dotenv()
@@ -47,3 +47,4 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(blogs.router, prefix="/api", tags=["Blogs"])
 app.include_router(case_studies.router, prefix="/api", tags=["Case Studies"])
 app.include_router(media.router, prefix="/api/admin/media", tags=["Media"])
+app.include_router(content_router.router, prefix="/api", tags=["Content"])
