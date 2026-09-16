@@ -4,8 +4,8 @@ import { test, expect } from '@playwright/test'
 
 test.describe('V2.3 Case Studies', () => {
   test('static prerender generates index.html for case-studies archive with correct title', async () => {
-    const fs = require('fs');
-    const path = require('path');
+    
+    
     const distPath = path.resolve(process.cwd(), 'dist', 'case-studies', 'index.html');
     
     expect(fs.existsSync(distPath)).toBe(true);
