@@ -30,8 +30,16 @@
     <path d="M 390 110 L 480 110" fill="none" stroke="#4facfe" stroke-width="2" />
     <path d="M 620 110 L 710 110" fill="none" stroke="#4facfe" stroke-width="2" />
     
-    <!-- Vertical links down to bottom components -->
-    <path d="M 90 140 L 90 220" fill="none" stroke="#4facfe" stroke-width="2" />
+    <!-- Vertical link down from Agent Runtime to the bus -->
+    <path d="M 90 140 L 90 180" fill="none" stroke="#4facfe" stroke-width="2" />
+    
+    <!-- The horizontal bus for bottom nodes (y=180) -->
+    <path d="M 90 180 L 550 180" fill="none" stroke="#4facfe" stroke-width="2" />
+    
+    <!-- Downlinks from bus to bottom nodes -->
+    <path d="M 90 180 L 90 220" fill="none" stroke="#4facfe" stroke-width="2" />
+    <path d="M 320 180 L 320 220" fill="none" stroke="#4facfe" stroke-width="2" />
+    <path d="M 550 180 L 550 220" fill="none" stroke="#4facfe" stroke-width="2" />
     
     <!-- API Gateway -->
     <rect x="290" y="0" width="200" height="40" rx="4" fill="#222" stroke="#555" stroke-width="2"/>
