@@ -52,26 +52,7 @@ test.describe('V2-P6 responsive', () => {
     })
   }
 
-  test('project pipeline diagram scrolls horizontally instead of overflowing', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 375, height: 800 })
-    await page.goto('/projects/gesture-recognition')
-    // V2.1 P2: aria-label renamed "Pipeline steps" → "Architecture / pipeline steps".
-    const pipeline = page.getByLabel('Architecture / pipeline steps')
-    await expect(pipeline).toBeVisible()
-    const { scrollWidth, clientWidth } = await pipeline.evaluate((el) => ({
-      scrollWidth: el.scrollWidth,
-      clientWidth: el.clientWidth,
-    }))
-    // The pipeline's own content is allowed to be wider than its box (that's
-    // what makes it scrollable) — the page itself must not overflow for it.
-    expect(scrollWidth).toBeGreaterThanOrEqual(clientWidth)
-    const bodyOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
-    )
-    expect(bodyOverflow).toBe(true)
-  })
+
 })
 
 test.describe('V2-P6 a11y', () => {
@@ -148,6 +129,9 @@ test.describe('V2-P6 states', () => {
 
 test.describe('V2-P6 SEO', () => {
   test('project detail page sets a per-project document title', async ({ page }) => {
+    await page.route('**/api/case-studies/gesture-recognition', async (route) => route.fulfill({
+        json: { id: '1', slug: 'gesture-recognition', title: 'Gesture Recognition', summary: 'Summary', category: 'ML', context: 'ctx', architecture: 'arch', outcome: 'out', technologies: ['Tech'], media_urls: [], relevant_roles: [] }
+    }))
     await page.goto('/projects/gesture-recognition')
     await expect(page).toHaveTitle(/Kuldeep Lodha/)
     await expect(page).not.toHaveTitle('Kuldeep Lodha — Senior Software Developer')

@@ -131,6 +131,7 @@ describe('catch-all route', () => {
   })
 
   it('still matches known routes exactly', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ id: "1", title: "Gesture Recognition" }) }));
     render(
       <MemoryRouter initialEntries={['/projects/gesture-recognition']}>
         <App />
@@ -139,5 +140,6 @@ describe('catch-all route', () => {
 
     expect(await screen.findByRole('heading', { name: /gesture recognition/i })).toBeVisible()
     expect(screen.queryByRole('heading', { name: /page not found/i })).toBeNull()
+    vi.unstubAllGlobals();
   })
 })

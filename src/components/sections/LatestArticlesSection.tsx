@@ -12,9 +12,9 @@ import { SectionShell } from '../ui/SectionShell'
 // migration/retirement of that path).
 export function LatestArticlesSection() {
   const { roleId } = useRole()
-  const { data, loading, error } = usePublishedBlogs()
+  const { data, loading, error } = usePublishedBlogs(1, 10)
 
-  const latest = data ? latestForRole(data, roleId, 3) : []
+  const latest = data ? latestForRole(data.items, roleId, 3) : []
 
   if (!loading && (error || latest.length === 0)) return null
 

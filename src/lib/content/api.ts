@@ -5,6 +5,15 @@
 // published-only, no-JWT side of that same API.
 import { getApiBase, type CmsBlogPost, type CmsCaseStudy } from '../admin/cms'
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+  has_more: boolean;
+}
+
 export class PublicContentError extends Error {
   status: number
   constructor(message: string, status: number) {
@@ -30,16 +39,24 @@ async function get<T>(path: string): Promise<T> {
   return (await res.json()) as T
 }
 
-export function listPublishedBlogs(): Promise<CmsBlogPost[]> {
-  return get('/blogs')
+async function getList<T>(path: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
+  const data = await get<T[] | PaginatedResponse<T>>(`${path}?page=${page}&limit=${limit}`);
+  if (Array.isArray(data)) {
+    return { items: data, page: 1, limit: data.length, total: data.length, total_pages: 1, has_more: false };
+  }
+  return data;
+}
+
+export function listPublishedBlogs(page: number = 1, limit: number = 10): Promise<PaginatedResponse<CmsBlogPost>> {
+  return getList('/blogs', page, limit)
 }
 
 export function getBlogBySlug(slug: string): Promise<CmsBlogPost> {
   return get(`/blogs/${encodeURIComponent(slug)}`)
 }
 
-export function listPublishedCaseStudies(): Promise<CmsCaseStudy[]> {
-  return get('/case-studies')
+export function listPublishedCaseStudies(page: number = 1, limit: number = 10): Promise<PaginatedResponse<CmsCaseStudy>> {
+  return getList('/case-studies', page, limit)
 }
 
 export function getCaseStudyBySlug(slug: string): Promise<CmsCaseStudy> {

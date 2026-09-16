@@ -14,9 +14,9 @@ import { SectionShell } from '../ui/SectionShell'
 // reads from the Turso-backed case_studies table via the public API.
 export function SelectedCaseStudiesSection() {
   const { roleId } = useRole()
-  const { data, loading, error } = usePublishedCaseStudies()
+  const { data, loading, error } = usePublishedCaseStudies(1, 3)
 
-  const latest = data ? latestForRole(data, roleId, 3) : []
+  const latest = data ? latestForRole(data.items, roleId, 3) : []
 
   // Nothing published yet (or backend unreachable) is a valid, honest state
   // for a brand-new content type — hide the section rather than show an

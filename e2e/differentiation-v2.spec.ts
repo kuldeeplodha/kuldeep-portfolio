@@ -37,6 +37,7 @@ test.describe('Engineering differentiation (V2-P4)', () => {
   })
 
   test('project case-study page shows the honest category badge', async ({ page }) => {
+    await page.route('**/api/case-studies/gesture-recognition', async (route) => route.fulfill({ json: { id: "1", title: "Gesture Recognition", category: "Machine Learning · Deep Learning", technologies: [], media_urls: [], relevant_roles: [] } }))
     await page.goto('/projects/gesture-recognition')
     await expect(page.getByText('Machine Learning · Deep Learning')).toBeVisible()
   })

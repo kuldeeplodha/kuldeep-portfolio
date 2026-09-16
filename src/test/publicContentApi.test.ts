@@ -28,9 +28,9 @@ describe('public content API client', () => {
   it('listPublishedBlogs hits the unauthenticated /api/blogs route', async () => {
     ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(jsonResponse([{ id: 'b1' }]))
     const result = await listPublishedBlogs()
-    expect(result).toEqual([{ id: 'b1' }])
+    expect(result.items).toEqual([{ id: 'b1' }])
     const [url, init] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
-    expect(url).toContain('/api/blogs')
+    expect(url).toContain('/api/blogs?page=1&limit=10')
     expect(init).toBeUndefined()
   })
 
@@ -38,7 +38,7 @@ describe('public content API client', () => {
     ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(jsonResponse([]))
     await listPublishedCaseStudies()
     const [url] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
-    expect(url).toContain('/api/case-studies')
+    expect(url).toContain('/api/case-studies?page=1&limit=10')
   })
 
   it('getBlogBySlug encodes the slug and hits the single-item route', async () => {

@@ -6,6 +6,7 @@ import { withRoleQuery } from '../lib/roleLink'
 import { usePublishedCaseStudies } from '../lib/content/usePublicContent'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { GRID_PADDING, GRID_WIDTH } from '../components/ui/grid'
+import { Pagination } from '../components/ui/Pagination'
 import { RoleBadges } from '../components/admin/RoleScopeEditor'
 import type { RoleId } from '../types'
 
@@ -27,14 +28,16 @@ const cardVariants = {
 export function CaseStudiesListPage() {
   useDocumentMeta('Case Studies | Kuldeep Lodha', 'Structured engineering case studies: problem, architecture, outcome.')
   const { roleId } = useRole()
-  const { data, loading, error } = usePublishedCaseStudies()
+  const [page, setPage] = useState(1)
+  const { data, loading, error } = usePublishedCaseStudies(page, 10)
   const [techFilter, setTechFilter] = useState<string>('all')
 
   const roleFiltered = useMemo(() => {
     if (!data) return []
+    const items = data.items || []
     return roleId === 'system'
-      ? data
-      : data.filter((cs) => cs.relevant_roles.length === 0 || cs.relevant_roles.includes(roleId) || cs.relevant_roles.includes('system'))
+      ? items
+      : items.filter((cs) => cs.relevant_roles.length === 0 || cs.relevant_roles.includes(roleId) || cs.relevant_roles.includes('system'))
   }, [data, roleId])
 
   const allTechnologies = useMemo(() => {
@@ -121,7 +124,7 @@ export function CaseStudiesListPage() {
               >
                 {cs.category}
               </span>
-              <Link to={withRoleQuery(`/case-studies/${cs.slug}`, roleId)} className="hover:underline">
+              <Link to={withRoleQuery(`/projects/${cs.slug}`, roleId)} className="hover:underline">
                 <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text)' }}>
                   {cs.title}
                 </h2>
@@ -147,6 +150,15 @@ export function CaseStudiesListPage() {
             </m.article>
           ))}
         </m.div>
+      )}
+
+      {!loading && !error && data && (
+        <Pagination
+          page={data.page}
+          totalPages={data.total_pages}
+          hasMore={data.has_more}
+          onPageChange={setPage}
+        />
       )}
     </main>
   )
