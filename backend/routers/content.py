@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Path
 from database import get_db
 from auth import get_current_admin
 from models import SiteContent
@@ -23,7 +23,7 @@ async def get_all_content(response: Response):
     return [row_to_dict(row) for row in result.rows]
 
 @router.get("/content/{section_key}")
-async def get_content_by_key(section_key: str, response: Response):
+async def get_content_by_key(response: Response, section_key: str = Path(..., pattern=r'^[a-z0-9_-]{1,64}$')):
     response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
     client = get_db()
     result = await client.execute("SELECT * FROM site_content WHERE section_key = ? AND status = 'published'", [section_key])
@@ -32,7 +32,7 @@ async def get_content_by_key(section_key: str, response: Response):
     return row_to_dict(result.rows[0])
 
 @router.get("/admin/content/{section_key}")
-async def get_admin_content(section_key: str, admin: dict = Depends(get_current_admin)):
+async def get_admin_content(section_key: str = Path(..., pattern=r'^[a-z0-9_-]{1,64}$'), admin: dict = Depends(get_current_admin)):
     client = get_db()
     result = await client.execute("SELECT * FROM site_content WHERE section_key = ?", [section_key])
     if not result.rows:
@@ -40,7 +40,7 @@ async def get_admin_content(section_key: str, admin: dict = Depends(get_current_
     return row_to_dict(result.rows[0])
 
 @router.put("/admin/content/{section_key}")
-async def update_content(section_key: str, content: SiteContent, admin: dict = Depends(get_current_admin)):
+async def update_content(content: SiteContent, section_key: str = Path(..., pattern=r'^[a-z0-9_-]{1,64}$'), admin: dict = Depends(get_current_admin)):
     client = get_db()
     # Check if exists to decide insert vs update
     check = await client.execute("SELECT section_key FROM site_content WHERE section_key = ?", [section_key])

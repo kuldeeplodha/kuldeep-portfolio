@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class LoginRequest(BaseModel):
@@ -49,7 +49,7 @@ class CaseStudy(BaseModel):
 from typing import Any, Dict
 
 class SiteContent(BaseModel):
-    section_key: str
+    section_key: str = Field(..., pattern=r'^[a-z0-9_-]{1,64}$')
     data: Dict[str, Any]
     status: str
     published_at: Optional[str] = None

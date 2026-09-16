@@ -32,3 +32,25 @@ def test_content_crud():
         # Admin Get
         res = client.get("/api/admin/content/profile", headers=headers)
         assert res.status_code == 200
+
+def test_content_bad_key():
+    with TestClient(app) as client:
+        # Auth
+        login_res = client.post("/api/auth/login", json={"password": "password123"})
+        token = login_res.json()["token"]
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        # Test bad key in path
+        res = client.get("/api/content/BAD_KEY!")
+        assert res.status_code == 422
+        
+        # Test bad key in body
+        content_data = {
+            "section_key": "BAD_KEY!",
+            "data": {},
+            "status": "published",
+            "published_at": "now",
+            "updated_at": "now"
+        }
+        res = client.put("/api/admin/content/BAD_KEY!", json=content_data, headers=headers)
+        assert res.status_code == 422
