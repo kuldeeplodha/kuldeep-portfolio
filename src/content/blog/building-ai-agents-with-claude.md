@@ -4,7 +4,7 @@ slug: building-ai-agents-with-claude
 date: 2026-09-17
 excerpt: A practical guide to the agent loop, Claude tool use, and the gap between a demo script and a production agent architecture.
 tags: [ai, agents, claude, python, architecture, llm]
-readingTimeMinutes: 14
+readingTimeMinutes: 11
 roles: [software, ai]
 ---
 
@@ -122,8 +122,9 @@ def run_tool(name: str, inputs: dict) -> str:
 def run_agent(user_message: str, max_turns: int = 5) -> str:
     messages = [{"role": "user", "content": user_message}]
     for _ in range(max_turns):
+        # Model IDs are dated snapshots — verify current IDs on the Anthropic models page.
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-5",
             max_tokens=1024,
             tools=TOOLS,
             messages=messages,
@@ -168,7 +169,7 @@ Production agents add layers the minimal loop skips:
 └──────────────┘   └──────────────┘   └──────────────┘
 ```
 
-![Production agent architecture with API gateway, agent runtime, tool executor, approval queue, and observability pipeline](/blog-assets/building-ai-agents-with-claude/agent-loop.svg)
+![Production agent architecture with API gateway, agent runtime, tool executor, approval queue, and observability pipeline](/blog-assets/building-ai-agents-with-claude/production-architecture.svg)
 
 Consider a hypothetical internal support agent:
 

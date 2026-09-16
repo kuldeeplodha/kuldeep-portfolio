@@ -4,7 +4,7 @@ slug: ai-agents-workflows-and-multi-agent-systems
 date: 2026-09-17
 excerpt: When to use a workflow, a single agent, or a multi-agent system — and why the agent loop alone is an incomplete mental model.
 tags: [ai, agents, architecture, llm, system-design]
-readingTimeMinutes: 16
+readingTimeMinutes: 11
 roles: [software, ai, system]
 ---
 # AI Agents Are Not Just Loops: Understanding Workflows, Agents and Multi-Agent Systems

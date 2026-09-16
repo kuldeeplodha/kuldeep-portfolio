@@ -4,7 +4,7 @@ slug: building-reliable-ai-agents
 date: 2026-09-17
 excerpt: Why agent demos fail in production — and the engineering practices (context, memory, observability, evals) that make behavior predictable enough to ship.
 tags: [ai, agents, reliability, evaluation, architecture, llmops]
-readingTimeMinutes: 17
+readingTimeMinutes: 11
 roles: [software, ai, system]
 ---
 # Building Reliable AI Agents: Context, Tools, Memory and Evals

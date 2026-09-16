@@ -4,7 +4,7 @@ slug: mcp-explained-ai-agents-tools
 date: 2026-09-17
 excerpt: Model Context Protocol is not the model and not the agent — it is the standard interface between AI applications and the tools they need.
 tags: [mcp, ai, agents, tools, architecture, developer-tools]
-readingTimeMinutes: 15
+readingTimeMinutes: 10
 roles: [software, ai, system]
 ---
 # MCP Explained: How AI Agents Connect to Real-World Tools
@@ -78,8 +78,9 @@ Choosing transport affects threat model: a local filesystem MCP server on stdio 
 The client:
 
 1. Establishes transport to a server
-2. Performs capability discovery (`server/discover` and related JSON-RPC messages)
-3. Invokes tools, reads resources, fetches prompt templates on behalf of the host
+2. Runs the MCP lifecycle handshake: `initialize` (protocol version + capability negotiation), then `notifications/initialized`
+3. Lists available primitives via `tools/list`, `resources/list`, and `prompts/list` ([Lifecycle](https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle))
+4. Invokes tools, reads resources, and fetches prompt templates on behalf of the host
 
 The host maps MCP tools into whatever format the LLM expects (e.g. Anthropic `tools` array). That mapping layer is **your** agent-computer interface — MCP does not replace thoughtful tool descriptions.
 
@@ -117,10 +118,11 @@ Distinguish resources (context) from tools (actions). Mixing everything as a "to
 
 ## Tool discovery
 
-At connection time, clients discover server capabilities: protocol version, available tools, resources, prompts. Dynamic discovery means adding a server to the host can extend the agent without redeploying monolithic tool code.
+After `initialize` completes, clients discover what a server exposes by calling `tools/list`, `resources/list`, and `prompts/list`. Dynamic discovery means adding a server to the host can extend the agent without redeploying monolithic tool code.
 
 ```
-Host starts → Client connects to server → Discovery response
+Host starts → Client connects → initialize / initialized
+       → tools/list, resources/list, prompts/list
        → Host registers tools in LLM-facing registry
        → Agent loop selects among unified tool surface
 ```
@@ -232,4 +234,5 @@ Namespace tools when aggregating multiple servers (`github_search_issues`, `jira
 
 - Model Context Protocol — [Introduction](https://modelcontextprotocol.io/introduction)
 - Model Context Protocol — [Architecture overview](https://modelcontextprotocol.io/docs/concepts/architecture)
+- Model Context Protocol — [Lifecycle (initialize handshake)](https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle)
 - Anthropic Engineering — [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) (MCP as integration approach)
