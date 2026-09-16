@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%" style="background-color: #1a1a1a; font-family: system-ui, -apple-system, sans-serif;">
+
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="glowCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="100%" stop-color="#4facfe" />
+    </linearGradient>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#444444" />
+      <stop offset="50%" stop-color="#4facfe" />
+      <stop offset="100%" stop-color="#444444" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="#1a1a1a" />
+  <rect width="100%" height="100%" fill="url(#grid)" />
+
+
+  <g transform="translate(100, 150)">
+    <!-- Path -->
+    <path d="M 100 50 L 500 50 M 500 50 C 550 50, 550 150, 500 150 L 300 150 C 250 150, 250 50, 300 50" fill="none" stroke="url(#lineGrad)" stroke-width="2" stroke-dasharray="5,5" />
+    
+    <!-- Nodes -->
+    <rect x="0" y="20" width="100" height="60" rx="8" fill="#222" stroke="#4facfe" stroke-width="2" filter="url(#glow)"/>
+    <text x="50" y="55" fill="#e0e0e0" font-size="16" font-weight="600" text-anchor="middle">Goal</text>
+    
+    <rect x="150" y="20" width="100" height="60" rx="8" fill="#222" stroke="#555" stroke-width="2"/>
+    <text x="200" y="55" fill="#e0e0e0" font-size="16" font-weight="600" text-anchor="middle">Plan</text>
+
+    <rect x="300" y="20" width="100" height="60" rx="8" fill="#222" stroke="#555" stroke-width="2"/>
+    <text x="350" y="55" fill="#e0e0e0" font-size="16" font-weight="600" text-anchor="middle">Tool</text>
+
+    <rect x="450" y="20" width="100" height="60" rx="8" fill="#222" stroke="#555" stroke-width="2"/>
+    <text x="500" y="55" fill="#e0e0e0" font-size="16" font-weight="600" text-anchor="middle">Observe</text>
+    
+    <rect x="600" y="20" width="100" height="60" rx="8" fill="#222" stroke="#00f2fe" stroke-width="2" filter="url(#glow)"/>
+    <text x="650" y="55" fill="#e0e0e0" font-size="16" font-weight="600" text-anchor="middle">Result</text>
+    
+    <!-- Title -->
+    <text x="350" y="-50" fill="#4facfe" font-size="24" font-weight="700" text-anchor="middle" letter-spacing="2">AUTONOMOUS AGENT LOOP</text>
+  </g>
+
+</svg>
