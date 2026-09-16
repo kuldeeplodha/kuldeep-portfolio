@@ -131,4 +131,38 @@ test.describe('V2.2 P3 public reading experience (mocked backend)', () => {
     await expect(page.getByText('Second Post')).toBeVisible()
     await expect(page.getByText('First Post')).toHaveCount(0)
   })
+
+  // T-BLOG-MOBILE-TABLE-OVERFLOW: a wide markdown table used to force the
+  // whole page wider on mobile (.blog-content table had no scroll
+  // containment). Mirrors the page-wide check in e2e/polish-v2.spec.ts,
+  // scoped to a post whose body actually contains a wide table.
+  test('a wide markdown table does not cause page-wide horizontal overflow on mobile', async ({ page }) => {
+    const wideTableBody = [
+      'Intro paragraph before the table.',
+      '',
+      '| Column One | Column Two | Column Three | Column Four | Column Five | Column Six |',
+      '| --- | --- | --- | --- | --- | --- |',
+      '| aaaaaaaaaa | bbbbbbbbbb | cccccccccc | dddddddddd | eeeeeeeeee | ffffffffff |',
+      '| gggggggggg | hhhhhhhhhh | iiiiiiiiii | jjjjjjjjjj | kkkkkkkkkk | llllllllll |',
+    ].join('\n')
+    await mockContent(page)
+    // mockContent's single-post route always serves the fixed BLOG_A body,
+    // so override it (registered later = takes precedence) to get the wide
+    // table into the actual detail page response.
+    await page.route(`**/api/blogs/${BLOG_A.slug}`, (route) =>
+      json(route, { ...BLOG_A, body: wideTableBody }),
+    )
+
+    for (const width of [320, 375, 414]) {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/blog/first-post')
+      await page.waitForLoadState('networkidle')
+
+      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }))
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1) // +1 for sub-pixel rounding
+    }
+  })
 })
