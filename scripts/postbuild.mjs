@@ -106,6 +106,13 @@ async function run() {
     .replace(/<title>.*?<\/title>/, `<title>Blog | Portfolio</title>`);
   fs.writeFileSync(path.join(blogListDir, 'index.html'), blogListHtml);
   
+  // 3.5. Emit /case-studies/index.html (list page)
+  const caseStudiesListDir = path.join(DIST_DIR, 'case-studies');
+  fs.mkdirSync(caseStudiesListDir, { recursive: true });
+  const caseStudiesListHtml = baseHtml
+    .replace(/<title>.*?<\/title>/, `<title>Case Studies | Portfolio</title>`);
+  fs.writeFileSync(path.join(caseStudiesListDir, 'index.html'), caseStudiesListHtml);
+
   // 4. Emit /blog/<slug>/index.html per post
   for (const post of posts) {
     const postDir = path.join(DIST_DIR, 'blog', post.slug);
@@ -201,6 +208,9 @@ async function run() {
     const sitemapUrls = [];
     const blogListPath = (BASE_PATH + (BASE_PATH.endsWith('/') ? '' : '/') + 'blog').replace(/(?<!:)\/\/+/g, '/');
     sitemapUrls.push(`  <url>\n    <loc>${origin}${blogListPath}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`);
+    const caseStudiesListPath = (BASE_PATH + (BASE_PATH.endsWith('/') ? '' : '/') + 'case-studies').replace(/(?<!:)\/\/+/g, '/');
+    sitemapUrls.push(`  <url>\n    <loc>${origin}${caseStudiesListPath}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`);
+
 
     for (const post of posts) {
       const postPath = (BASE_PATH + (BASE_PATH.endsWith('/') ? '' : '/') + 'blog/' + post.slug).replace(/(?<!:)\/\/+/g, '/');

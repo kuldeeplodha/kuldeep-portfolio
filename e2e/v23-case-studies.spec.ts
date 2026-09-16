@@ -1,6 +1,19 @@
+import fs from 'fs';
+import path from 'path';
 import { test, expect } from '@playwright/test'
 
 test.describe('V2.3 Case Studies', () => {
+  test('static prerender generates index.html for case-studies archive with correct title', async () => {
+    
+    
+    const distPath = path.resolve(process.cwd(), 'dist', 'case-studies', 'index.html');
+    
+    expect(fs.existsSync(distPath)).toBe(true);
+    
+    const htmlContent = fs.readFileSync(distPath, 'utf-8');
+    expect(htmlContent).toContain('<title>Case Studies | Portfolio</title>');
+  });
+
   test('homepage strip loads and links to archive', async ({ page }) => {
     // Intercept to avoid needing the real backend during basic e2e navigation
     await page.route('**/api/case-studies*', async (route) => {
