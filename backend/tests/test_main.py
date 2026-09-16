@@ -10,13 +10,23 @@ def test_get_blogs_public():
     with TestClient(app) as client:
         response = client.get("/api/blogs")
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+        assert isinstance(response.json()["items"], list)
+        assert "page" in response.json()
+        assert "total" in response.json()
+        assert "has_more" in response.json()
+        assert "Cache-Control" in response.headers
+        assert "s-maxage=" in response.headers["Cache-Control"]
 
 def test_get_case_studies_public():
     with TestClient(app) as client:
         response = client.get("/api/case-studies")
         assert response.status_code == 200
-        assert isinstance(response.json(), list)
+        assert isinstance(response.json()["items"], list)
+        assert "page" in response.json()
+        assert "total" in response.json()
+        assert "has_more" in response.json()
+        assert "Cache-Control" in response.headers
+        assert "s-maxage=" in response.headers["Cache-Control"]
 
 def test_admin_blogs_unauthorized():
     with TestClient(app) as client:
@@ -104,4 +114,16 @@ def test_media_unset_cloudinary():
         res = client.get("/api/admin/media/sign", headers={"Authorization": f"Bearer {token}"})
         assert res.status_code == 500
     os.environ["CLOUDINARY_API_SECRET"] = "your_api_secret"
+
+
+def test_pagination_limits():
+    with TestClient(app) as client:
+        res = client.get("/api/blogs?page=2&limit=5")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["page"] == 2
+        assert data["limit"] == 5
+        assert data["total"] >= 0
+        assert data["total_pages"] >= 1
+        assert type(data["has_more"]) == bool
 
