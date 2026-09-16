@@ -13,7 +13,7 @@ A stakeholder says: *"We need an AI agent for this."* You ask what it should do.
 
 This article unpacks the architecture space beyond the simple loop: workflows, single agents, and multi-agent systems — and gives a practical framework for choosing among them. If you have not yet built a minimal agent loop, start with [**Building AI Agents with Claude**](/blog/building-ai-agents-with-claude).
 
-![Spectrum diagram showing workflow, single agent, and multi-agent patterns on a complexity axis](/blog-assets/02-spectrum/hero.svg)
+![Spectrum diagram showing workflow, single agent, and multi-agent patterns on a complexity axis](/blog-assets/ai-agents-workflows-and-multi-agent-systems/hero.svg)
 
 ## Why the "agent loop" definition is incomplete
 
@@ -80,7 +80,7 @@ Run **independent subtasks concurrently** and merge results.
 
 A **central LLM** breaks down a task, delegates to **worker** LLMs (or tools), synthesizes results. Subtasks are **not fixed upfront** — the orchestrator decides based on input.
 
-![Orchestrator-worker pattern with central coordinator delegating to specialized worker agents](/blog-assets/02-spectrum/orchestrator-workers.svg)
+![Orchestrator-worker pattern with central coordinator delegating to specialized worker agents](/blog-assets/ai-agents-workflows-and-multi-agent-systems/orchestrator-workers.svg)
 
 ```
 User task → Orchestrator → Worker A (search codebase)
@@ -206,7 +206,7 @@ Use this **heuristic**, not a universal law — your domain constraints may over
                                   │  └──────────┘ └─────────────┘
 ```
 
-![Decision tree for choosing between workflow, single agent, and multi-agent approaches](/blog-assets/02-spectrum/decision-tree.svg)
+![Decision tree for choosing between workflow, single agent, and multi-agent approaches](/blog-assets/ai-agents-workflows-and-multi-agent-systems/decision-tree.svg)
 
 **Before shipping:** define success metrics, failure modes, stopping conditions, and who approves irreversible tool calls.
 

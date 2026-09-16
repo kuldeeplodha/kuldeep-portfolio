@@ -14,7 +14,7 @@ Your team has a working chatbot. Users ask questions, Claude answers from a syst
 
 This article walks through what that means with Claude, how to build a minimal educational agent, and — critically — what production architecture looks like so you do not ship a twenty-line loop and call it enterprise-ready.
 
-![Architecture diagram showing a Claude-powered agent loop cycling through goal, plan, tool selection, observation, and result](/blog-assets/01-agent-loop/hero.svg)
+![Architecture diagram showing a Claude-powered agent loop cycling through goal, plan, tool selection, observation, and result](/blog-assets/building-ai-agents-with-claude/hero.svg)
 
 ## What is an AI agent?
 
@@ -87,7 +87,7 @@ Good tools are small, composable, and honest about failure.
 4. **Idempotency where possible** — `create_draft_slack_message` vs `post_slack_message` lets you separate approval from side effects.
 5. **Document edge cases in the description** — "Returns at most 20 issues; use pagination cursor for more."
 
-![Tool interface design showing clear schemas, error responses, and idempotent operations](/blog-assets/01-agent-loop/tool-design.svg)
+![Tool interface design showing clear schemas, error responses, and idempotent operations](/blog-assets/building-ai-agents-with-claude/tool-design.svg)
 
 For connecting tools across many backends without bespoke glue per service, see [**MCP Explained**](/blog/mcp-explained-ai-agents-tools).
 
@@ -168,7 +168,7 @@ Production agents add layers the minimal loop skips:
 └──────────────┘   └──────────────┘   └──────────────┘
 ```
 
-![Production agent architecture with API gateway, agent runtime, tool executor, approval queue, and observability pipeline](/blog-assets/01-agent-loop/production-architecture.svg)
+![Production agent architecture with API gateway, agent runtime, tool executor, approval queue, and observability pipeline](/blog-assets/building-ai-agents-with-claude/agent-loop.svg)
 
 Consider a hypothetical internal support agent:
 

@@ -15,7 +15,7 @@ Your agent needs GitHub issues, a Postgres read replica, Slack drafts, and an in
 
 This article explains the architecture, primitives, security implications, and how MCP fits next to an agent loop like the one in [**Building AI Agents with Claude**](/blog/building-ai-agents-with-claude).
 
-![MCP architecture showing AI application connecting through MCP client to multiple MCP servers exposing tools and resources](/blog-assets/03-mcp/hero.svg)
+![MCP architecture showing AI application connecting through MCP client to multiple MCP servers exposing tools and resources](/blog-assets/mcp-explained-ai-agents-tools/hero.svg)
 
 ## The integration problem
 
@@ -125,7 +125,7 @@ Host starts → Client connects to server → Discovery response
        → Agent loop selects among unified tool surface
 ```
 
-![Tool discovery flow from MCP client listing server capabilities to agent tool selection](/blog-assets/03-mcp/tool-discovery.svg)
+![Tool discovery flow from MCP client listing server capabilities to agent tool selection](/blog-assets/mcp-explained-ai-agents-tools/tool-discovery.svg)
 
 Your policy engine should still **filter** discovered tools per user/session — discovery ≠ authorization.
 
@@ -210,7 +210,7 @@ Layer stack (conceptual):
 └─────────────────────────────────────┘
 ```
 
-![Layered MCP stack with transport layer and data layer separating client-server communication](/blog-assets/03-mcp/layers.svg)
+![Layered MCP stack with transport layer and data layer separating client-server communication](/blog-assets/mcp-explained-ai-agents-tools/mcp-architecture.svg)
 
 For production reliability patterns (retries, idempotency, evals), see [**Building Reliable AI Agents**](/blog/building-reliable-ai-agents).
 

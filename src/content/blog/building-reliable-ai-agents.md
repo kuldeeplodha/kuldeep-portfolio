@@ -13,7 +13,7 @@ The demo worked in the conference room. The agent found the right doc, called on
 
 **Demos optimize for the happy path. Production optimizes for distributions** — messy inputs, partial outages, ambiguous instructions, and adversarial content in retrieved context. This article covers what changes after the first working loop: context engineering, memory, tool hardening, observability, evaluation, and the architecture that ties them together. Start with [**Building AI Agents with Claude**](/blog/building-ai-agents-with-claude) if you need the baseline loop; see [**AI Agents Are Not Just Loops**](/blog/ai-agents-workflows-and-multi-agent-systems) for when an agent is the right shape at all.
 
-![Reliability stack showing agent, context, tools, memory, observability, and evaluation layers](/blog-assets/04-reliability/hero.svg)
+![Reliability stack showing agent, context, tools, memory, observability, and evaluation layers](/blog-assets/building-reliable-ai-agents/hero.svg)
 
 ## Why demos fail in production
 
@@ -122,7 +122,7 @@ human_intervention
 
 **Do not log** secrets, full PII, or raw payment data. Use trace IDs to correlate across services.
 
-![Agent trace visualization showing tool calls, latencies, and decision points](/blog-assets/04-reliability/agent-trace.svg)
+![Agent trace visualization showing tool calls, latencies, and decision points](/blog-assets/building-reliable-ai-agents/agent-trace.svg)
 
 Dashboards worth building:
 
@@ -255,7 +255,7 @@ Track **cost per successful task** — not just cost per request. An agent that 
 └────────────┘   └────────────┘   └────────────┘
 ```
 
-![Production reliability architecture with eval pipeline, trace store, and human review queue](/blog-assets/04-reliability/production-stack.svg)
+![Production reliability architecture with eval pipeline, trace store, and human review queue](/blog-assets/building-reliable-ai-agents/reliability-stack.svg)
 
 **Release process (hypothetical):** prompt/tool change → offline eval pass rate ≥ baseline → staged rollout → trace sampling → alert on error rate regression.
 
