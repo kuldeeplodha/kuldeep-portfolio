@@ -24,7 +24,16 @@ const SECTION_GROUPS: { label: string; keys: { key: string; label: string }[] }[
   },
   {
     label: 'P2 — résumé data',
-    keys: [{ key: 'education', label: 'Education' }],
+    keys: [
+      { key: 'education', label: 'Education' },
+      // experience (role-scoped timeline) and skills have no public
+      // consumer post-V2 (experience-story replaced the timeline; no
+      // skills section is rendered) — read-wiring was skipped for both,
+      // but they stay seeded and MUST remain editable here: this
+      // generic editor is the only reason they're still admin-managed.
+      { key: 'experience', label: 'Experience (not publicly consumed)' },
+      { key: 'skills', label: 'Skills (not publicly consumed)' },
+    ],
   },
   {
     label: 'P3 — remaining sections',
@@ -123,7 +132,10 @@ export function SiteContentAdminPanel() {
         <nav aria-label="Site content sections" className="space-y-4">
           {SECTION_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{group.label}</p>
+              {/* text-slate-500 measured 3.96:1 on this surface — fails
+                  WCAG AA (needs 4.5:1); text-slate-400 passes with 0
+                  Axe violations (Imagine, QA-CMS-FE-ADMIN-EDITOR). */}
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{group.label}</p>
               <ul className="space-y-0.5">
                 {group.keys.map((item) => (
                   <li key={item.key}>
