@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { portfolioConfig, getResumeForVariant } from '../../config'
+import { portfolioConfig, getResumeForVariant, resumes } from '../../config'
 import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
 import { useRole } from '../../hooks/useRole'
@@ -55,7 +55,9 @@ export function Navbar() {
   const [moreOpen, setMoreOpen] = useState(false)
   const moreRef = useRef<HTMLLIElement>(null)
   const moreTriggerRef = useRef<HTMLButtonElement>(null)
-  const resume = getResumeForVariant(role.resumeVariant)
+  // CMS-FE-WIRE-P3: admin-editable via the `resumes` site_content key.
+  const resumesList = useSiteContent('resumes', resumes)
+  const resume = getResumeForVariant(role.resumeVariant, resumesList)
 
   // V2-P6 a11y: standard disclosure-menu keyboard behavior — move focus
   // into the menu on open, and back to the trigger button on close (click
@@ -327,7 +329,9 @@ export function ContactSection() {
   // whenever the DB is empty/unreachable.
   const contactContent = useSiteContent('contact', portfolioConfig.contactContent)
   const { role } = useRole()
-  const resume = getResumeForVariant(role.resumeVariant)
+  // CMS-FE-WIRE-P3: admin-editable via the `resumes` site_content key.
+  const resumesList = useSiteContent('resumes', resumes)
+  const resume = getResumeForVariant(role.resumeVariant, resumesList)
   const hasLinkedIn = profile.links.linkedin && isValidSafeUrl(profile.links.linkedin)
   const hasGitHub = profile.links.github && isValidSafeUrl(profile.links.github)
 

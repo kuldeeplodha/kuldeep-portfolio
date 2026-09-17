@@ -1,4 +1,5 @@
 import { portfolioConfig } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { RoleTransition } from '../ui/RoleTransition'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
@@ -15,8 +16,11 @@ const ABOUT_LEAD_IN =
  * (content.philosophy, verbatim). Text-heavy, no background cards — relies
  * on whitespace and typographic hierarchy per the design spec.
  */
+// CMS-FE-WIRE-P3: admin-editable via the `philosophy` site_content key,
+// falling back to portfolioConfig.philosophy when the DB is
+// empty/unreachable.
 export function AboutSection() {
-  const { philosophy } = portfolioConfig
+  const philosophy = useSiteContent('philosophy', portfolioConfig.philosophy)
 
   return (
     <SectionShell id="about" narrow>

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { portfolioConfig } from '../../config'
-import { getAIProvider } from '../../lib/ai/provider'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
+import { ClientSearchProvider, getAIProvider, setAIProvider } from '../../lib/ai/provider'
 import { NO_RESULT_MESSAGE } from '../../lib/ai/knowledgeSearch'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
@@ -26,8 +27,21 @@ const ERROR_DISPLAY_MESSAGE =
  * supplemental) with a subtle separator between them, rather than a chat
  * bubble.
  */
+// CMS-FE-WIRE-P3: askKuldeepContent (section chrome/suggested questions) is
+// admin-editable via the `ask-kuldeep` key. aiKnowledge (the underlying
+// matching entries) is admin-editable via `ai-knowledge`, but unlike every
+// other section it isn't read at render time — getAIProvider() returns a
+// module-level singleton constructed once at import (lib/ai/provider.ts).
+// The effect below re-points that singleton at the current (DB or
+// fallback) entries whenever they change, using the module's own
+// setAIProvider() extension point rather than restructuring the search
+// engine itself.
 export function AskKuldeepSection() {
-  const { askKuldeepContent } = portfolioConfig
+  const askKuldeepContent = useSiteContent('ask-kuldeep', portfolioConfig.askKuldeepContent)
+  const aiKnowledge = useSiteContent('ai-knowledge', portfolioConfig.aiKnowledge)
+  useEffect(() => {
+    setAIProvider(new ClientSearchProvider(aiKnowledge))
+  }, [aiKnowledge])
   const [query, setQuery] = useState('')
   const [askedQuestion, setAskedQuestion] = useState('')
   const [answer, setAnswer] = useState('')
