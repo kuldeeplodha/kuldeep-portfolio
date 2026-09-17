@@ -40,6 +40,7 @@ import { createDefaultEntity } from '../lib/admin/defaultTemplates'
 import { CmsAuthGate } from '../components/admin/cms/CmsAuthGate'
 import { BlogsAdminPanel } from '../components/admin/cms/BlogsAdminPanel'
 import { CaseStudiesAdminPanel } from '../components/admin/cms/CaseStudiesAdminPanel'
+import { SiteContentAdminPanel } from '../components/admin/cms/SiteContentAdminPanel'
 
 type AdminTab =
   | 'profile'
@@ -54,6 +55,7 @@ type AdminTab =
   | 'aiKnowledge'
   | 'blogPosts'
   | 'caseStudies'
+  | 'siteContent'
 
 const TAB_META: { id: AdminTab; label: string; icon: string }[] = [
   { id: 'profile', label: 'Profile', icon: '👤' },
@@ -68,12 +70,16 @@ const TAB_META: { id: AdminTab; label: string; icon: string }[] = [
   { id: 'aiKnowledge', label: 'AI Knowledge', icon: '🧠' },
   { id: 'blogPosts', label: 'Blog Posts', icon: '📝' },
   { id: 'caseStudies', label: 'Case Studies', icon: '🗂️' },
+  { id: 'siteContent', label: 'Site Content', icon: '🧩' },
 ]
 
-// The two CMS tabs are backed by the V2.2 FastAPI/Turso content backend, not
+// The CMS tabs are backed by the V2.2 FastAPI/Turso content backend, not
 // the static-config JSON this page otherwise edits — they render their own
 // panel instead of participating in the config-draft <form>/save/export flow.
-const CMS_TABS: AdminTab[] = ['blogPosts', 'caseStudies']
+// 'siteContent' is the generic site_content editor (CMS-FE-ADMIN-EDITOR) —
+// same backend, same auth, its own key-per-section JSON editor rather than
+// the blog/case-study-specific forms.
+const CMS_TABS: AdminTab[] = ['blogPosts', 'caseStudies', 'siteContent']
 
 function filterByRole<T extends { relevantRoles: RoleId[] }>(
   items: T[],
@@ -185,6 +191,7 @@ function AdminPanel() {
       aiKnowledge: config.aiKnowledge.length,
       blogPosts: undefined,
       caseStudies: undefined,
+      siteContent: undefined,
     }),
     [config],
   )
@@ -616,7 +623,7 @@ function AdminPanel() {
 
       <p className="mb-6 text-sm text-slate-400">
         {CMS_TABS.includes(tab)
-          ? 'Blog posts and case studies are authored and published directly here — no export step.'
+          ? 'Blog posts, case studies, and site content are authored and published directly here — no export step.'
           : 'Pick a section, choose or reorder items, then set which resume page(s) each appears on. Export JSON to publish.'}
       </p>
 
@@ -651,6 +658,7 @@ function AdminPanel() {
         <CmsAuthGate>
           {tab === 'blogPosts' && <BlogsAdminPanel />}
           {tab === 'caseStudies' && <CaseStudiesAdminPanel />}
+          {tab === 'siteContent' && <SiteContentAdminPanel />}
         </CmsAuthGate>
       ) : (
         <>
