@@ -1,4 +1,5 @@
 import { portfolioConfig } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
 
@@ -6,10 +7,12 @@ import { SectionShell } from '../ui/SectionShell'
  * V2 §Background — education kept deliberately compact and visually
  * secondary to the engineering story (uiContentRules: not a primary
  * section). A simple stacked list, not the timeline treatment Experience
- * gets.
+ * gets. CMS-FE-WIRE-P2: admin-editable via the `education` site_content
+ * key, falling back to portfolioConfig.education when the DB is
+ * empty/unreachable.
  */
 export function EducationSection() {
-  const { education } = portfolioConfig
+  const education = useSiteContent('education', portfolioConfig.education)
 
   return (
     <SectionShell id="education">
