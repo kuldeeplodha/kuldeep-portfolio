@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { portfolioConfig, getResumeForVariant } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
 import { useRole } from '../../hooks/useRole'
 import { GRID_PADDING, GRID_WIDTH } from '../ui/grid'
@@ -320,7 +321,11 @@ export function Navbar() {
 }
 
 export function ContactSection() {
-  const { profile, contactContent } = portfolioConfig
+  const { profile } = portfolioConfig
+  // CMS-FE-WIRE-P1: admin-editable via the `contact` site_content key,
+  // falling back to portfolioConfig.contactContent (content.contact)
+  // whenever the DB is empty/unreachable.
+  const contactContent = useSiteContent('contact', portfolioConfig.contactContent)
   const { role } = useRole()
   const resume = getResumeForVariant(role.resumeVariant)
   const hasLinkedIn = profile.links.linkedin && isValidSafeUrl(profile.links.linkedin)

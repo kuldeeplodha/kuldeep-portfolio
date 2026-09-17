@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { portfolioConfig } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
 
@@ -7,8 +8,11 @@ import { SectionShell } from '../ui/SectionShell'
 // expanded view shows the full list (already capped at 5 in the source content).
 const HOMEPAGE_BULLET_LIMIT = 4
 
+// CMS-FE-WIRE-P1: admin-editable via the `experience-story` site_content
+// key, falling back to portfolioConfig.experienceStory whenever the DB is
+// empty/unreachable.
 export function ExperienceSection() {
-  const { experienceStory } = portfolioConfig
+  const experienceStory = useSiteContent('experience-story', portfolioConfig.experienceStory)
   const [expandedId, setExpandedId] = useState<string | null>(experienceStory[0]?.id ?? null)
 
   return (

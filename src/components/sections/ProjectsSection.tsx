@@ -3,6 +3,7 @@ import { portfolioConfig } from '../../config'
 import { useRole } from '../../hooks/useRole'
 import { withRoleQuery } from '../../lib/roleLink'
 import { usePublishedCaseStudies, latestForRole } from '../../lib/content/usePublicContent'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { RoleTransition } from '../ui/RoleTransition'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
@@ -10,10 +11,12 @@ import { SectionShell } from '../ui/SectionShell'
 /**
  * V2 §2.4 Selected Work — impact metrics strip grouped with the case-study
  * previews (content.impact, verbatim, already exactly 5 items per
- * uiContentRules.limits.impactMetrics).
+ * uiContentRules.limits.impactMetrics). CMS-FE-WIRE-P1: admin-editable via
+ * the `impact-metrics` site_content key, falling back to
+ * portfolioConfig.impactMetrics whenever the DB is empty/unreachable.
  */
 function ImpactMetricsStrip() {
-  const { impactMetrics } = portfolioConfig
+  const impactMetrics = useSiteContent('impact-metrics', portfolioConfig.impactMetrics)
 
   return (
     <div className="mt-12 border-t pt-10" style={{ borderColor: 'var(--color-border)' }}>
