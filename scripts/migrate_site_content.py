@@ -52,6 +52,278 @@ async def main():
     
     content_items = [
         {
+            "section_key": "ai-knowledge",
+            "data": [
+        {
+                "id": "backend-tech",
+                "questionPatterns": [
+                        "backend",
+                        "django",
+                        "rest api",
+                        "what technologies",
+                        "python frameworks"
+                ],
+                "answer": "Kuldeep uses Python with Django and Django REST Framework for backend development, along with PostgreSQL, Docker, Git, and CI/CD. As Senior Software Developer (Lead) at Vidai Solutions, he builds and optimizes REST APIs and integrations across EMR, billing, and CRM systems.",
+                "tags": [
+                        "software",
+                        "backend"
+                ],
+                "source": "resume:software"
+        },
+        {
+                "id": "nlp-work",
+                "questionPatterns": [
+                        "nlp",
+                        "natural language",
+                        "ticket classification",
+                        "multilingual"
+                ],
+                "answer": "Kuldeep has worked on NLP including automatic ticket classification (Scikit-learn), sentiment-based recommendations, and is researching explainability in low-resource and multilingual NLP applications for his MS thesis.",
+                "tags": [
+                        "ai",
+                        "nlp"
+                ],
+                "source": "resume:ai_ml"
+        },
+        {
+                "id": "data-engineering",
+                "questionPatterns": [
+                        "data engineering",
+                        "etl",
+                        "airflow",
+                        "pipelines",
+                        "dashboard"
+                ],
+                "answer": "Kuldeep has built ETL pipelines with Python and Apache Airflow, automated AVNI data ingestion, and deployed dashboards with Apache Superset and Metabase for 5+ program teams.",
+                "tags": [
+                        "data",
+                        "etl"
+                ],
+                "source": "resume:data_analyst"
+        },
+        {
+                "id": "research-thesis",
+                "questionPatterns": [
+                        "research",
+                        "thesis",
+                        "explainability",
+                        "multilingual"
+                ],
+                "answer": "His research thesis is titled \"Explainability in Low-Resource and Multilingual NLP Applications\" as part of his MS in Machine Learning & Artificial Intelligence at Liverpool John Moores University & UpGrad.",
+                "tags": [
+                        "ai",
+                        "research"
+                ],
+                "source": "resume:ai_ml"
+        },
+        {
+                "id": "ml-projects",
+                "questionPatterns": [
+                        "machine learning",
+                        "ml project",
+                        "deep learning",
+                        "gesture"
+                ],
+                "answer": "ML projects include Gesture Recognition (CNN/RNN with TensorFlow), Automatic Ticket Classification (NLP with Scikit-learn), and a Sentiment-Based Product Recommendation System capstone.",
+                "tags": [
+                        "ai",
+                        "projects"
+                ],
+                "source": "resume:ai_ml"
+        },
+        {
+                "id": "experience-years",
+                "questionPatterns": [
+                        "years of experience",
+                        "how long",
+                        "experience"
+                ],
+                "answer": "Kuldeep has 5+ years of software development experience. He is currently Senior Software Developer (Lead) at Vidai Solutions (Aug 2025 \u2013 Present), and previously worked at Shelter Associates and as a Software Developer Consultant at Swadhar IDWC.",
+                "tags": [
+                        "general"
+                ],
+                "source": "resume:all"
+        },
+        {
+                "id": "education-details",
+                "questionPatterns": [
+                        "education",
+                        "degree",
+                        "study",
+                        "university",
+                        "college",
+                        "gpa",
+                        "cgpa",
+                        "where did you study",
+                        "where did he study"
+                ],
+                "answer": "Kuldeep holds an MS in Machine Learning & AI from Liverpool John Moores University (Jul '24), an Executive PG in Machine Learning & AI from IIIT Bangalore (Mar '23 \u2013 May '24, 3.58/4 GPA), and a B.Tech in Computer Science from Hitkarini College of Engineering & Technology (Aug '17 \u2013 Jul '21, 8.00 CGPA).",
+                "tags": [
+                        "education",
+                        "general"
+                ],
+                "source": "resume:all"
+        },
+        {
+                "id": "certifications-details",
+                "questionPatterns": [
+                        "certifications",
+                        "certification",
+                        "certificates",
+                        "cert",
+                        "certified"
+                ],
+                "answer": "Kuldeep's certifications include: Prompt Design in Vertex AI (Google Cloud Skills Boost), Data Analyst Associate (DataCamp), Docker Foundations Professional Certificate, Getting Started as an AWS Developer (LinkedIn), Building React and Django Apps (LinkedIn), Career Essentials in Software Development (Microsoft/LinkedIn), Excel Skills for Data Analytics and Visualization, SQL (Advanced) and Problem Solving (Intermediate) from HackerRank.",
+                "tags": [
+                        "certifications",
+                        "general"
+                ],
+                "source": "resume:all"
+        },
+        {
+                "id": "career-direction",
+                "questionPatterns": [
+                        "career",
+                        "direction",
+                        "goal",
+                        "objective",
+                        "summary",
+                        "about",
+                        "who is",
+                        "passionate about"
+                ],
+                "answer": "Kuldeep is a Senior Software Developer (Lead) with 5+ years of experience building backend systems, APIs, and data workflows. His career has evolved from software engineering into data and, through an MS in Machine Learning & AI, into machine learning, NLP, and AI research.",
+                "tags": [
+                        "general",
+                        "career"
+                ],
+                "source": "resume:all"
+        }
+]
+        },
+        {
+            "section_key": "career-journey",
+            "data": [
+        {
+                "period": "2021",
+                "title": "Starting with Software",
+                "description": "Began my professional software engineering journey, building backend applications, APIs, databases, and digital workflows."
+        },
+        {
+                "period": "2021 \u2013 Jul 2025",
+                "title": "Software + Data",
+                "description": "Expanded into data engineering, ETL automation, analytics, dashboards, reporting, and operational systems while continuing backend development."
+        },
+        {
+                "period": "2023 \u2013 2024",
+                "title": "Machine Learning",
+                "description": "Pursued advanced education in Machine Learning & Artificial Intelligence, developing practical experience across ML, deep learning, NLP, and MLOps."
+        },
+        {
+                "period": "2024",
+                "title": "AI Research",
+                "description": "Completed an MS in Machine Learning & Artificial Intelligence with research focused on explainability in low-resource and multilingual NLP."
+        },
+        {
+                "period": "Aug 2025 \u2013 Present",
+                "title": "Engineering Leadership",
+                "description": "Joined Vidai Solutions as a Senior Software Developer (Lead), taking responsibility for backend engineering, architecture, integrations, optimization, and team leadership."
+        }
+]
+        },
+        {
+            "section_key": "currently-exploring",
+            "data": {
+        "title": "Currently Exploring",
+        "items": [
+                {
+                        "title": "Generative AI",
+                        "description": "Building practical applications around LLMs, AI agents, and intelligent workflows."
+                },
+                {
+                        "title": "AI Engineering",
+                        "description": "Exploring how strong software engineering practices can be applied to production AI systems."
+                },
+                {
+                        "title": "NLP & Explainability",
+                        "description": "Continuing to explore multilingual NLP, low-resource language challenges, and interpretable machine learning."
+                },
+                {
+                        "title": "Developer Productivity",
+                        "description": "Experimenting with AI-assisted development workflows and multi-agent engineering systems."
+                }
+        ]
+}
+        },
+        {
+            "section_key": "philosophy",
+            "data": {
+        "title": "How I approach engineering",
+        "items": [
+                {
+                        "title": "Understand the system",
+                        "description": "Before changing code, understand the problem, existing architecture, data flow, and constraints."
+                },
+                {
+                        "title": "Design for the right complexity",
+                        "description": "Good architecture is about choosing abstractions that make systems easier to understand, change, and operate."
+                },
+                {
+                        "title": "Build with the future in mind",
+                        "description": "Prefer modular, testable implementations that can evolve as requirements and system complexity grow."
+                },
+                {
+                        "title": "Optimize what matters",
+                        "description": "Performance improvements should come from understanding bottlenecks rather than premature optimization."
+                },
+                {
+                        "title": "Measure the outcome",
+                        "description": "Engineering success is reflected in reliability, performance, maintainability, developer productivity, and user impact."
+                }
+        ]
+}
+        },
+        {
+            "section_key": "ask-kuldeep",
+            "data": {
+        "title": "Ask Kuldeep",
+        "description": "Curious about how I approach backend architecture, API optimization, data systems, machine learning, or AI? Ask me.",
+        "suggestedQuestions": [
+                "How would you design a scalable Django API?",
+                "How do you approach API performance optimization?",
+                "How would you design a multi-tenant backend?",
+                "When would you use Django vs FastAPI?",
+                "How do you approach machine learning projects?",
+                "What did you research during your MS?",
+                "How would you integrate AI into an existing software system?"
+        ],
+        "responseHeading": "Kuldeep's Engineering Note"
+}
+        },
+        {
+            "section_key": "resumes",
+            "data": [
+        {
+                "variant": "software",
+                "label": "Software Engineering Resume",
+                "filename": "software-engineering.pdf",
+                "path": "/resumes/software-engineering.pdf"
+        },
+        {
+                "variant": "ai_ml",
+                "label": "AI / ML Resume",
+                "filename": "ai-ml.pdf",
+                "path": "/resumes/ai-ml.pdf"
+        },
+        {
+                "variant": "data_analyst",
+                "label": "Data Analyst Resume",
+                "filename": "data-analyst.pdf",
+                "path": "/resumes/data-analyst.pdf"
+        }
+]
+        },
+        {
             "section_key": "experience",
             "data": [
         {
