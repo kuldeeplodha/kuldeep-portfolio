@@ -23,6 +23,7 @@ import { test, expect } from '@playwright/test'
 /** Snapshot options applied to every screenshot. */
 const SNAP_OPTS = {
   animations: 'disabled' as const,
+  fullPage: true,
   maxDiffPixelRatio: 0.01,
 }
 
