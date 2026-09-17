@@ -1,14 +1,17 @@
 import { portfolioConfig } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
 
 /**
  * V2 §2.3 Engineering Signal — high-signal categories replacing generic
- * skill-percentage bars. Content is portfolioConfig.engineeringSignal
- * (home.valueProposition.items, verbatim).
+ * skill-percentage bars. CMS-FE-WIRE-P1: content is admin-editable via
+ * the `engineering-signal` site_content key, falling back to
+ * portfolioConfig.engineeringSignal (home.valueProposition.items,
+ * verbatim) whenever the DB is empty/unreachable.
  */
 export function EngineeringSignalSection() {
-  const { engineeringSignal } = portfolioConfig
+  const engineeringSignal = useSiteContent('engineering-signal', portfolioConfig.engineeringSignal)
 
   return (
     <SectionShell id="signal" muted>

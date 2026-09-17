@@ -1,15 +1,19 @@
 import { portfolioConfig } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { isValidSafeUrl } from '../../lib/config/exportImport'
 import { GRID_PADDING, GRID_WIDTH } from '../ui/grid'
 
 /**
  * V2.1 P4 (spec §47) — minimal footer: name, title, a subdued tagline,
- * social links (real URLs only), and the copyright line. Real content
- * verbatim from footerContent (content.footer). LinkedIn/GitHub are
- * rendered only when a real URL exists — never a dead "#" link.
+ * social links (real URLs only), and the copyright line. CMS-FE-WIRE-P1:
+ * footerContent is admin-editable via the `footer` site_content key,
+ * falling back to portfolioConfig.footerContent (content.footer)
+ * whenever the DB is empty/unreachable. LinkedIn/GitHub are rendered
+ * only when a real URL exists — never a dead "#" link.
  */
 export function Footer() {
-  const { profile, footerContent } = portfolioConfig
+  const { profile } = portfolioConfig
+  const footerContent = useSiteContent('footer', portfolioConfig.footerContent)
   const hasLinkedIn = profile.links.linkedin && isValidSafeUrl(profile.links.linkedin)
   const hasGitHub = profile.links.github && isValidSafeUrl(profile.links.github)
 
