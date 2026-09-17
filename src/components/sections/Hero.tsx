@@ -1,5 +1,6 @@
 import { m } from 'framer-motion'
-import { portfolioConfig, getResumeForVariant } from '../../config'
+import { portfolioConfig, getResumeForVariant, resumes } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { useRole } from '../../hooks/useRole'
 import { RoleSwitcher } from '../ui/RoleSwitcher'
 import { CareerJourney } from '../ui/CareerJourney'
@@ -14,7 +15,9 @@ function ctaHref(target: string, resumePath: string): string {
 export function Hero() {
   const { roleId, role, theme, setRole, allRoles, isTransitioning } = useRole()
   const { profile } = portfolioConfig
-  const resume = getResumeForVariant(role.resumeVariant)
+  // CMS-FE-WIRE-P3: admin-editable via the `resumes` site_content key.
+  const resumesList = useSiteContent('resumes', resumes)
+  const resume = getResumeForVariant(role.resumeVariant, resumesList)
 
   return (
     <section

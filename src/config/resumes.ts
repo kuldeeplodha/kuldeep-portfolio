@@ -29,6 +29,11 @@ export const resumes: ResumeFile[] = [
   },
 ]
 
-export function getResumeForVariant(variant: ResumeVariant): ResumeFile {
-  return resumes.find((r) => r.variant === variant) ?? resumes[0]
+// CMS-FE-WIRE-P3: `resumesList` defaults to the static config array, but a
+// caller reading the `resumes` site_content key (via useSiteContent) can
+// pass the current DB-or-fallback list instead — this stays a plain
+// function (not a hook) since it's also called from non-component
+// contexts.
+export function getResumeForVariant(variant: ResumeVariant, resumesList: ResumeFile[] = resumes): ResumeFile {
+  return resumesList.find((r) => r.variant === variant) ?? resumesList[0]
 }

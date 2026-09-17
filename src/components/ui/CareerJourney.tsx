@@ -1,14 +1,17 @@
 import { portfolioConfig } from '../../config'
+import { useSiteContent } from '../../lib/content/SiteContentProvider'
 
 /**
  * Compact factual timeline of the software -> data -> ML -> AI evolution
  * (V2 career journey, real content from careerJourney.ts). Kept intentionally
  * light for the hero: period + title only, full description available via
  * `title` attribute rather than inline text, per uiContentRules (medium
- * density, avoid walls of text).
+ * density, avoid walls of text). CMS-FE-WIRE-P3: admin-editable via the
+ * `career-journey` site_content key, falling back to
+ * portfolioConfig.careerJourney when the DB is empty/unreachable.
  */
 export function CareerJourney() {
-  const { careerJourney } = portfolioConfig
+  const careerJourney = useSiteContent('career-journey', portfolioConfig.careerJourney)
 
   return (
     <div className="w-full" role="group" aria-label="Career evolution: software to AI">
