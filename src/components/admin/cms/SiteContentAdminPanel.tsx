@@ -1,0 +1,235 @@
+import { useCallback, useEffect, useState } from 'react'
+import { getAdminContent, updateAdminContent, type SiteContentRecord } from '../../../lib/admin/siteContent'
+import { CmsApiError } from '../../../lib/admin/cms'
+import { adminInputClass, AdminCard } from '../AdminLayout'
+
+// CMS-FE-ADMIN-EDITOR: one generic JSON editor for every site_content
+// section_key (PRD-007 §4, Tier-A/MVP) rather than 15 bespoke forms.
+// Groups mirror the PRD's phase list; every key here is already seeded
+// and live (confirmed against GET /api/content — see hive notes).
+const SECTION_GROUPS: { label: string; keys: { key: string; label: string }[] }[] = [
+  {
+    label: 'Identity',
+    keys: [{ key: 'profile', label: 'Profile' }],
+  },
+  {
+    label: 'P1 — high-touch copy',
+    keys: [
+      { key: 'contact', label: 'Contact' },
+      { key: 'footer', label: 'Footer' },
+      { key: 'engineering-signal', label: 'Engineering Signal' },
+      { key: 'impact-metrics', label: 'Impact Metrics' },
+      { key: 'experience-story', label: 'Experience Story' },
+    ],
+  },
+  {
+    label: 'P2 — résumé data',
+    keys: [
+      { key: 'education', label: 'Education' },
+      // experience (role-scoped timeline) and skills have no public
+      // consumer post-V2 (experience-story replaced the timeline; no
+      // skills section is rendered) — read-wiring was skipped for both,
+      // but they stay seeded and MUST remain editable here: this
+      // generic editor is the only reason they're still admin-managed.
+      { key: 'experience', label: 'Experience (not publicly consumed)' },
+      { key: 'skills', label: 'Skills (not publicly consumed)' },
+    ],
+  },
+  {
+    label: 'P3 — remaining sections',
+    keys: [
+      { key: 'ai-knowledge', label: 'AI Knowledge' },
+      { key: 'career-journey', label: 'Career Journey' },
+      { key: 'currently-exploring', label: 'Currently Exploring' },
+      { key: 'philosophy', label: 'Philosophy' },
+      { key: 'ask-kuldeep', label: 'Ask Kuldeep' },
+      { key: 'resumes', label: 'Resumes' },
+    ],
+  },
+]
+
+const ALL_KEYS = SECTION_GROUPS.flatMap((g) => g.keys)
+
+function nowIso(): string {
+  return new Date().toISOString()
+}
+
+export function SiteContentAdminPanel() {
+  const [selectedKey, setSelectedKey] = useState(ALL_KEYS[0].key)
+  const [record, setRecord] = useState<SiteContentRecord | null>(null)
+  const [jsonText, setJsonText] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveOk, setSaveOk] = useState(false)
+
+  const load = useCallback((key: string) => {
+    setLoading(true)
+    setLoadError(null)
+    setSaveError(null)
+    setSaveOk(false)
+    getAdminContent(key)
+      .then((r) => {
+        setRecord(r)
+        setJsonText(JSON.stringify(r.data, null, 2))
+      })
+      .catch((err) => {
+        // A 404 means this key hasn't been published yet — not an error
+        // state, just an empty starting point the human can fill in and
+        // publish for the first time.
+        if (err instanceof CmsApiError && err.status === 404) {
+          setRecord(null)
+          setJsonText('{}')
+        } else {
+          setLoadError(err instanceof CmsApiError ? err.message : 'Failed to load content.')
+        }
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    load(selectedKey)
+  }, [selectedKey, load])
+
+  const handleSave = useCallback(
+    async (status: 'draft' | 'published') => {
+      let parsed: unknown
+      try {
+        parsed = JSON.parse(jsonText)
+      } catch (err) {
+        setSaveError(`Invalid JSON: ${err instanceof Error ? err.message : 'could not parse'}`)
+        return
+      }
+      setSaving(true)
+      setSaveError(null)
+      setSaveOk(false)
+      try {
+        const ts = nowIso()
+        const saved = await updateAdminContent(selectedKey, {
+          data: parsed,
+          status,
+          published_at: status === 'published' ? ts : (record?.published_at ?? null),
+          updated_at: ts,
+        })
+        setRecord(saved)
+        setSaveOk(true)
+      } catch (err) {
+        setSaveError(err instanceof CmsApiError ? err.message : 'Save failed.')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [jsonText, selectedKey, record],
+  )
+
+  return (
+    <AdminCard
+      title="Site Content"
+      description="Every homepage/section payload, admin-editable here instead of a code commit. The public site always falls back to the bundled default if a key is unpublished or the backend is unreachable."
+    >
+      <div className="grid gap-6 md:grid-cols-[220px_1fr]">
+        <nav aria-label="Site content sections" className="space-y-4">
+          {SECTION_GROUPS.map((group) => (
+            <div key={group.label}>
+              {/* text-slate-500 measured 3.96:1 on this surface — fails
+                  WCAG AA (needs 4.5:1); text-slate-400 passes with 0
+                  Axe violations (Imagine, QA-CMS-FE-ADMIN-EDITOR). */}
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{group.label}</p>
+              <ul className="space-y-0.5">
+                {group.keys.map((item) => (
+                  <li key={item.key}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedKey(item.key)}
+                      className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                        selectedKey === item.key
+                          ? 'bg-cyan-400/10 font-medium text-cyan-400'
+                          : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-white">{selectedKey}</h3>
+              {record && (
+                <p className="text-xs text-slate-400">
+                  {record.status} · updated {new Date(record.updated_at).toLocaleString()}
+                </p>
+              )}
+              {!record && !loading && !loadError && (
+                <p className="text-xs text-amber-300">Not yet published — save to create it.</p>
+              )}
+            </div>
+          </div>
+
+          {loading && (
+            <p className="text-sm text-slate-400" role="status">
+              Loading…
+            </p>
+          )}
+
+          {loadError && (
+            <p className="mb-4 text-sm text-red-400" role="alert">
+              {loadError}
+            </p>
+          )}
+
+          {!loading && !loadError && (
+            <>
+              <label className="block">
+                <span className="mb-1 block text-sm text-slate-400">Data (JSON)</span>
+                <textarea
+                  value={jsonText}
+                  onChange={(e) => setJsonText(e.target.value)}
+                  rows={18}
+                  spellCheck={false}
+                  className={`${adminInputClass} font-mono text-xs`}
+                />
+              </label>
+
+              {saveError && (
+                <p className="mt-3 text-sm text-red-400" role="alert">
+                  {saveError}
+                </p>
+              )}
+              {saveOk && (
+                <p className="mt-3 text-sm text-emerald-400" role="status">
+                  Saved.
+                </p>
+              )}
+
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleSave('published')}
+                  disabled={saving}
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {saving ? 'Publishing…' : 'Publish'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSave('draft')}
+                  disabled={saving}
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Save draft
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </AdminCard>
+  )
+}
