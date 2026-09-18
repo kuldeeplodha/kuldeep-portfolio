@@ -7,7 +7,14 @@
   ],
   "routes": [
     {
-      "src": "/api/(case-studies|blogs|content)(.*)",
+      "src": "/api/content(.*)",
+      "dest": "main.py",
+      "headers": {
+        "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=86400"
+      }
+    },
+    {
+      "src": "/api/(case-studies|blogs)(.*)",
       "dest": "main.py",
       "headers": {
         "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=86400"
