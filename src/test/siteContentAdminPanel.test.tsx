@@ -24,7 +24,11 @@ describe('SiteContentAdminPanel', () => {
     ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
       jsonResponse({ section_key: 'profile', data: { name: 'Kuldeep Lodha' }, status: 'published', published_at: 'now', updated_at: 'now' }),
     )
+    const user = userEvent.setup()
     render(<SiteContentAdminPanel />)
+    
+    await user.click(await screen.findByRole('button', { name: 'Switch to Raw JSON' }))
+    
     await waitFor(() => expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('Kuldeep Lodha'))
     expect(screen.getByText(/\bpublished\b/)).toBeInTheDocument()
   })
@@ -36,6 +40,9 @@ describe('SiteContentAdminPanel', () => {
       .mockResolvedValueOnce(jsonResponse({ section_key: 'contact', data: { title: 'Contact title' }, status: 'published', published_at: 'now', updated_at: 'now' }))
     const user = userEvent.setup()
     render(<SiteContentAdminPanel />)
+    
+    await user.click(await screen.findByRole('button', { name: 'Switch to Raw JSON' }))
+    
     await waitFor(() => expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('Kuldeep'))
 
     await user.click(screen.getByRole('button', { name: 'Contact' }))
@@ -45,7 +52,11 @@ describe('SiteContentAdminPanel', () => {
 
   it('a 404 (unpublished key) shows an empty draft instead of an error', async () => {
     ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(jsonResponse({ detail: 'Content not found' }, 404))
+    const user = userEvent.setup()
     render(<SiteContentAdminPanel />)
+    
+    await user.click(await screen.findByRole('button', { name: 'Switch to Raw JSON' }))
+    
     await waitFor(() => expect(screen.getByText('Not yet published — save to create it.')).toBeInTheDocument())
     expect(screen.getByRole('textbox', { name: 'Data (JSON)' })).toHaveValue('{}')
   })
@@ -57,6 +68,9 @@ describe('SiteContentAdminPanel', () => {
       .mockResolvedValueOnce(jsonResponse({ section_key: 'profile', data: { name: 'Updated' }, status: 'published', published_at: 'now', updated_at: 'now' }))
     const user = userEvent.setup()
     render(<SiteContentAdminPanel />)
+    
+    await user.click(await screen.findByRole('button', { name: 'Switch to Raw JSON' }))
+    
     const textarea = await screen.findByRole('textbox', { name: 'Data (JSON)' })
     await waitFor(() => expect((textarea as HTMLTextAreaElement).value).toContain('Kuldeep'))
 
@@ -74,6 +88,9 @@ describe('SiteContentAdminPanel', () => {
     )
     const user = userEvent.setup()
     render(<SiteContentAdminPanel />)
+    
+    await user.click(await screen.findByRole('button', { name: 'Switch to Raw JSON' }))
+    
     const textarea = await screen.findByRole('textbox', { name: 'Data (JSON)' })
     await waitFor(() => expect((textarea as HTMLTextAreaElement).value).toContain('Kuldeep'))
 
