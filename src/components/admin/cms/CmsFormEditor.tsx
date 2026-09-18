@@ -76,6 +76,22 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
     onChange(arr)
   }
 
+  const handleRootArrayStringListMove = (index: number, field: string, stringIndex: number, direction: 'up' | 'down') => {
+    const arr = [...value]
+    const stringArr = [...(arr[index][field] || [])]
+    if (direction === 'up' && stringIndex > 0) {
+      const temp = stringArr[stringIndex - 1]
+      stringArr[stringIndex - 1] = stringArr[stringIndex]
+      stringArr[stringIndex] = temp
+    } else if (direction === 'down' && stringIndex < stringArr.length - 1) {
+      const temp = stringArr[stringIndex + 1]
+      stringArr[stringIndex + 1] = stringArr[stringIndex]
+      stringArr[stringIndex] = temp
+    }
+    arr[index] = { ...arr[index], [field]: stringArr }
+    onChange(arr)
+  }
+
   const handleRootArrayAdd = (defaultItem: any) => {
     const arr = [...(value || [])]
     arr.push(defaultItem)
@@ -121,11 +137,25 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
     onChange({ ...value, [field]: arr })
   }
 
+  const handleStringArrayMove = (field: string, index: number, direction: 'up' | 'down') => {
+    const arr = [...(value[field] || [])]
+    if (direction === 'up' && index > 0) {
+      const temp = arr[index - 1]
+      arr[index - 1] = arr[index]
+      arr[index] = temp
+    } else if (direction === 'down' && index < arr.length - 1) {
+      const temp = arr[index + 1]
+      arr[index + 1] = arr[index]
+      arr[index] = temp
+    }
+    onChange({ ...value, [field]: arr })
+  }
+
   // Helper for simple text fields
   const renderTextInput = (label: string, val: any, changeFn: (val: string) => void, isTextArea = false) => (
     <label className="block mb-4">
       <span className="mb-1 block text-xs text-slate-400 capitalize">{label}</span>
-      {isTextArea || (typeof val === 'string' && val.length > 80) ? (
+      {isTextArea ? (
         <textarea
           value={val || ''}
           onChange={(e) => changeFn(e.target.value)}
@@ -143,14 +173,18 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
     </label>
   )
 
-  const renderStringList = (label: string, items: string[], changeFn: (idx: number, val: string) => void, addFn: () => void, removeFn: (idx: number) => void) => (
+  const renderStringList = (label: string, items: string[], changeFn: (idx: number, val: string) => void, addFn: () => void, removeFn: (idx: number) => void, moveFn: (idx: number, dir: 'up'|'down') => void) => (
     <div className="mb-4">
       <span className="mb-1 block text-xs text-slate-400 capitalize">{label}</span>
       <div className="space-y-2">
         {items?.map((str, idx) => (
-          <div key={idx} className="flex gap-2">
-            <input type="text" value={str} onChange={(e) => changeFn(idx, e.target.value)} className={adminInputClass} />
-            <button type="button" onClick={() => removeFn(idx)} className="text-red-400 hover:text-red-300 px-2" aria-label="Remove item">×</button>
+          <div key={idx} className="flex items-center gap-2 group relative">
+            <input type="text" value={str} onChange={(e) => changeFn(idx, e.target.value)} className={adminInputClass} aria-label={`Item ${idx + 1} for ${label}`} />
+            <div className="flex items-center opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              <button type="button" onClick={() => moveFn(idx, 'up')} disabled={idx === 0} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move up">↑</button>
+              <button type="button" onClick={() => moveFn(idx, 'down')} disabled={idx === items.length - 1} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move down">↓</button>
+              <button type="button" onClick={() => removeFn(idx)} className="p-1 text-red-400 hover:text-red-300" aria-label="Remove item">×</button>
+            </div>
           </div>
         ))}
       </div>
@@ -165,7 +199,7 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
       return (
         <div className="space-y-2">
           {Object.keys(value).map((key) => 
-            renderTextInput(key, value[key], (v) => handleChange(key, v))
+            renderTextInput(key, value[key], (v) => handleChange(key, v), key === 'description')
           )}
         </div>
       )
@@ -175,7 +209,7 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
       return (
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
-            {['name', 'navDisplayName', 'title', 'location', 'email', 'phone', 'avatarUrl'].map(k => (
+            {['name', 'navDisplayName', 'title', 'location', 'email', 'phone'].map(k => (
               renderTextInput(k, value[k], (v) => handleChange(k, v))
             ))}
           </div>
@@ -199,7 +233,7 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
           {renderTextInput('title', value.title, (v) => handleChange('title', v))}
           {renderTextInput('description', value.description, (v) => handleChange('description', v), true)}
           {renderTextInput('responseHeading', value.responseHeading, (v) => handleChange('responseHeading', v))}
-          {renderStringList('suggestedQuestions', value.suggestedQuestions || [], (idx, val) => handleStringArrayChange('suggestedQuestions', idx, val), () => handleStringArrayAdd('suggestedQuestions'), (idx) => handleStringArrayRemove('suggestedQuestions', idx))}
+          {renderStringList('suggestedQuestions', value.suggestedQuestions || [], (idx, val) => handleStringArrayChange('suggestedQuestions', idx, val), () => handleStringArrayAdd('suggestedQuestions'), (idx) => handleStringArrayRemove('suggestedQuestions', idx), (idx, dir) => handleStringArrayMove('suggestedQuestions', idx, dir))}
         </div>
       )
 
@@ -215,10 +249,10 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
         <div className="space-y-6">
           {(value || []).map((item: any, idx: number) => (
             <div key={idx} className="rounded-lg border border-slate-700 bg-slate-800/40 p-4 relative group">
-              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button type="button" onClick={() => handleRootArrayMove(idx, 'up')} disabled={idx === 0} className="p-1 text-slate-400 hover:text-white disabled:opacity-30">↑</button>
-                <button type="button" onClick={() => handleRootArrayMove(idx, 'down')} disabled={idx === value.length - 1} className="p-1 text-slate-400 hover:text-white disabled:opacity-30">↓</button>
-                <button type="button" onClick={() => handleRootArrayRemove(idx)} className="p-1 text-red-400 hover:text-red-300">×</button>
+              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                <button type="button" onClick={() => handleRootArrayMove(idx, 'up')} disabled={idx === 0} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move up">↑</button>
+                <button type="button" onClick={() => handleRootArrayMove(idx, 'down')} disabled={idx === value.length - 1} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move down">↓</button>
+                <button type="button" onClick={() => handleRootArrayRemove(idx)} className="p-1 text-red-400 hover:text-red-300" aria-label="Remove item">×</button>
               </div>
               <div className="mt-2 space-y-2">
                 {keys.map(k => renderTextInput(k, item[k], (v) => handleRootArrayChange(idx, k, v), k === 'description'))}
@@ -247,10 +281,10 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
             <div className="space-y-4">
               {(value.items || []).map((item: any, idx: number) => (
                 <div key={idx} className="rounded-lg border border-slate-700 bg-slate-800/40 p-4 relative group">
-                  <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button type="button" onClick={() => handleMoveArrayItem('items', idx, 'up')} disabled={idx === 0} className="p-1 text-slate-400 hover:text-white disabled:opacity-30">↑</button>
-                    <button type="button" onClick={() => handleMoveArrayItem('items', idx, 'down')} disabled={idx === (value.items?.length || 0) - 1} className="p-1 text-slate-400 hover:text-white disabled:opacity-30">↓</button>
-                    <button type="button" onClick={() => handleRemoveArrayItem('items', idx)} className="p-1 text-red-400 hover:text-red-300">×</button>
+                  <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                    <button type="button" onClick={() => handleMoveArrayItem('items', idx, 'up')} disabled={idx === 0} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move up">↑</button>
+                    <button type="button" onClick={() => handleMoveArrayItem('items', idx, 'down')} disabled={idx === (value.items?.length || 0) - 1} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move down">↓</button>
+                    <button type="button" onClick={() => handleRemoveArrayItem('items', idx)} className="p-1 text-red-400 hover:text-red-300" aria-label="Remove item">×</button>
                   </div>
                   <div className="mt-2 space-y-2">
                     {itemKeys.map(k => renderTextInput(k, item[k], (v) => handleArrayChange('items', idx, k, v), k === 'description'))}
@@ -270,16 +304,16 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
     case 'ai-knowledge':
     case 'education': {
       const keys = sectionKey === 'ai-knowledge' ? ['id', 'answer', 'source'] : ['id', 'degree', 'institution', 'period', 'location', 'gpa', 'research']
-      const stringArrayKeys = sectionKey === 'ai-knowledge' ? ['questionPatterns', 'tags'] : ['highlights', 'focus']
+      const stringArrayKeys = sectionKey === 'ai-knowledge' ? ['questionPatterns', 'tags'] : ['focus']
       
       return (
         <div className="space-y-6">
           {(value || []).map((item: any, idx: number) => (
             <div key={idx} className="rounded-lg border border-slate-700 bg-slate-800/40 p-4 relative group">
-              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button type="button" onClick={() => handleRootArrayMove(idx, 'up')} disabled={idx === 0} className="p-1 text-slate-400 hover:text-white disabled:opacity-30">↑</button>
-                <button type="button" onClick={() => handleRootArrayMove(idx, 'down')} disabled={idx === value.length - 1} className="p-1 text-slate-400 hover:text-white disabled:opacity-30">↓</button>
-                <button type="button" onClick={() => handleRootArrayRemove(idx)} className="p-1 text-red-400 hover:text-red-300">×</button>
+              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                <button type="button" onClick={() => handleRootArrayMove(idx, 'up')} disabled={idx === 0} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move up">↑</button>
+                <button type="button" onClick={() => handleRootArrayMove(idx, 'down')} disabled={idx === value.length - 1} className="p-1 text-slate-400 hover:text-white disabled:opacity-30" aria-label="Move down">↓</button>
+                <button type="button" onClick={() => handleRootArrayRemove(idx)} className="p-1 text-red-400 hover:text-red-300" aria-label="Remove item">×</button>
               </div>
               <div className="mt-2 grid md:grid-cols-2 gap-4">
                 {keys.map(k => (
@@ -289,7 +323,7 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
                 ))}
                 {stringArrayKeys.map(k => (
                   <div key={k} className="md:col-span-2 p-3 bg-slate-900/50 rounded border border-slate-700">
-                    {renderStringList(k, item[k] || [], (strIdx, val) => handleRootArrayStringListChange(idx, k, strIdx, val), () => handleRootArrayStringListAdd(idx, k), (strIdx) => handleRootArrayStringListRemove(idx, k, strIdx))}
+                    {renderStringList(k, item[k] || [], (strIdx, val) => handleRootArrayStringListChange(idx, k, strIdx, val), () => handleRootArrayStringListAdd(idx, k), (strIdx) => handleRootArrayStringListRemove(idx, k, strIdx), (strIdx, dir) => handleRootArrayStringListMove(idx, k, strIdx, dir))}
                   </div>
                 ))}
               </div>
@@ -302,26 +336,7 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
       )
     }
 
-    // COMPLEX FALLBACKS
-    case 'experience-story':
-    case 'experience':
-    case 'skills':
-      return (
-        <div className="p-5 border border-amber-900/50 bg-amber-950/20 rounded-lg">
-          <p className="text-sm font-semibold text-amber-400 mb-2">Complex Shape: Edit as JSON</p>
-          <p className="text-sm text-amber-300/80 mb-4">
-            The `{sectionKey}` section contains deeply nested arrays and complex structures. To prevent silent data loss, form-editing is disabled for this section. Please switch to the Raw JSON editor to make changes.
-          </p>
-        </div>
-      )
-
     default:
-      return (
-        <div className="p-4 border border-slate-700 bg-slate-800/40 rounded-lg">
-          <p className="text-sm text-slate-300">
-            A form editor for <strong>{sectionKey}</strong> has not been implemented yet. Please use the Raw JSON tab.
-          </p>
-        </div>
-      )
+      return null
   }
 }

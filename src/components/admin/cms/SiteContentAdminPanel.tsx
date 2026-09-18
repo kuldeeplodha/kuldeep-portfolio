@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getAdminContent, updateAdminContent, type SiteContentRecord } from '../../../lib/admin/siteContent'
 import { CmsApiError } from '../../../lib/admin/cms'
 import { adminInputClass, AdminCard } from '../AdminLayout'
+import { CmsFormEditor } from './CmsFormEditor'
 
 // CMS-FE-ADMIN-EDITOR: one generic JSON editor for every site_content
 // section_key (PRD-007 §4, Tier-A/MVP) rather than 15 bespoke forms.
@@ -58,6 +59,7 @@ export function SiteContentAdminPanel() {
   const [selectedKey, setSelectedKey] = useState(ALL_KEYS[0].key)
   const [record, setRecord] = useState<SiteContentRecord | null>(null)
   const [jsonText, setJsonText] = useState('')
+  const [isRawMode, setIsRawMode] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -123,6 +125,18 @@ export function SiteContentAdminPanel() {
     [jsonText, selectedKey, record],
   )
 
+  const isComplexShape = ['skills', 'experience', 'experience-story'].includes(selectedKey)
+  
+  let parsedData: any = {}
+  let parseError = false
+  if (!isRawMode && !isComplexShape) {
+    try {
+      parsedData = JSON.parse(jsonText || '{}')
+    } catch {
+      parseError = true
+    }
+  }
+
   return (
     <AdminCard
       title="Site Content"
@@ -170,6 +184,15 @@ export function SiteContentAdminPanel() {
                 <p className="text-xs text-amber-300">Not yet published — save to create it.</p>
               )}
             </div>
+            {!loading && !loadError && (
+              <button
+                type="button"
+                onClick={() => setIsRawMode(!isRawMode)}
+                className="text-xs font-medium text-cyan-400 hover:text-cyan-300"
+              >
+                {isRawMode ? 'Switch to Form Editor' : 'Switch to Raw JSON'}
+              </button>
+            )}
           </div>
 
           {loading && (
@@ -186,16 +209,48 @@ export function SiteContentAdminPanel() {
 
           {!loading && !loadError && (
             <>
-              <label className="block">
-                <span className="mb-1 block text-sm text-slate-400">Data (JSON)</span>
-                <textarea
-                  value={jsonText}
-                  onChange={(e) => setJsonText(e.target.value)}
-                  rows={18}
-                  spellCheck={false}
-                  className={`${adminInputClass} font-mono text-xs`}
+              {isComplexShape ? (
+                <div className="space-y-4">
+                  <div className="p-4 border border-amber-900/50 bg-amber-950/20 rounded-lg">
+                    <p className="text-sm font-semibold text-amber-400 mb-2">Complex Shape: Edit as JSON</p>
+                    <p className="text-sm text-amber-300/80">
+                      The `{selectedKey}` section contains deeply nested arrays and complex structures. To prevent silent data loss, form-editing is disabled for this section.
+                    </p>
+                  </div>
+                  <label className="block">
+                    <span className="mb-1 block text-sm text-slate-400">Data (JSON)</span>
+                    <textarea
+                      value={jsonText}
+                      onChange={(e) => setJsonText(e.target.value)}
+                      rows={18}
+                      spellCheck={false}
+                      className={`${adminInputClass} font-mono text-xs`}
+                    />
+                  </label>
+                </div>
+              ) : isRawMode ? (
+                <label className="block">
+                  <span className="mb-1 block text-sm text-slate-400">Data (JSON)</span>
+                  <textarea
+                    value={jsonText}
+                    onChange={(e) => setJsonText(e.target.value)}
+                    rows={18}
+                    spellCheck={false}
+                    className={`${adminInputClass} font-mono text-xs`}
+                  />
+                </label>
+              ) : parseError ? (
+                <div className="p-4 border border-red-900/50 bg-red-950/20 rounded-lg">
+                  <p className="text-sm text-red-400 mb-2">The current JSON is invalid. Please fix it in Raw JSON mode before using the form editor.</p>
+                  <button type="button" onClick={() => setIsRawMode(true)} className="text-sm text-cyan-400 hover:underline">Switch to Raw JSON</button>
+                </div>
+              ) : (
+                <CmsFormEditor
+                  sectionKey={selectedKey}
+                  value={parsedData}
+                  onChange={(newVal) => setJsonText(JSON.stringify(newVal, null, 2))}
                 />
-              </label>
+              )}
 
               {saveError && (
                 <p className="mt-3 text-sm text-red-400" role="alert">
