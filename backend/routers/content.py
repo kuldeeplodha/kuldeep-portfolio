@@ -17,14 +17,14 @@ def row_to_dict(row):
 
 @router.get("/content")
 async def get_all_content(response: Response):
-    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
+    response.headers["Cache-Control"] = "s-maxage=60, stale-while-revalidate"
     client = get_db()
     result = await client.execute("SELECT * FROM site_content WHERE status = 'published'")
     return [row_to_dict(row) for row in result.rows]
 
 @router.get("/content/{section_key}")
 async def get_content_by_key(response: Response, section_key: str = Path(..., pattern=r'^[a-z0-9_-]{1,64}$')):
-    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
+    response.headers["Cache-Control"] = "s-maxage=60, stale-while-revalidate"
     client = get_db()
     result = await client.execute("SELECT * FROM site_content WHERE section_key = ? AND status = 'published'", [section_key])
     if not result.rows:
