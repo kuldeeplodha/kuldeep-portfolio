@@ -1,4 +1,5 @@
 import { portfolioConfig } from '../../config'
+import type { Research } from '../../types'
 import { useSiteContent } from '../../lib/content/SiteContentProvider'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
@@ -35,9 +36,15 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 // CMS-FE-WIRE-P3: "Currently Exploring" is admin-editable via the
 // `currently-exploring` site_content key, falling back to
 // portfolioConfig.currentlyExploring when the DB is empty/unreachable.
-// research/researchIntro are unchanged (not in this phase's key list).
+// CMS-UNIFY-CONFIG-EDITOR: research/researchIntro now share ONE
+// `research` site_content key (a single object) rather than two keys,
+// since they're always read together here and edited together in the
+// legacy panel too.
 export function ResearchLabSection() {
-  const { research, researchIntro } = portfolioConfig
+  const { research, researchIntro } = useSiteContent<{ research: Research[]; researchIntro: string }>('research', {
+    research: portfolioConfig.research,
+    researchIntro: portfolioConfig.researchIntro,
+  })
   const currentlyExploring = useSiteContent('currently-exploring', portfolioConfig.currentlyExploring)
   const featured = research[0]
 
