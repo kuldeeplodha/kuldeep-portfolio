@@ -100,4 +100,35 @@ describe('SiteContentAdminPanel', () => {
     expect(await screen.findByText(/Invalid JSON/)).toBeInTheDocument()
     expect(fetch).toHaveBeenCalledTimes(1)
   })
+
+  it('save draft via form editor calls PUT with edited payload', async () => {
+    const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ section_key: 'profile', data: { name: 'Profile' }, status: 'published', published_at: 'now', updated_at: 'now' }))
+      .mockResolvedValueOnce(jsonResponse({ section_key: 'contact', data: { title: 'Contact' }, status: 'published', published_at: 'now', updated_at: 'now' }))
+      .mockResolvedValueOnce(jsonResponse({ section_key: 'contact', data: { title: 'Updated' }, status: 'draft', published_at: 'now', updated_at: 'now' }))
+    
+    const user = userEvent.setup()
+    const { container } = render(<SiteContentAdminPanel />)
+    
+    // Switch to contact
+    await user.click(await screen.findByRole('button', { name: 'Contact' }))
+    
+    // Wait for input to render and edit it
+    const input = await waitFor(() => container.querySelector('input[type="text"]') as HTMLInputElement)
+    fireEvent.change(input, { target: { value: 'Updated' } })
+    
+    // Click Save draft
+    await user.click(screen.getByRole('button', { name: 'Save draft' }))
+
+    // Assert success
+    await waitFor(() => expect(screen.getByText('Saved.')).toBeInTheDocument())
+    
+    // Assert PUT payload
+    const [, putInit] = fetchMock.mock.calls[2]
+    expect(putInit.method).toBe('PUT')
+    const body = JSON.parse(putInit.body)
+    expect(body.data.title).toBe('Updated')
+    expect(body.status).toBe('draft')
+  })
 })
