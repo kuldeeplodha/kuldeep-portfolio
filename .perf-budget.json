@@ -3,7 +3,7 @@
   "budgets": [
     { "name": "entry (index.js)",           "pattern": "^index-",           "type": "js",  "maxBytes": 184320 },
     { "name": "validationRegistry chunk",   "pattern": "^validationRegistry-", "type": "js",  "maxBytes": 33792  },
-    { "name": "AdminPage chunk",            "pattern": "^AdminPage-",        "type": "js",  "maxBytes": 25600  },
+    { "name": "AdminPage chunk",            "pattern": "^AdminPage-",        "type": "js",  "maxBytes": 38912  },
     { "name": "total JS",                   "pattern": null,                 "type": "js",  "maxBytes": 307200, "aggregate": true },
     { "name": "total CSS",                  "pattern": null,                 "type": "css", "maxBytes": 16384,  "aggregate": true }
   ],

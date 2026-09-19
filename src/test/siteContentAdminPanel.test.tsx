@@ -36,18 +36,18 @@ describe('SiteContentAdminPanel', () => {
   it('switching sections loads the newly selected key', async () => {
     const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>
     fetchMock
-      .mockResolvedValueOnce(jsonResponse({ section_key: 'profile', data: { name: 'Kuldeep' }, status: 'published', published_at: 'now', updated_at: 'now' }))
       .mockResolvedValueOnce(jsonResponse({ section_key: 'contact', data: { title: 'Contact title' }, status: 'published', published_at: 'now', updated_at: 'now' }))
+      .mockResolvedValueOnce(jsonResponse({ section_key: 'footer', data: { text: 'Footer text' }, status: 'published', published_at: 'now', updated_at: 'now' }))
     const user = userEvent.setup()
     render(<SiteContentAdminPanel />)
-    
-    await user.click(await screen.findByRole('button', { name: 'Switch to Raw JSON' }))
-    
-    await waitFor(() => expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('Kuldeep'))
 
-    await user.click(screen.getByRole('button', { name: 'Contact' }))
+    await user.click(await screen.findByRole('button', { name: 'Switch to Raw JSON' }))
+
     await waitFor(() => expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('Contact title'))
-    expect(fetchMock.mock.calls[1][0]).toContain('/api/admin/content/contact')
+
+    await user.click(screen.getByRole('button', { name: 'Footer' }))
+    await waitFor(() => expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('Footer text'))
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/admin/content/footer')
   })
 
   it('a 404 (unpublished key) shows an empty draft instead of an error', async () => {
@@ -104,78 +104,79 @@ describe('SiteContentAdminPanel', () => {
   it('save draft via form editor calls PUT with edited payload', async () => {
     const fetchMock = fetch as unknown as ReturnType<typeof vi.fn>
     fetchMock
-      .mockResolvedValueOnce(jsonResponse({ section_key: 'profile', data: { name: 'Profile' }, status: 'published', published_at: 'now', updated_at: 'now' }))
       .mockResolvedValueOnce(jsonResponse({ section_key: 'contact', data: { title: 'Contact' }, status: 'published', published_at: 'now', updated_at: 'now' }))
       .mockResolvedValueOnce(jsonResponse({ section_key: 'contact', data: { title: 'Updated' }, status: 'draft', published_at: 'now', updated_at: 'now' }))
-    
-    const user = userEvent.setup()
+
     const { container } = render(<SiteContentAdminPanel />)
-    
-    // Switch to contact
-    await user.click(await screen.findByRole('button', { name: 'Contact' }))
-    
-    // Wait for input to render and edit it
-    const input = await waitFor(() => container.querySelector('input[type="text"]') as HTMLInputElement)
+
+    // 'contact' is the first/default key — no click needed to select it,
+    // but wait for the initial GET to resolve before the form renders.
+    await screen.findByRole('button', { name: 'Switch to Raw JSON' })
+    const input = await waitFor(() => {
+      const el = container.querySelector('input[type="text"]') as HTMLInputElement | null
+      if (!el) throw new Error('input not rendered yet')
+      return el
+    })
     fireEvent.change(input, { target: { value: 'Updated' } })
-    
+
     // Click Save draft
+    const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: 'Save draft' }))
 
     // Assert success
     await waitFor(() => expect(screen.getByText('Saved.')).toBeInTheDocument())
-    
+
     // Assert PUT payload
-    const [, putInit] = fetchMock.mock.calls[2]
+    const [, putInit] = fetchMock.mock.calls[1]
     expect(putInit.method).toBe('PUT')
     const body = JSON.parse(putInit.body)
     expect(body.data.title).toBe('Updated')
     expect(body.status).toBe('draft')
   })
 
-  // 'metrics' alone would also match "Impact Metrics"; anchor to the start
-  // of the label to disambiguate the newly-unified "Metrics (legacy...)".
-  const LABEL_OVERRIDES: Record<string, RegExp> = {
-    roles: /^Role Pages$/i,
-    metrics: /^Metrics/i,
-  }
-  function labelPattern(key: string): RegExp {
-    return LABEL_OVERRIDES[key] ?? new RegExp(key, 'i')
-  }
+  // CMS-RESTORE-FRIENDLY-PANEL: profile/experience/projects/roles/
+  // metrics/skills/education/certifications/research/ai-knowledge moved
+  // to the restored friendly forms (AdminPage.tsx) and were removed from
+  // this panel's SECTION_GROUPS, so they're no longer listed or
+  // fetchable here — this generic editor is now the catch-all for the
+  // other 10 keys only. 'experience-story' still has no CmsFormEditor
+  // case (falls through to `default: return null`), so it still must
+  // always render the raw-JSON textarea.
+  it("'experience-story' always shows the raw JSON textarea, never a blank form-editor panel", async () => {
+    ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+      jsonResponse({ section_key: 'experience-story', data: { probe: 'value' }, status: 'published', published_at: 'now', updated_at: 'now' }),
+    )
+    const user = userEvent.setup()
+    render(<SiteContentAdminPanel />)
 
-  // CMS-UNIFY-CONFIG-EDITOR: the 5 newly-unified keys (roles, certifications,
-  // research, projects, metrics) have no CmsFormEditor case — its switch
-  // falls through to `default: return null`, i.e. a BLANK form. They must
-  // always render the raw-JSON textarea instead of silently showing nothing.
-  it.each(['roles', 'certifications', 'research', 'projects', 'metrics'])(
-    "'%s' always shows the raw JSON textarea, never a blank form-editor panel",
-    async (key) => {
-      // mockResolvedValue (not -Once): the panel loads its default first
-      // key (profile) on mount before the click below selects the target
-      // key, so both fetches need a response.
-      ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
-        jsonResponse({ section_key: key, data: { probe: 'value' }, status: 'published', published_at: 'now', updated_at: 'now' }),
-      )
-      const user = userEvent.setup()
-      render(<SiteContentAdminPanel />)
+    await user.click(await screen.findByRole('button', { name: 'Experience Story' }))
 
-      await user.click(await screen.findByRole('button', { name: labelPattern(key) }))
+    await waitFor(() =>
+      expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('probe'),
+    )
+    expect(screen.getByText('Complex Shape: Edit as JSON')).toBeInTheDocument()
+  })
 
-      await waitFor(() =>
-        expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('probe'),
-      )
-      // The "Complex Shape" warning banner only renders on the isComplexShape
-      // branch -- its presence confirms these keys never fall through to
-      // CmsFormEditor's `default: return null` (a silently blank panel).
-      expect(screen.getByText('Complex Shape: Edit as JSON')).toBeInTheDocument()
-    },
-  )
-
-  it('lists all 20 site_content keys across the sidebar groups (15 original + 5 unified)', () => {
+  it('lists the 10 catch-all keys not covered by the friendly forms', () => {
     ;(fetch as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(new Promise(() => {}))
     render(<SiteContentAdminPanel />)
-    for (const key of ['roles', 'certifications', 'research', 'projects', 'metrics']) {
-      expect(screen.getByRole('button', { name: labelPattern(key) })).toBeInTheDocument()
+    for (const label of [
+      'Contact',
+      'Footer',
+      'Engineering Signal',
+      'Impact Metrics',
+      'Experience Story',
+      'Career Journey',
+      'Currently Exploring',
+      'Philosophy',
+      'Ask Kuldeep',
+      'Resumes',
+    ]) {
+      expect(screen.getByRole('button', { name: label })).toBeInTheDocument()
     }
+    // The 10 friendly-form-owned keys must NOT appear here anymore.
+    expect(screen.queryByRole('button', { name: 'Role Pages' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Profile' })).not.toBeInTheDocument()
   })
 
   // CMS-UNIFY-CONFIG-EDITOR step (c): bulk export/import against the DB,
@@ -206,7 +207,7 @@ describe('SiteContentAdminPanel', () => {
     it('reports partial export when some keys 404 (not yet published)', async () => {
       ;(fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
         const key = url.split('/').pop()
-        if (key === 'metrics') return Promise.resolve(jsonResponse({ detail: 'Content not found' }, 404))
+        if (key === 'resumes') return Promise.resolve(jsonResponse({ detail: 'Content not found' }, 404))
         return Promise.resolve(
           jsonResponse({ section_key: key, data: { probe: key }, status: 'published', published_at: 'now', updated_at: 'now' }),
         )

@@ -4,15 +4,15 @@ import { CmsApiError } from '../../../lib/admin/cms'
 import { adminInputClass, AdminCard } from '../AdminLayout'
 import { CmsFormEditor } from './CmsFormEditor'
 
-// CMS-FE-ADMIN-EDITOR: one generic JSON editor for every site_content
-// section_key (PRD-007 §4, Tier-A/MVP) rather than 15 bespoke forms.
-// Groups mirror the PRD's phase list; every key here is already seeded
-// and live (confirmed against GET /api/content — see hive notes).
+// CMS-RESTORE-FRIENDLY-PANEL: the restored per-section Configuration
+// Panel (src/pages/AdminPage.tsx) now owns friendly forms for profile,
+// experience, projects, roles, metrics, skills, education,
+// certifications, research, and ai-knowledge — those 10 keys were
+// removed from this list so they aren't editable from two places at
+// once (risk of one tab clobbering the other's unsaved change). This
+// panel stays the catch-all/raw-JSON editor for every key that has no
+// friendly form yet.
 const SECTION_GROUPS: { label: string; keys: { key: string; label: string }[] }[] = [
-  {
-    label: 'Identity',
-    keys: [{ key: 'profile', label: 'Profile' }],
-  },
   {
     label: 'P1 — high-touch copy',
     keys: [
@@ -24,43 +24,13 @@ const SECTION_GROUPS: { label: string; keys: { key: string; label: string }[] }[
     ],
   },
   {
-    label: 'P2 — résumé data',
-    keys: [
-      { key: 'education', label: 'Education' },
-      // experience (role-scoped timeline) and skills have no public
-      // consumer post-V2 (experience-story replaced the timeline; no
-      // skills section is rendered) — read-wiring was skipped for both,
-      // but they stay seeded and MUST remain editable here: this
-      // generic editor is the only reason they're still admin-managed.
-      { key: 'experience', label: 'Experience (not publicly consumed)' },
-      { key: 'skills', label: 'Skills (not publicly consumed)' },
-    ],
-  },
-  {
     label: 'P3 — remaining sections',
     keys: [
-      { key: 'ai-knowledge', label: 'AI Knowledge' },
       { key: 'career-journey', label: 'Career Journey' },
       { key: 'currently-exploring', label: 'Currently Exploring' },
       { key: 'philosophy', label: 'Philosophy' },
       { key: 'ask-kuldeep', label: 'Ask Kuldeep' },
       { key: 'resumes', label: 'Resumes' },
-    ],
-  },
-  {
-    label: 'Unified from the retired Configuration Panel',
-    keys: [
-      { key: 'roles', label: 'Role Pages' },
-      { key: 'certifications', label: 'Certifications' },
-      { key: 'research', label: 'Research' },
-      // projects and metrics have no public consumer (confirmed: the
-      // homepage's project cards and role-based hero read from the
-      // case-studies CMS and the DB-backed role/certification/research
-      // keys above, not from these two) — same "editable but invisible"
-      // situation as experience/skills, kept for zero capability loss
-      // vs. the legacy panel.
-      { key: 'projects', label: 'Projects (legacy, not publicly consumed)' },
-      { key: 'metrics', label: 'Metrics (legacy, not publicly consumed)' },
     ],
   },
 ]
@@ -229,22 +199,10 @@ export function SiteContentAdminPanel() {
     [load, selectedKey],
   )
 
-  // CMS-UNIFY-CONFIG-EDITOR: the 5 newly-unified keys have no CmsFormEditor
-  // case (its switch falls through to `default: return null`, i.e. a BLANK
-  // form) — force raw JSON for all of them rather than risk a silently
-  // empty editor. 'roles' especially is deeply nested (Record<RoleId,
-  // RoleConfig> with a nested hero object) and 'research' now bundles
-  // researchIntro alongside a nested-array 'research' field.
-  const isComplexShape = [
-    'skills',
-    'experience',
-    'experience-story',
-    'roles',
-    'certifications',
-    'research',
-    'projects',
-    'metrics',
-  ].includes(selectedKey)
+  // CmsFormEditor's switch has no case for 'experience-story' — falls
+  // through to `default: return null` (a silently blank form) — force
+  // raw JSON for it rather than risk that.
+  const isComplexShape = ['experience-story'].includes(selectedKey)
   
   let parsedData: any = {}
   let parseError = false
