@@ -153,7 +153,7 @@ export function CmsFormEditor({ sectionKey, value, onChange }: CmsFormEditorProp
 
   // Helper for simple text fields
   const renderTextInput = (label: string, val: any, changeFn: (val: string) => void, isTextArea = false) => (
-    <label className="block mb-4">
+    <label key={label} className="block mb-4">
       <span className="mb-1 block text-xs text-slate-400 capitalize">{label}</span>
       {isTextArea ? (
         <textarea
