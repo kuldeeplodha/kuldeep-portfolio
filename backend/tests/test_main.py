@@ -28,6 +28,34 @@ def test_get_case_studies_public():
         assert "Cache-Control" in response.headers
         assert "s-maxage=" in response.headers["Cache-Control"]
 
+def test_blogs_and_case_studies_cache_control_no_long_stale_while_revalidate():
+    """CMS-CACHE-REALTIME: blogs/case-studies had the identical
+    86400s stale-while-revalidate problem content.py did -- fixed the
+    same way (must-revalidate, no long SWR) for consistency, even
+    though the card's live-blocking symptom was specific to content."""
+    with TestClient(app) as client:
+        for path in ("/api/blogs", "/api/case-studies"):
+            res = client.get(path)
+            cache_control = res.headers.get("Cache-Control", "")
+            assert "s-maxage=300" in cache_control, (path, cache_control)
+            assert "must-revalidate" in cache_control, (path, cache_control)
+            assert "stale-while-revalidate" not in cache_control, (path, cache_control)
+
+
+def test_vercel_json_blogs_case_studies_routes_have_no_long_stale_while_revalidate():
+    import json
+    from pathlib import Path
+
+    vercel_config = json.loads((Path(__file__).parent.parent / "vercel.json").read_text())
+    routes = vercel_config["routes"]
+
+    route = next(r for r in routes if r["src"] == "/api/(case-studies|blogs)(.*)")
+    cache_control = route["headers"]["Cache-Control"]
+    assert "s-maxage=300" in cache_control
+    assert "must-revalidate" in cache_control
+    assert "stale-while-revalidate" not in cache_control
+
+
 def test_admin_blogs_unauthorized():
     with TestClient(app) as client:
         response = client.get("/api/admin/blogs")

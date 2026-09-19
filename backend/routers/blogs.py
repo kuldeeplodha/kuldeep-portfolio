@@ -27,7 +27,10 @@ def row_to_dict(row):
 
 @router.get("/blogs")
 async def get_blogs(response: Response, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=50)):
-    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
+    # CMS-CACHE-REALTIME: same 86400s stale-while-revalidate problem as
+    # content.py had -- see backend/vercel.json for the route-level
+    # header Vercel actually serves (kept identical to avoid drift).
+    response.headers["Cache-Control"] = "public, max-age=0, must-revalidate, s-maxage=300"
     client = get_db()
     count_res = await client.execute("SELECT COUNT(*) FROM blog_posts WHERE status = 'published'")
     total = count_res.rows[0][0]
@@ -71,7 +74,10 @@ async def create_blog(blog: BlogPost, admin: dict = Depends(get_current_admin)):
 
 @router.get("/blogs/{slug}")
 async def get_blog_by_slug(slug: str, response: Response):
-    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
+    # CMS-CACHE-REALTIME: same 86400s stale-while-revalidate problem as
+    # content.py had -- see backend/vercel.json for the route-level
+    # header Vercel actually serves (kept identical to avoid drift).
+    response.headers["Cache-Control"] = "public, max-age=0, must-revalidate, s-maxage=300"
     client = get_db()
     result = await client.execute("SELECT * FROM blog_posts WHERE slug = ? AND status = 'published'", [slug])
     if not result.rows:

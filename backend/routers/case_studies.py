@@ -37,7 +37,10 @@ def cs_row_to_dict(row):
 
 @router.get("/case-studies")
 async def get_case_studies(response: Response, page: int = Query(1, ge=1), limit: int = Query(10, ge=1, le=50)):
-    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
+    # CMS-CACHE-REALTIME: same 86400s stale-while-revalidate problem as
+    # content.py had -- see backend/vercel.json for the route-level
+    # header Vercel actually serves (kept identical to avoid drift).
+    response.headers["Cache-Control"] = "public, max-age=0, must-revalidate, s-maxage=300"
     client = get_db()
     count_res = await client.execute("SELECT COUNT(*) FROM case_studies WHERE status = 'published'")
     total = count_res.rows[0][0]
@@ -83,7 +86,10 @@ async def create_case_study(cs: CaseStudy, admin: dict = Depends(get_current_adm
 
 @router.get("/case-studies/{slug}")
 async def get_case_study_by_slug(slug: str, response: Response):
-    response.headers["Cache-Control"] = "s-maxage=300, stale-while-revalidate"
+    # CMS-CACHE-REALTIME: same 86400s stale-while-revalidate problem as
+    # content.py had -- see backend/vercel.json for the route-level
+    # header Vercel actually serves (kept identical to avoid drift).
+    response.headers["Cache-Control"] = "public, max-age=0, must-revalidate, s-maxage=300"
     client = get_db()
     result = await client.execute("SELECT * FROM case_studies WHERE slug = ? AND status = 'published'", [slug])
     if not result.rows:
