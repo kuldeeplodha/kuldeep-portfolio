@@ -1022,6 +1022,193 @@ async def main():
         {
             "section_key": "profile",
             "data": profile_data
+        },
+        # CMS-UNIFY-CONFIG-EDITOR: 5 additional keys so the legacy
+        # localStorage Configuration Panel's tabs can retire without any
+        # capability loss. projects/metrics have no live public consumer
+        # (confirmed by grep — ProjectsSection/ProjectDetailPage read from
+        # the case-studies CMS instead, and no component ever renders
+        # useRole().filteredMetrics), same situation as the existing
+        # experience/skills keys — seeded so they stay admin-editable.
+        # roles/certifications/research ARE live (useRole.ts theming +
+        # CertificationsSection + ResearchLabSection) and get read-wired
+        # in this same PR. research+researchIntro share ONE key (a single
+        # object) rather than two, to keep them atomically editable
+        # together the way they're read together in ResearchLabSection.
+        {
+            "section_key": "projects",
+            "data": [
+        {
+                "id": "gesture-recognition",
+                "title": "Gesture Recognition Using Neural Networks",
+                "category": "Machine Learning · Deep Learning",
+                "featured": True,
+                "period": "Oct '23 – Nov '23",
+                "overview": "Developed a deep learning system for recognizing hand gestures using convolutional and recurrent neural networks.",
+                "problem": "Classify hand gestures from time-series and image-based data.",
+                "approach": "Built data preprocessing, model training, and evaluation workflows for image and sequential data.",
+                "technologies": ["Python", "TensorFlow", "Keras", "CNN", "RNN"],
+                "pipeline": ["Data", "Preprocessing", "Feature Representation", "CNN/RNN", "Training", "Evaluation", "Prediction"],
+                "result": "Explored how CNN and RNN architectures can be combined with appropriate data representations for gesture recognition.",
+                "futureImprovements": "Add real-time webcam inference and expand the gesture vocabulary with transfer learning.",
+                "relevantRoles": ["ai", "system"]
+        },
+        {
+                "id": "ticket-classification",
+                "title": "Automatic Ticket Classification",
+                "category": "NLP · Machine Learning",
+                "period": "Dec '23 – Jan '24",
+                "overview": "Built an NLP-based classification system to automatically categorize support tickets from their textual content.",
+                "problem": "Manual ticket categorization is slow and inconsistent.",
+                "approach": "Applied text preprocessing, feature extraction, and supervised machine learning to transform unstructured support-ticket text into useful categories.",
+                "technologies": ["Python", "Scikit-learn", "NLP", "Text Classification"],
+                "pipeline": ["Raw Ticket", "Text Preprocessing", "Feature Extraction", "ML Model", "Classification", "Ticket Category"],
+                "result": "Demonstrated how NLP can automate repetitive ticket categorization and improve support workflow efficiency.",
+                "relevantRoles": ["ai", "system"]
+        },
+        {
+                "id": "sentiment-recommendation",
+                "title": "Sentiment-Based Product Recommendation System",
+                "category": "NLP · Recommendation Systems",
+                "period": "Apr '24 – May '24",
+                "overview": "Built a recommendation system that incorporates sentiment extracted from customer reviews to make product recommendations more personalized.",
+                "approach": "Developed sentiment-analysis and recommendation workflows using machine learning and NLP techniques.",
+                "technologies": ["Python", "Scikit-learn", "TensorFlow", "NLP", "Sentiment Analysis"],
+                "pipeline": ["Customer Review", "Sentiment Analysis", "Preference Signal", "Recommendation", "Personalized Product Suggestion"],
+                "result": "Explored how customer sentiment can become an additional signal for improving recommendation relevance.",
+                "relevantRoles": ["ai", "system"]
+        }
+]
+        },
+        {
+            "section_key": "roles",
+            "data": {
+        "software": {
+                "id": "software",
+                "label": "Software Engineer",
+                "themeId": "software",
+                "hero": {
+                        "eyebrow": "SENIOR SOFTWARE DEVELOPER • LEAD",
+                        "headline": "Building reliable software that solves real problems.",
+                        "subtitle": "Senior software developer and backend engineering lead with 5+ years of experience building production systems, APIs, databases, integrations, and business-critical applications.",
+                        "focus": ["Backend Engineering", "Django & REST APIs", "System Design", "Database Optimization", "Third-Party Integrations", "Team Leadership"],
+                        "primaryCta": "Explore My Work",
+                        "primaryCtaTarget": "#projects",
+                        "secondaryCta": "Download Resume",
+                        "secondaryCtaTarget": "resume"
+                },
+                "highlightedSkillIds": ["python", "django", "rest", "postgresql", "docker", "git", "airflow"],
+                "highlightedProjectIds": [],
+                "highlightedMetricIds": ["years-experience", "deployment-improvement", "api-improvement", "manual-entry-reduction"],
+                "experiencePriorityIds": ["shelter-associates", "swadhar-idwc"],
+                "resumeVariant": "software",
+                "navEmphasis": ["experience", "skills", "projects"]
+        },
+        "ai": {
+                "id": "ai",
+                "label": "AI / ML",
+                "themeId": "ai",
+                "hero": {
+                        "eyebrow": "MACHINE LEARNING • AI • NLP",
+                        "headline": "Engineering intelligent systems from data, models, and real-world problems.",
+                        "subtitle": "Software engineer with an MS in Machine Learning & Artificial Intelligence, combining production engineering experience with machine learning, NLP, deep learning, and AI research.",
+                        "focus": ["Machine Learning", "Natural Language Processing", "Deep Learning", "Generative AI", "Explainable AI", "MLOps"],
+                        "primaryCta": "Explore AI Work",
+                        "primaryCtaTarget": "#projects",
+                        "secondaryCta": "View Research",
+                        "secondaryCtaTarget": "#research"
+                },
+                "highlightedSkillIds": ["nlp", "machine-learning", "deep-learning", "llm", "mlops", "pytorch"],
+                "highlightedProjectIds": ["gesture-recognition", "ticket-classification", "sentiment-recommendation"],
+                "highlightedMetricIds": ["years-experience"],
+                "experiencePriorityIds": ["shelter-associates", "swadhar-idwc"],
+                "resumeVariant": "ai_ml",
+                "navEmphasis": ["research", "projects", "skills"]
+        },
+        "data": {
+                "id": "data",
+                "label": "Data Analyst",
+                "themeId": "data",
+                "hero": {
+                        "eyebrow": "DATA • ANALYTICS • ENGINEERING",
+                        "headline": "Turning data into decisions and measurable impact.",
+                        "subtitle": "Experienced in building data pipelines, automating reporting workflows, analyzing operational data, and creating dashboards that help teams understand performance and make better decisions.",
+                        "focus": ["Python", "SQL", "ETL", "Data Pipelines", "Analytics", "Dashboards"],
+                        "primaryCta": "Explore Data Work",
+                        "primaryCtaTarget": "#projects",
+                        "secondaryCta": "View Impact",
+                        "secondaryCtaTarget": "#metrics"
+                },
+                "highlightedSkillIds": ["sql", "pandas", "excel", "superset", "metabase", "airflow", "etl"],
+                "highlightedProjectIds": [],
+                "highlightedMetricIds": ["reporting-time-reduction", "data-accuracy", "survey-forms", "program-teams"],
+                "experiencePriorityIds": ["swadhar-idwc", "shelter-associates"],
+                "resumeVariant": "data_analyst",
+                "navEmphasis": ["experience", "skills", "projects"]
+        },
+        "system": {
+                "id": "system",
+                "label": "System View",
+                "themeId": "system",
+                "hero": {
+                        "eyebrow": "SOFTWARE → DATA → ML → AI",
+                        "headline": "A software engineer's journey into intelligent systems.",
+                        "subtitle": "My career has evolved from software development and backend engineering into data, machine learning, NLP, and AI while staying grounded in building practical production systems.",
+                        "focus": ["Software Engineering", "Backend Systems", "Data", "Machine Learning", "NLP", "Artificial Intelligence"],
+                        "primaryCta": "Explore My Journey",
+                        "primaryCtaTarget": "#projects",
+                        "secondaryCta": "Download Resume",
+                        "secondaryCtaTarget": "resume"
+                },
+                "highlightedSkillIds": [],
+                "highlightedProjectIds": ["gesture-recognition", "ticket-classification", "sentiment-recommendation"],
+                "highlightedMetricIds": ["years-experience"],
+                "experiencePriorityIds": ["shelter-associates", "swadhar-idwc"],
+                "resumeVariant": "software",
+                "navEmphasis": ["experience", "research", "projects", "skills"]
+        }
+}
+        },
+        {
+            "section_key": "certifications",
+            "data": [
+        {"id": "ms-linkedin-sw", "name": "Career Essentials in Software Development", "issuer": "Microsoft & LinkedIn", "date": "2025", "sourceVariants": ["software", "ai_ml", "data_analyst"]},
+        {"id": "aws-dev", "name": "Getting Started as an AWS Developer", "issuer": "LinkedIn", "date": "2025", "sourceVariants": ["software", "ai_ml", "data_analyst"]},
+        {"id": "vertex-ai", "name": "Prompt Design in Vertex AI", "issuer": "Google Cloud Skills Boost", "date": "2025", "sourceVariants": ["ai_ml"]},
+        {"id": "pyspark", "name": "Apache PySpark by Example", "issuer": "LinkedIn", "date": "2025", "sourceVariants": ["ai_ml", "data_analyst"]},
+        {"id": "excel-coursera", "name": "Excel Skills for Data Analytics and Visualization", "issuer": "Macquarie University / Coursera", "date": "2024", "sourceVariants": ["software", "ai_ml", "data_analyst"]},
+        {"id": "sql-hackerrank", "name": "SQL Advanced", "issuer": "HackerRank", "date": "2023", "sourceVariants": ["software", "ai_ml", "data_analyst"]},
+        {"id": "problem-solving", "name": "Problem Solving — Intermediate", "issuer": "HackerRank", "date": "2023", "sourceVariants": ["software", "ai_ml", "data_analyst"]}
+]
+        },
+        {
+            "section_key": "research",
+            "data": {
+        "researchIntro": "My interest in AI goes beyond applying models. I am particularly interested in understanding how models behave, how their decisions can be explained, and how AI can work effectively where data and language resources are limited.",
+        "research": [
+                {
+                        "id": "nlp-explainability",
+                        "title": "Explainability in Low-Resource and Multilingual NLP Applications",
+                        "type": "MS Research Thesis · 2024",
+                        "description": "Research focused on explainability and interpretability challenges in NLP systems operating across low-resource and multilingual settings.",
+                        "status": "Completed · 2024",
+                        "areas": ["Explainable AI", "Natural Language Processing", "Low-Resource NLP", "Multilingual NLP", "Model Interpretability"]
+                }
+        ]
+}
+        },
+        {
+            "section_key": "metrics",
+            "data": [
+        {"id": "years-experience", "label": "Years of experience", "value": "4+", "sourceVariants": ["software", "ai_ml", "data_analyst"], "relevantRoles": ["software", "ai", "data", "system"]},
+        {"id": "deployment-improvement", "label": "Feature deployment improvement", "value": "30%", "sourceVariants": ["software", "ai_ml", "data_analyst"], "relevantRoles": ["software", "system"]},
+        {"id": "api-improvement", "label": "API response improvement", "value": "60%+", "sourceVariants": ["software", "ai_ml", "data_analyst"], "relevantRoles": ["software", "system"]},
+        {"id": "manual-entry-reduction", "label": "Manual data entry reduction", "value": "75%", "sourceVariants": ["software"], "relevantRoles": ["software"]},
+        {"id": "data-accuracy", "label": "Data accuracy improvement", "value": "30%", "sourceVariants": ["software", "ai_ml", "data_analyst"], "relevantRoles": ["data", "system"]},
+        {"id": "reporting-time-reduction", "label": "Reporting time reduction", "value": "50%", "sourceVariants": ["software", "ai_ml", "data_analyst"], "relevantRoles": ["data", "system"]},
+        {"id": "survey-forms", "label": "Custom survey forms & workflows", "value": "30+", "sourceVariants": ["software", "ai_ml", "data_analyst"], "relevantRoles": ["data", "software", "system"]},
+        {"id": "program-teams", "label": "Program teams supported", "value": "5+", "sourceVariants": ["software", "ai_ml", "data_analyst"], "relevantRoles": ["data", "system"]}
+]
         }
     ]
     

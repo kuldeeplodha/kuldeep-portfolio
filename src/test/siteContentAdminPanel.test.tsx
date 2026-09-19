@@ -131,4 +131,50 @@ describe('SiteContentAdminPanel', () => {
     expect(body.data.title).toBe('Updated')
     expect(body.status).toBe('draft')
   })
+
+  // 'metrics' alone would also match "Impact Metrics"; anchor to the start
+  // of the label to disambiguate the newly-unified "Metrics (legacy...)".
+  const LABEL_OVERRIDES: Record<string, RegExp> = {
+    roles: /^Role Pages$/i,
+    metrics: /^Metrics/i,
+  }
+  function labelPattern(key: string): RegExp {
+    return LABEL_OVERRIDES[key] ?? new RegExp(key, 'i')
+  }
+
+  // CMS-UNIFY-CONFIG-EDITOR: the 5 newly-unified keys (roles, certifications,
+  // research, projects, metrics) have no CmsFormEditor case — its switch
+  // falls through to `default: return null`, i.e. a BLANK form. They must
+  // always render the raw-JSON textarea instead of silently showing nothing.
+  it.each(['roles', 'certifications', 'research', 'projects', 'metrics'])(
+    "'%s' always shows the raw JSON textarea, never a blank form-editor panel",
+    async (key) => {
+      // mockResolvedValue (not -Once): the panel loads its default first
+      // key (profile) on mount before the click below selects the target
+      // key, so both fetches need a response.
+      ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        jsonResponse({ section_key: key, data: { probe: 'value' }, status: 'published', published_at: 'now', updated_at: 'now' }),
+      )
+      const user = userEvent.setup()
+      render(<SiteContentAdminPanel />)
+
+      await user.click(await screen.findByRole('button', { name: labelPattern(key) }))
+
+      await waitFor(() =>
+        expect((screen.getByRole('textbox', { name: 'Data (JSON)' }) as HTMLTextAreaElement).value).toContain('probe'),
+      )
+      // The "Complex Shape" warning banner only renders on the isComplexShape
+      // branch -- its presence confirms these keys never fall through to
+      // CmsFormEditor's `default: return null` (a silently blank panel).
+      expect(screen.getByText('Complex Shape: Edit as JSON')).toBeInTheDocument()
+    },
+  )
+
+  it('lists all 20 site_content keys across the sidebar groups (15 original + 5 unified)', () => {
+    ;(fetch as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(new Promise(() => {}))
+    render(<SiteContentAdminPanel />)
+    for (const key of ['roles', 'certifications', 'research', 'projects', 'metrics']) {
+      expect(screen.getByRole('button', { name: labelPattern(key) })).toBeInTheDocument()
+    }
+  })
 })

@@ -47,6 +47,22 @@ const SECTION_GROUPS: { label: string; keys: { key: string; label: string }[] }[
       { key: 'resumes', label: 'Resumes' },
     ],
   },
+  {
+    label: 'Unified from the retired Configuration Panel',
+    keys: [
+      { key: 'roles', label: 'Role Pages' },
+      { key: 'certifications', label: 'Certifications' },
+      { key: 'research', label: 'Research' },
+      // projects and metrics have no public consumer (confirmed: the
+      // homepage's project cards and role-based hero read from the
+      // case-studies CMS and the DB-backed role/certification/research
+      // keys above, not from these two) — same "editable but invisible"
+      // situation as experience/skills, kept for zero capability loss
+      // vs. the legacy panel.
+      { key: 'projects', label: 'Projects (legacy, not publicly consumed)' },
+      { key: 'metrics', label: 'Metrics (legacy, not publicly consumed)' },
+    ],
+  },
 ]
 
 const ALL_KEYS = SECTION_GROUPS.flatMap((g) => g.keys)
@@ -125,7 +141,22 @@ export function SiteContentAdminPanel() {
     [jsonText, selectedKey, record],
   )
 
-  const isComplexShape = ['skills', 'experience', 'experience-story'].includes(selectedKey)
+  // CMS-UNIFY-CONFIG-EDITOR: the 5 newly-unified keys have no CmsFormEditor
+  // case (its switch falls through to `default: return null`, i.e. a BLANK
+  // form) — force raw JSON for all of them rather than risk a silently
+  // empty editor. 'roles' especially is deeply nested (Record<RoleId,
+  // RoleConfig> with a nested hero object) and 'research' now bundles
+  // researchIntro alongside a nested-array 'research' field.
+  const isComplexShape = [
+    'skills',
+    'experience',
+    'experience-story',
+    'roles',
+    'certifications',
+    'research',
+    'projects',
+    'metrics',
+  ].includes(selectedKey)
   
   let parsedData: any = {}
   let parseError = false

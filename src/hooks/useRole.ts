@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import type { RoleId } from '../types'
+import type { RoleConfig, RoleId } from '../types'
 import { portfolioConfig } from '../config'
+import { useSiteContent } from '../lib/content/SiteContentProvider'
 
 const ROLE_IDS: RoleId[] = ['software', 'ai', 'data', 'system']
 
@@ -17,7 +18,14 @@ export function useRole() {
   const roleId = parseRole(searchParams.get('role'))
   const [isTransitioning, setIsTransitioning] = useState(false)
 
-  const role = portfolioConfig.roles[roleId]
+  // CMS-UNIFY-CONFIG-EDITOR: 'roles' is a nested Record<RoleId,RoleConfig>
+  // object (not a flat array like the other site_content keys) — the
+  // generic JSON editor round-trips arbitrary JSON either way, so this is
+  // just a plain object fallback like any other useSiteContent call.
+  const rolesData = useSiteContent<Record<string, RoleConfig>>('roles', portfolioConfig.roles)
+  const certifications = useSiteContent('certifications', portfolioConfig.certifications)
+
+  const role = rolesData[roleId]
   const theme = portfolioConfig.themes[role.themeId]
 
   const setRole = useCallback(
@@ -112,11 +120,11 @@ export function useRole() {
 
   const filteredCertifications = useMemo(() => {
     const variant = role.resumeVariant
-    return portfolioConfig.certifications.filter(
+    return certifications.filter(
       (c) =>
         c.sourceVariants.includes(variant) || roleId === 'system',
     )
-  }, [role, roleId])
+  }, [certifications, role, roleId])
 
   const skillChains = useMemo(() => {
     const chains: Record<RoleId, string[][]> = {
@@ -155,6 +163,6 @@ export function useRole() {
     filteredSkills,
     filteredCertifications,
     skillChains,
-    allRoles: ROLE_IDS.map((id) => portfolioConfig.roles[id]),
+    allRoles: ROLE_IDS.map((id) => rolesData[id]),
   }
 }
