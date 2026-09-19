@@ -371,7 +371,11 @@ describe('AdminPage Validation Integration', () => {
     )
 
     expect(screen.getByText(/All sections valid\. Ready to export or save draft\./i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Save Draft/i })).toBeEnabled()
+    // CMS-RESTORE-FRIENDLY-PANEL steer: Save Draft only writes sections
+    // changed since load, so on a fresh load with nothing edited yet it's
+    // correctly disabled -- there's nothing dirty to save. Export JSON is
+    // unrelated to DB dirty-tracking and stays enabled.
+    expect(screen.getByRole('button', { name: /Save Draft/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /Export JSON/i })).toBeEnabled()
   })
 

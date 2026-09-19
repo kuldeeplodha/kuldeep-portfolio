@@ -42,6 +42,15 @@ export const FRIENDLY_DB_KEYS = [
   'research',
 ]
 
+// configReducer.ts's ConfigSection names (used by patchEntity/insertEntity/
+// removeEntity/duplicateEntity/moveEntity) already match FRIENDLY_FIELD_TO_KEY's
+// keys 1:1 except for the two actions that don't carry a `section` at all
+// (patchProfile -> profile, patchRole -> roles) — those are handled by name
+// directly wherever this map is consulted.
+export function friendlyFieldToDbKey(field: string): string | undefined {
+  return FRIENDLY_FIELD_TO_KEY[field]
+}
+
 export interface FriendlyLoadResult {
   config: Partial<PortfolioConfig>
   failedKeys: string[]
@@ -91,23 +100,34 @@ export interface FriendlySaveResult {
 }
 
 /**
- * Writes every friendly-panel slice of `config` back to the DB in one
- * shot (mirrors the old panel's atomic single-localStorage-blob Save
- * Draft — one button, everything persists together). `status` controls
- * draft vs. publish; published_at only advances on a publish.
+ * Writes ONLY the dirty (changed-since-load) friendly-panel keys back
+ * to the DB. `status` controls draft vs. publish; published_at only
+ * advances on a publish.
+ *
+ * CMS-RESTORE-FRIENDLY-PANEL steer (god, conv-cms-restore): an earlier
+ * version of this function blanket-wrote all 10 keys on every save.
+ * Since DB status is per-key and live, that would have flipped every
+ * currently-PUBLISHED-but-untouched section back to 'draft' on any
+ * single-field edit elsewhere — pulling it off the public site until
+ * manually re-published. Only sections the human actually touched may
+ * ever be written; everything else keeps its existing DB status
+ * untouched, full stop.
  */
 export async function saveFriendlyConfigToDB(
   config: PortfolioConfig,
   status: 'draft' | 'published',
+  dirtyKeys: ReadonlySet<string> | readonly string[],
 ): Promise<FriendlySaveResult> {
   const ts = new Date().toISOString()
   const savedKeys: string[] = []
   const failedKeys: string[] = []
+  const dirty = dirtyKeys instanceof Set ? dirtyKeys : new Set(dirtyKeys)
 
-  const writes: { dbKey: string; data: unknown }[] = Object.entries(FRIENDLY_FIELD_TO_KEY).map(
+  const allWrites: { dbKey: string; data: unknown }[] = Object.entries(FRIENDLY_FIELD_TO_KEY).map(
     ([field, dbKey]) => ({ dbKey, data: (config as any)[field] }),
   )
-  writes.push({ dbKey: 'research', data: { research: config.research, researchIntro: config.researchIntro } })
+  allWrites.push({ dbKey: 'research', data: { research: config.research, researchIntro: config.researchIntro } })
+  const writes = allWrites.filter((w) => dirty.has(w.dbKey))
 
   const results = await Promise.allSettled(
     writes.map(async ({ dbKey, data }) => {

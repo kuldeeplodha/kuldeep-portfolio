@@ -32,7 +32,12 @@ import { ValidationStatusBar } from '../components/admin/ValidationStatusBar'
 import { DiagnosticImportModal } from '../components/admin/DiagnosticImportModal'
 import { configDraftReducer, initialConfig, type ConfigSection } from '../lib/admin/configReducer'
 import { createDefaultEntity } from '../lib/admin/defaultTemplates'
-import { loadFriendlyConfigFromDB, saveFriendlyConfigToDB } from '../lib/admin/friendlyConfigDB'
+import {
+  loadFriendlyConfigFromDB,
+  saveFriendlyConfigToDB,
+  friendlyFieldToDbKey,
+  FRIENDLY_DB_KEYS,
+} from '../lib/admin/friendlyConfigDB'
 import { CmsAuthGate } from '../components/admin/cms/CmsAuthGate'
 import { BlogsAdminPanel } from '../components/admin/cms/BlogsAdminPanel'
 import { CaseStudiesAdminPanel } from '../components/admin/cms/CaseStudiesAdminPanel'
@@ -108,6 +113,51 @@ function AdminPanel() {
   const [dirty, setDirty] = useState(false)
   const [importStatus, setImportStatus] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  // CMS-RESTORE-FRIENDLY-PANEL steer (god): DB status is per-key and
+  // live -- saving must only write sections the human actually touched
+  // since the last load. Blanket-writing all 10 would flip every
+  // currently-published-but-untouched section back to 'draft' and pull
+  // it off the public site. dirtyKeys tracks DB keys changed since load;
+  // only those get PUT on Save Draft/Publish.
+  const [dirtyKeys, setDirtyKeys] = useState<Set<string>>(() => new Set())
+
+  const markDirty = useCallback((keys: string | string[]) => {
+    setDirtyKeys((prev) => {
+      const next = new Set(prev)
+      ;(Array.isArray(keys) ? keys : [keys]).forEach((k) => next.add(k))
+      return next
+    })
+  }, [])
+
+  const trackedDispatch = useCallback(
+    (action: Parameters<typeof dispatch>[0]) => {
+      switch (action.type) {
+        case 'patchProfile':
+          markDirty('profile')
+          break
+        case 'patchRole':
+          markDirty('roles')
+          break
+        case 'patchEntity':
+        case 'insertEntity':
+        case 'removeEntity':
+        case 'duplicateEntity':
+        case 'moveEntity': {
+          const dbKey = action.section === 'research' ? 'research' : friendlyFieldToDbKey(action.section)
+          if (dbKey) markDirty(dbKey)
+          break
+        }
+        case 'replaceConfig':
+          // Import/Reset replace the whole config -- every friendly key
+          // may have changed, so all of them need re-saving.
+          markDirty(FRIENDLY_DB_KEYS)
+          break
+      }
+      dispatch(action)
+    },
+    [markDirty],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -232,30 +282,30 @@ function AdminPanel() {
   )
 
   const handleProfileChange = useCallback((field: keyof Profile, value: any) => {
-    dispatch({ type: 'patchProfile', patch: { [field]: value } })
+    trackedDispatch({ type: 'patchProfile', patch: { [field]: value } })
     setDirty(true)
-  }, [])
+  }, [trackedDispatch])
 
   const handleMoveEntity = useCallback(
     (section: ConfigSection, id: string, delta: -1 | 1) => {
-      dispatch({ type: 'moveEntity', section, id, delta, direction: delta })
+      trackedDispatch({ type: 'moveEntity', section, id, delta, direction: delta })
       setDirty(true)
     },
-    [],
+    [trackedDispatch],
   )
 
   const handleDuplicateEntity = useCallback(
     (section: ConfigSection, id: string) => {
-      dispatch({ type: 'duplicateEntity', section, id })
+      trackedDispatch({ type: 'duplicateEntity', section, id })
       setDirty(true)
     },
-    [],
+    [trackedDispatch],
   )
 
   const handleAddEntity = useCallback(
     (section: ConfigSection) => {
       const newEntity = createDefaultEntity(section)
-      dispatch({ type: 'insertEntity', section, entity: newEntity })
+      trackedDispatch({ type: 'insertEntity', section, entity: newEntity })
       switch (section) {
         case 'experience':
           setSelectedExpId(newEntity.id)
@@ -284,7 +334,7 @@ function AdminPanel() {
       }
       setDirty(true)
     },
-    [],
+    [trackedDispatch],
   )
 
   const handleConfirmDelete = useCallback(() => {
@@ -327,22 +377,35 @@ function AdminPanel() {
         break
     }
 
-    dispatch({ type: 'removeEntity', section, id })
+    trackedDispatch({ type: 'removeEntity', section, id })
     setDirty(true)
     setDeleteTarget(null)
-  }, [config, deleteTarget])
+  }, [config, deleteTarget, trackedDispatch])
 
   const persistFriendlyConfig = useCallback(
     async (status: 'draft' | 'published') => {
       if (!validationSummary.isValid) return
+      if (dirtyKeys.size === 0) {
+        setImportStatus('Nothing changed since load — no sections to save.')
+        return
+      }
       setSaving(true)
       try {
-        const { savedKeys, failedKeys } = await saveFriendlyConfigToDB(config, status)
+        const { savedKeys, failedKeys } = await saveFriendlyConfigToDB(config, status, dirtyKeys)
         setDirty(failedKeys.length > 0)
+        // Only clear the keys that actually saved -- a failed key stays
+        // dirty so it's retried (and still excluded from) the next save.
+        if (savedKeys.length > 0) {
+          setDirtyKeys((prev) => {
+            const next = new Set(prev)
+            savedKeys.forEach((k) => next.delete(k))
+            return next
+          })
+        }
         if (failedKeys.length === 0) {
           const verb = status === 'published' ? 'Published' : 'Draft saved'
           const warn = validationSummary.warningCount > 0 ? ` ${validationSummary.warningCount} quality recommendation(s) remaining.` : ''
-          setImportStatus(`${verb} — ${savedKeys.length} section(s) written to the database.${warn}`)
+          setImportStatus(`${verb} — ${savedKeys.length} changed section(s) written to the database.${warn}`)
         } else {
           setImportStatus(`Saved ${savedKeys.length} section(s), but ${failedKeys.length} failed (${failedKeys.join(', ')}). Try again.`)
         }
@@ -350,7 +413,7 @@ function AdminPanel() {
         setSaving(false)
       }
     },
-    [config, validationSummary],
+    [config, validationSummary, dirtyKeys],
   )
 
   const handleSaveDraft = useCallback(() => {
@@ -393,7 +456,7 @@ function AdminPanel() {
         }
 
         if (result.config) {
-          dispatch({ type: 'replaceConfig', config: result.config })
+          trackedDispatch({ type: 'replaceConfig', config: result.config })
           setDirty(true)
           setImportStatus('Config imported into the editor. Click Save Draft or Publish to persist it to the database.')
         }
@@ -403,13 +466,13 @@ function AdminPanel() {
     }
     reader.readAsText(file)
     e.target.value = ''
-  }, [])
+  }, [trackedDispatch])
 
   const handleReset = useCallback(() => {
-    dispatch({ type: 'replaceConfig', config: portfolioConfig })
+    trackedDispatch({ type: 'replaceConfig', config: portfolioConfig })
     setDirty(true)
     setImportStatus('Reset to bundled defaults in the editor (not yet saved — click Save Draft or Publish to persist).')
-  }, [])
+  }, [trackedDispatch])
 
   const selectedExp = config.experience.find((e) => e.id === selectedExpId) ?? config.experience[0]
   const selectedProject = config.projects.find((p) => p.id === selectedProjectId) ?? config.projects[0]
@@ -424,85 +487,85 @@ function AdminPanel() {
   const updateExperience = useCallback(
     (patch: Partial<Experience>) => {
       if (!selectedExp?.id) return
-      dispatch({ type: 'patchEntity', section: 'experience', id: selectedExp.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'experience', id: selectedExp.id, patch })
       setDirty(true)
     },
-    [selectedExp],
+    [selectedExp, trackedDispatch],
   )
 
   const updateProject = useCallback(
     (patch: Partial<Project>) => {
       if (!selectedProject?.id) return
-      dispatch({ type: 'patchEntity', section: 'projects', id: selectedProject.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'projects', id: selectedProject.id, patch })
       setDirty(true)
     },
-    [selectedProject],
+    [selectedProject, trackedDispatch],
   )
 
   const updateRoleHero = useCallback(
     (field: 'headline' | 'subtitle' | 'primaryCta', value: string) => {
-      dispatch({
+      trackedDispatch({
         type: 'patchRole',
         id: selectedRoleId,
         patch: { hero: { ...config.roles[selectedRoleId].hero, [field]: value } },
       })
       setDirty(true)
     },
-    [selectedRoleId, config.roles],
+    [selectedRoleId, config.roles, trackedDispatch],
   )
 
   const updateMetric = useCallback(
     (patch: Partial<Metric>) => {
       if (!selectedMetric?.id) return
-      dispatch({ type: 'patchEntity', section: 'metrics', id: selectedMetric.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'metrics', id: selectedMetric.id, patch })
       setDirty(true)
     },
-    [selectedMetric],
+    [selectedMetric, trackedDispatch],
   )
 
   const updateSkillCategory = useCallback(
     (patch: Partial<SkillCategory>) => {
       if (!selectedSkillCategory?.id) return
-      dispatch({ type: 'patchEntity', section: 'skills', id: selectedSkillCategory.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'skills', id: selectedSkillCategory.id, patch })
       setDirty(true)
     },
-    [selectedSkillCategory],
+    [selectedSkillCategory, trackedDispatch],
   )
 
   const updateEdu = useCallback(
     (patch: Partial<Education>) => {
       if (!selectedEdu?.id) return
-      dispatch({ type: 'patchEntity', section: 'education', id: selectedEdu.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'education', id: selectedEdu.id, patch })
       setDirty(true)
     },
-    [selectedEdu],
+    [selectedEdu, trackedDispatch],
   )
 
   const updateCert = useCallback(
     (patch: Partial<Certification>) => {
       if (!selectedCert?.id) return
-      dispatch({ type: 'patchEntity', section: 'certifications', id: selectedCert.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'certifications', id: selectedCert.id, patch })
       setDirty(true)
     },
-    [selectedCert],
+    [selectedCert, trackedDispatch],
   )
 
   const updateResearch = useCallback(
     (patch: Partial<Research>) => {
       if (!selectedResearch?.id) return
-      dispatch({ type: 'patchEntity', section: 'research', id: selectedResearch.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'research', id: selectedResearch.id, patch })
       setDirty(true)
     },
-    [selectedResearch],
+    [selectedResearch, trackedDispatch],
   )
 
   const updateAIKnowledge = useCallback(
     (patch: Partial<AIKnowledgeEntry>) => {
       if (!selectedAIKnowledge?.id) return
-      dispatch({ type: 'patchEntity', section: 'aiKnowledge', id: selectedAIKnowledge.id, patch })
+      trackedDispatch({ type: 'patchEntity', section: 'aiKnowledge', id: selectedAIKnowledge.id, patch })
       setDirty(true)
     },
-    [selectedAIKnowledge],
+    [selectedAIKnowledge, trackedDispatch],
   )
 
   const sidebar = (
@@ -1990,17 +2053,22 @@ function AdminPanel() {
           </AdminCard>
         )}
 
-        <div className="flex flex-wrap gap-3 rounded-[var(--radius-card)] border border-slate-700 bg-slate-900/40 p-4">
+        <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border border-slate-700 bg-slate-900/40 p-4">
+          <span className="text-xs text-slate-400">
+            {dirtyKeys.size > 0
+              ? `Will save: ${Array.from(dirtyKeys).join(', ')}`
+              : 'No changes since load — only edited sections are ever saved.'}
+          </span>
           <button
             type="submit"
-            disabled={validationSummary.errorCount > 0 || saving}
+            disabled={validationSummary.errorCount > 0 || saving || dirtyKeys.size === 0}
             title={
               validationSummary.errorCount > 0
                 ? `Cannot save draft: Fix ${validationSummary.errorCount} blocking error(s)`
                 : undefined
             }
             className={`min-h-[44px] min-w-[44px] rounded-[var(--radius-base)] px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
-              validationSummary.errorCount > 0 || saving
+              validationSummary.errorCount > 0 || saving || dirtyKeys.size === 0
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                 : 'bg-cyan-500 text-slate-950 hover:bg-cyan-400 shadow'
             }`}
@@ -2010,14 +2078,14 @@ function AdminPanel() {
           <button
             type="button"
             onClick={handlePublish}
-            disabled={validationSummary.errorCount > 0 || saving}
+            disabled={validationSummary.errorCount > 0 || saving || dirtyKeys.size === 0}
             title={
               validationSummary.errorCount > 0
                 ? `Cannot publish: Fix ${validationSummary.errorCount} blocking error(s)`
                 : undefined
             }
             className={`min-h-[44px] min-w-[44px] rounded-[var(--radius-base)] px-5 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
-              validationSummary.errorCount > 0 || saving
+              validationSummary.errorCount > 0 || saving || dirtyKeys.size === 0
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                 : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow'
             }`}
@@ -2076,7 +2144,7 @@ function AdminPanel() {
           onConfirmImport={
             diagnosticData.candidateConfig
               ? () => {
-                  dispatch({ type: 'replaceConfig', config: diagnosticData.candidateConfig! })
+                  trackedDispatch({ type: 'replaceConfig', config: diagnosticData.candidateConfig! })
                   setDirty(true)
                   setImportStatus('Configuration imported with quality warnings into the editor. Click Save Draft or Publish to persist it.')
                   setDiagnosticData(null)

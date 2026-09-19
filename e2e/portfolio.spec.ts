@@ -60,14 +60,19 @@ test.describe('Portfolio', () => {
   // the DB instead of localStorage (the root cause of the old
   // Save-Draft-does-nothing bug, PR #78). This test covers the real
   // acceptance criteria: editing the Profile form and clicking Save
-  // Draft issues a genuine network PUT to every friendly-panel key.
-  test('Configuration Panel Save Draft is a real network PUT, not a localStorage no-op', async ({ page }) => {
+  // Draft issues a genuine network PUT for the changed key -- AND (god's
+  // steer, conv-cms-restore) that it does NOT blanket-write every
+  // friendly-panel key: the other 9 untouched sections must never
+  // receive a PUT, or a currently-published one among them would be
+  // silently flipped back to draft and pulled off the live site.
+  test('Configuration Panel Save Draft writes only the changed section, never blanket-writing published sections', async ({ page }) => {
     await page.route('**/api/auth/login', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'fake-jwt', expiresIn: 86400 }) }),
     )
+    const putRequests: { key: string; status: string }[] = []
     // Friendly-panel keys: GET returns 404 (nothing published yet, falls
-    // back to bundled defaults) for every key except profile, whose PUT
-    // this test asserts on directly.
+    // back to bundled defaults, same as every other untouched key) for
+    // every key except profile, which this test edits.
     await page.route('**/api/admin/content/**', (route) => {
       const url = route.request().url()
       if (route.request().method() === 'GET') {
@@ -92,11 +97,13 @@ test.describe('Portfolio', () => {
         }
         return route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'Content not found' }) })
       }
-      const key = url.split('/').pop()
+      const key = url.split('/').pop() ?? ''
+      const putBody = JSON.parse(route.request().postData() ?? '{}')
+      putRequests.push({ key, status: putBody.status })
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ section_key: key, data: JSON.parse(route.request().postData() ?? '{}').data, status: 'draft', published_at: null, updated_at: 'now' }),
+        body: JSON.stringify({ section_key: key, data: putBody.data, status: putBody.status, published_at: null, updated_at: 'now' }),
       })
     })
 
@@ -109,6 +116,9 @@ test.describe('Portfolio', () => {
     // inner CmsAuthGate (only blogPosts/caseStudies/siteContent are) --
     // the outer login above is enough to reach the friendly form directly.
     const nameInput = page.getByLabel('Full name')
+    // Wait for the async DB-load merge to settle before editing, so the
+    // fill below isn't racing (and losing to) the load's re-render.
+    await expect(nameInput).toHaveValue('Kuldeep Lodha')
     await nameInput.fill('Kuldeep Lodha Updated')
 
     const putRequest = page.waitForRequest(
@@ -118,6 +128,10 @@ test.describe('Portfolio', () => {
     const req = await putRequest
     const body = JSON.parse(req.postData() ?? '{}')
     expect(body.status).toBe('draft')
+
+    await expect(page.getByText(/Draft saved/)).toBeVisible()
+    // The whole point of the fix: only the edited key was written.
+    expect(putRequests.map((r) => r.key)).toEqual(['profile'])
     expect(body.data.name).toBe('Kuldeep Lodha Updated')
   })
 
