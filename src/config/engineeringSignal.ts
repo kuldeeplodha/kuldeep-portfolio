@@ -4,7 +4,8 @@ import type { EngineeringSignalItem } from '../types'
 export const engineeringSignal: EngineeringSignalItem[] = [
   {
     title: 'Backend Systems',
-    description: 'Production backend applications, APIs, business logic, and data-driven workflows.',
+    description:
+      'Production backend applications, APIs, and business logic across EMR, billing, and CRM systems, plus data-driven workflows.',
   },
   {
     title: 'API Engineering',

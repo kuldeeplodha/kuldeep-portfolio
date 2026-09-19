@@ -12,7 +12,11 @@ describe('portfolioConfig', () => {
 
   it('has experience entries with achievements', () => {
     expect(portfolioConfig.experience.length).toBeGreaterThan(0)
-    expect(portfolioConfig.experience[0].achievements.length).toBeGreaterThan(0)
+    // CONTENT-APPLY-BUCKETA: Vidai Solutions (current role) is now index 0
+    // with achievements deliberately empty -- quantified Vidai achievements
+    // are Bucket B, not yet approved. At least one entry overall must still
+    // carry real achievements.
+    expect(portfolioConfig.experience.some((e) => e.achievements.length > 0)).toBe(true)
   })
 })
 

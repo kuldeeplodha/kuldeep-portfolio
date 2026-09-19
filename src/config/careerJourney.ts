@@ -6,13 +6,13 @@ export const careerJourney: CareerJourneyStep[] = [
     period: '2021',
     title: 'Starting with Software',
     description:
-      'Began my professional software engineering journey, building backend applications, APIs, databases, and digital workflows.',
+      'Began my professional software engineering journey, building Django and REST API backend applications, databases, and digital workflows.',
   },
   {
     period: '2021 – Jul 2025',
     title: 'Software + Data',
     description:
-      'Expanded into data engineering, ETL automation, analytics, dashboards, reporting, and operational systems while continuing backend development.',
+      'Expanded into data engineering, Apache Airflow ETL automation, Superset/Metabase dashboards, reporting, and operational systems while continuing backend development.',
   },
   {
     period: '2023 – 2024',
@@ -30,6 +30,6 @@ export const careerJourney: CareerJourneyStep[] = [
     period: 'Aug 2025 – Present',
     title: 'Engineering Leadership',
     description:
-      'Joined Vidai Solutions as a Senior Software Developer (Lead), taking responsibility for backend engineering, architecture, integrations, optimization, and team leadership.',
+      'Joined Vidai Solutions as a Senior Software Developer (Lead), taking responsibility for backend engineering across EMR, billing, and CRM, integrations, optimization, and team leadership.',
   },
 ]

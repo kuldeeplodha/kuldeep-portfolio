@@ -67,7 +67,7 @@ export const aiKnowledge: AIKnowledgeEntry[] = [
     id: 'certifications-details',
     questionPatterns: ['certifications', 'certification', 'certificates', 'cert', 'certified'],
     answer:
-      'Kuldeep\'s certifications include: Prompt Design in Vertex AI (Google Cloud Skills Boost), Data Analyst Associate (DataCamp), Docker Foundations Professional Certificate, Getting Started as an AWS Developer (LinkedIn), Building React and Django Apps (LinkedIn), Career Essentials in Software Development (Microsoft/LinkedIn), Excel Skills for Data Analytics and Visualization, SQL (Advanced) and Problem Solving (Intermediate) from HackerRank.',
+      'Kuldeep\'s certifications include: Career Essentials in Software Development (Microsoft & LinkedIn), Getting Started as an AWS Developer (LinkedIn), Prompt Design in Vertex AI (Google Cloud Skills Boost), Apache PySpark by Example (LinkedIn), Excel Skills for Data Analytics and Visualization (Macquarie University / Coursera), SQL Advanced (HackerRank), and Problem Solving — Intermediate (HackerRank).',
     tags: ['certifications', 'general'],
     source: 'resume:all',
   },
