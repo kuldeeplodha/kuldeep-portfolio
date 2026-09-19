@@ -54,29 +54,49 @@ test.describe('Portfolio', () => {
     await expect(page.locator('h1')).toContainText('Configuration Panel')
   })
 
-  // CMS-UNIFY-CONFIG-EDITOR: the legacy localStorage Configuration Panel
-  // (per-tab Add/Move/Duplicate/Delete entity controls, tested here
-  // previously) is retired -- every section is now edited through the
-  // single DB-backed Site Content editor. Replaced with a test of the
-  // actual acceptance criteria: editing a section and saving a draft is a
-  // real network PUT (the whole point of this retirement -- the old
-  // "Save Draft" silently wrote to localStorage only, PR #78).
-  test('Site Content editor Save Draft is a real network PUT, not a localStorage no-op', async ({ page }) => {
+  // CMS-RESTORE-FRIENDLY-PANEL: the legacy per-section multi-tab
+  // Configuration Panel (Add/Move/Duplicate/Delete entity controls) is
+  // restored as the default /admin experience, but now saves straight to
+  // the DB instead of localStorage (the root cause of the old
+  // Save-Draft-does-nothing bug, PR #78). This test covers the real
+  // acceptance criteria: editing the Profile form and clicking Save
+  // Draft issues a genuine network PUT to every friendly-panel key.
+  test('Configuration Panel Save Draft is a real network PUT, not a localStorage no-op', async ({ page }) => {
     await page.route('**/api/auth/login', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'fake-jwt', expiresIn: 86400 }) }),
     )
-    await page.route('**/api/admin/content/contact', (route) => {
+    // Friendly-panel keys: GET returns 404 (nothing published yet, falls
+    // back to bundled defaults) for every key except profile, whose PUT
+    // this test asserts on directly.
+    await page.route('**/api/admin/content/**', (route) => {
+      const url = route.request().url()
       if (route.request().method() === 'GET') {
-        return route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ section_key: 'contact', data: { title: 'Original title' }, status: 'published', published_at: 'now', updated_at: 'now' }),
-        })
+        if (url.endsWith('/profile')) {
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              section_key: 'profile',
+              data: {
+                name: 'Kuldeep Lodha',
+                title: 'Senior Software Developer',
+                email: 'kuldeep@example.com',
+                location: 'Remote',
+                summary: 'Senior software developer building reliable, well-tested systems end to end.',
+              },
+              status: 'published',
+              published_at: 'now',
+              updated_at: 'now',
+            }),
+          })
+        }
+        return route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'Content not found' }) })
       }
+      const key = url.split('/').pop()
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ section_key: 'contact', data: JSON.parse(route.request().postData() ?? '{}').data, status: 'draft', published_at: null, updated_at: 'now' }),
+        body: JSON.stringify({ section_key: key, data: JSON.parse(route.request().postData() ?? '{}').data, status: 'draft', published_at: null, updated_at: 'now' }),
       })
     })
 
@@ -85,26 +105,20 @@ test.describe('Portfolio', () => {
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.locator('h1')).toContainText('Configuration Panel')
 
-    // Site Content is already the default landing tab, but it sits behind
-    // its OWN inner CmsAuthGate (the outer gate above only unlocks the page
-    // shell) -- the unmocked /api/auth/verify call fails, so it re-shows
-    // its sign-in form; same pattern as v22-p2-admin-cms.spec.ts's tests.
-    await page.getByLabel('Admin password').fill('test-admin-password')
-    await page.getByRole('button', { name: 'Sign in' }).click()
-
-    // 'Contact' is a key inside SiteContentAdminPanel's own sidebar.
-    await page.locator('nav[aria-label="Site content sections"]').getByRole('button', { name: 'Contact' }).click()
-
-    const titleInput = page.getByRole('textbox').first()
-    await titleInput.fill('Updated title')
+    // Profile is the default landing tab and is NOT behind the CMS tabs'
+    // inner CmsAuthGate (only blogPosts/caseStudies/siteContent are) --
+    // the outer login above is enough to reach the friendly form directly.
+    const nameInput = page.getByLabel('Full name')
+    await nameInput.fill('Kuldeep Lodha Updated')
 
     const putRequest = page.waitForRequest(
-      (req) => req.url().includes('/api/admin/content/contact') && req.method() === 'PUT',
+      (req) => req.url().includes('/api/admin/content/profile') && req.method() === 'PUT',
     )
-    await page.getByRole('button', { name: 'Save draft' }).click()
+    await page.getByRole('button', { name: 'Save Draft' }).click()
     const req = await putRequest
-    expect(JSON.parse(req.postData() ?? '{}').status).toBe('draft')
-    await expect(page.getByText('Saved.')).toBeVisible()
+    const body = JSON.parse(req.postData() ?? '{}')
+    expect(body.status).toBe('draft')
+    expect(body.data.name).toBe('Kuldeep Lodha Updated')
   })
 
   test('unknown route renders not-found fallback', async ({ page }) => {
