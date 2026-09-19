@@ -17,14 +17,24 @@ def row_to_dict(row):
 
 @router.get("/content")
 async def get_all_content(response: Response):
-    response.headers["Cache-Control"] = "s-maxage=60, stale-while-revalidate"
+    # CMS-CACHE-REALTIME: must-revalidate (no long stale-while-revalidate)
+    # so browsers/intermediaries re-check with the origin after s-maxage
+    # instead of serving a day-old disk cache while a real edit is live.
+    # backend/vercel.json's route-level header is what Vercel actually
+    # serves in prod -- kept identical here so the two never drift.
+    response.headers["Cache-Control"] = "public, max-age=0, must-revalidate, s-maxage=60"
     client = get_db()
     result = await client.execute("SELECT * FROM site_content WHERE status = 'published'")
     return [row_to_dict(row) for row in result.rows]
 
 @router.get("/content/{section_key}")
 async def get_content_by_key(response: Response, section_key: str = Path(..., pattern=r'^[a-z0-9_-]{1,64}$')):
-    response.headers["Cache-Control"] = "s-maxage=60, stale-while-revalidate"
+    # CMS-CACHE-REALTIME: must-revalidate (no long stale-while-revalidate)
+    # so browsers/intermediaries re-check with the origin after s-maxage
+    # instead of serving a day-old disk cache while a real edit is live.
+    # backend/vercel.json's route-level header is what Vercel actually
+    # serves in prod -- kept identical here so the two never drift.
+    response.headers["Cache-Control"] = "public, max-age=0, must-revalidate, s-maxage=60"
     client = get_db()
     result = await client.execute("SELECT * FROM site_content WHERE section_key = ? AND status = 'published'", [section_key])
     if not result.rows:

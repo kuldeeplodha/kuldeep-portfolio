@@ -33,6 +33,44 @@ def test_content_crud():
         res = client.get("/api/admin/content/profile", headers=headers)
         assert res.status_code == 200
 
+def test_content_cache_control_no_long_stale_while_revalidate():
+    """CMS-CACHE-REALTIME: the old header (s-maxage=60,
+    stale-while-revalidate[=86400]) let browsers serve a day-old disk
+    cache for up to 24h while revalidating in the background, so an
+    edit could look "not live" far longer than the intended ~60s. The
+    fix drops the long SWR and adds must-revalidate so the browser
+    re-checks with the origin once s-maxage expires, on both the bulk
+    and single-key public content endpoints."""
+    with TestClient(app) as client:
+        for path in ("/api/content", "/api/content/profile"):
+            res = client.get(path)
+            cache_control = res.headers.get("Cache-Control", "")
+            assert "s-maxage=60" in cache_control, (path, cache_control)
+            assert "must-revalidate" in cache_control, (path, cache_control)
+            assert "stale-while-revalidate" not in cache_control, (
+                f"{path} must not carry a long-lived stale-while-revalidate "
+                f"that lets browsers serve day-stale cached edits: {cache_control!r}"
+            )
+
+
+def test_vercel_json_content_routes_have_no_long_stale_while_revalidate():
+    """The FastAPI-set Cache-Control header above is what TestClient
+    sees, but in production Vercel's route-level `headers` in
+    vercel.json (backend/vercel.json) is what's actually served to the
+    browser -- so it must carry the same fix, not just content.py."""
+    import json
+    from pathlib import Path
+
+    vercel_config = json.loads((Path(__file__).parent.parent / "vercel.json").read_text())
+    routes = vercel_config["routes"]
+
+    content_route = next(r for r in routes if r["src"] == "/api/content(.*)")
+    cache_control = content_route["headers"]["Cache-Control"]
+    assert "s-maxage=60" in cache_control
+    assert "must-revalidate" in cache_control
+    assert "stale-while-revalidate" not in cache_control
+
+
 def test_content_array_shaped_data_round_trips():
     """CMS-BUG-PUT-DATA-DICT-422: array-shaped sections (e.g.
     certifications) must save and round-trip through both the public
