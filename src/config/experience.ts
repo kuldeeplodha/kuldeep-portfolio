@@ -2,10 +2,37 @@ import type { Experience } from '../types'
 
 export const experience: Experience[] = [
   {
+    id: 'vidai-solutions',
+    organization: 'Vidai Solutions',
+    role: 'Senior Software Developer (Lead)',
+    period: 'Aug 2025 – Present',
+    location: 'Pune, IN',
+    responsibilities: [
+      'Currently leading a backend development team while remaining hands-on with engineering and architecture.',
+      'Building and maintaining systems across EMR, billing, and CRM domains.',
+      'Working with external provider APIs including LinkedIn and Google integrations.',
+      'Optimizing APIs and database operations to improve application performance.',
+      'Participating in architecture, code reviews, debugging, production support, and delivery.',
+    ],
+    achievements: [],
+    technologies: [
+      'Python',
+      'Django',
+      'Django REST Framework',
+      'PostgreSQL',
+      'SQL',
+      'REST APIs',
+      'Git',
+      'Docker',
+      'CI/CD',
+    ],
+    relevantRoles: ['software', 'system', 'ai'],
+  },
+  {
     id: 'shelter-associates',
     organization: 'Shelter Associates',
     role: 'Software Developer',
-    period: "Jul '21 – Present",
+    period: "Jul '21 – Jul 2025",
     location: 'Pune, IN',
     responsibilities: [
       'Backend development with Django and REST APIs',
@@ -74,7 +101,7 @@ export const experience: Experience[] = [
     id: 'swadhar-idwc',
     organization: 'Swadhar IDWC',
     role: 'Software Developer Consultant',
-    period: "Apr '23 – Present",
+    period: "Apr '23 – Jul 2025",
     location: 'Pune, IN',
     responsibilities: [
       'Digital transformation from manual data entry to AVNI-based systems',

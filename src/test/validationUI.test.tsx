@@ -370,7 +370,13 @@ describe('AdminPage Validation Integration', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.getByText(/All sections valid\. Ready to export or save draft\./i)).toBeInTheDocument()
+    // CONTENT-APPLY-BUCKETA: Vidai Solutions (the current role, added as
+    // experience[0]) deliberately has an empty achievements array --
+    // quantified Vidai achievements are Bucket B, not yet approved -- so
+    // the bundled default config now carries exactly one "no quantified
+    // achievements" quality warning instead of validating fully clean.
+    expect(screen.getByText(/1 quality recommendation\./i)).toBeInTheDocument()
+    expect(screen.getByText(/Draft is valid and safe to save and export\./i)).toBeInTheDocument()
     // CMS-RESTORE-FRIENDLY-PANEL steer: Save Draft only writes sections
     // changed since load, so on a fresh load with nothing edited yet it's
     // correctly disabled -- there's nothing dirty to save. Export JSON is
