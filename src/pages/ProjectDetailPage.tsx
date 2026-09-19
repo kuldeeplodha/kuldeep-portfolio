@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { isValidSafeUrl } from '../lib/config/exportImport'
+import { isValidSafeUrl } from '../lib/validation/safeUrl'
 import { useRole } from '../hooks/useRole'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { useCaseStudyBySlug } from '../lib/content/usePublicContent'

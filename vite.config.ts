@@ -32,20 +32,18 @@ export default defineConfig({
         'src/pages/HomePage.tsx', // e2e-only composed view shell (0% unit)
         'src/pages/AdminPage.tsx', // e2e-only admin view shell
       ],
-      // Phase A floors of record — ADR-005 Amendment-1, confirmed by god
-      // (statements/lines 58, functions 45, branches 50). Floors are
-      // up-only: Phase B ratchets them higher after targeted suites, never
-      // down without an ADR note. The per-file validationRegistry branch
-      // floor (PRD-V1.4 AC-1.3) is already satisfied (>=90%) by the suites
-      // expanded in this card and is locked in here.
+      // Floors of record — ADR-007 (2026-09-19) superseded ADR-005
+      // Amendment-1's 58/58/45/50 after CMS-UNIFY-CONFIG-EDITOR (PR #80)
+      // deleted validationRegistry.ts and its dedicated coverage-farming
+      // tests (coverageExpansion.test.ts/validationRegistry.test.ts). That
+      // was a deletion artifact, not a behavior regression — see ADR-007
+      // for the measured before/after. Floors are up-only FROM THIS NEW
+      // BASELINE: never lower again without another ADR note.
       thresholds: {
-        statements: 58,
-        lines: 58,
-        functions: 45,
-        branches: 50,
-        'src/lib/config/validationRegistry.ts': {
-          branches: 90,
-        },
+        statements: 50,
+        lines: 50,
+        functions: 43,
+        branches: 38,
       },
     },
   },

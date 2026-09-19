@@ -1,18 +1,7 @@
-import { describe, expect, it, beforeEach, afterAll } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { portfolioConfig } from '../config'
 import { generateAnswer, searchKnowledge } from '../lib/ai/knowledgeSearch'
 import { ClientSearchProvider, ServerLLMProvider } from '../lib/ai/provider'
-import {
-  validateFullConfig,
-  exportConfig,
-  parseImportedConfig,
-  loadDraftFromLocalStorage,
-  saveDraftToLocalStorage,
-  getQuarantinedDraft,
-  clearQuarantine,
-  clearDraft,
-  type StoredDraft,
-} from '../lib/config/exportImport'
 
 describe('portfolioConfig', () => {
   it('loads all four roles', () => {
@@ -143,174 +132,12 @@ describe('role themes', () => {
   })
 })
 
-describe('validateFullConfig href-bound URL safety', () => {
-  const malicious = ['javascript:alert(1)', 'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==']
-
-  const clone = () => JSON.parse(JSON.stringify(portfolioConfig))
-
-  const cases: Array<{ label: string; inject: (cfg: any, url: string) => void }> = [
-    {
-      label: 'profile.links.linkedin',
-      inject: (cfg, url) => { cfg.profile.links.linkedin = url },
-    },
-    {
-      label: 'profile.links.github',
-      inject: (cfg, url) => { cfg.profile.links.github = url },
-    },
-    {
-      label: 'project.githubUrl',
-      inject: (cfg, url) => { cfg.projects[0].githubUrl = url },
-    },
-    {
-      label: 'certification.url',
-      inject: (cfg, url) => { cfg.certifications[0].url = url },
-    },
-  ]
-
-  it.each(cases.flatMap(({ label }) =>
-    malicious.map((url) => ({ label, url })),
-  ))('rejects $url in $label', ({ label, url }) => {
-    const cfg = clone()
-    cases.find((c) => c.label === label)!.inject(cfg, url)
-    const errors = validateFullConfig(cfg)
-    expect(errors.some((e) => /Invalid/i.test(e))).toBe(true)
-  })
-
-  it('accepts https URLs in all four fields', () => {
-    const cfg = clone()
-    cfg.profile.links.linkedin = 'https://www.linkedin.com/in/kuldeeplodha'
-    cfg.profile.links.github = 'https://github.com/kuldeeplodha'
-    cfg.projects[0].githubUrl = 'https://github.com/kuldeeplodha/kuldeep-portfolio'
-    cfg.certifications[0].url = 'https://example.com/cert'
-    expect(validateFullConfig(cfg)).toEqual([])
-  })
-})
-
-describe('exportImport v2 envelope & quarantine', () => {
-  const originalLocalStorage = globalThis.localStorage
-  const STORAGE_KEY = 'kuldeep-portfolio-config-draft'
-  const QUARANTINE_KEY = 'kuldeep-portfolio-config-draft-corrupt'
-
-  beforeEach(() => {
-    globalThis.localStorage = {
-      ...originalLocalStorage,
-      store: {} as Record<string, string>,
-      getItem(key: string) { return this.store[key] ?? null },
-      setItem(key: string, value: string) { this.store[key] = value },
-      removeItem(key: string) { delete this.store[key] },
-      clear() { this.store = {} },
-      key(index: number) { return Object.keys(this.store)[index] ?? null },
-      length: 0,
-    }
-    clearDraft()
-    clearQuarantine()
-  })
-
-  afterAll(() => {
-    globalThis.localStorage = originalLocalStorage
-  })
-
-  it('exportConfig wraps config in v2 envelope', () => {
-    const json = exportConfig(portfolioConfig)
-    const envelope = JSON.parse(json) as StoredDraft
-    expect(envelope.schemaVersion).toBe(2)
-    expect(envelope.savedAt).toBeDefined()
-    expect(envelope.config.profile.name).toBe(portfolioConfig.profile.name)
-    expect(new Date(envelope.savedAt).getTime()).toBeLessThanOrEqual(Date.now())
-  })
-
-  it('parseImportedConfig accepts v2 envelope and extracts config', () => {
-    const envelopeJson = exportConfig(portfolioConfig)
-    const parsed = parseImportedConfig(envelopeJson)
-    expect(parsed.profile.name).toBe(portfolioConfig.profile.name)
-    expect(parsed.experience.length).toBe(portfolioConfig.experience.length)
-  })
-
-  it('parseImportedConfig accepts legacy raw config (backward compat)', () => {
-    const legacyJson = JSON.stringify(portfolioConfig)
-    const parsed = parseImportedConfig(legacyJson)
-    expect(parsed.profile.name).toBe(portfolioConfig.profile.name)
-  })
-
-  it('parseImportedConfig rejects v2 envelope with invalid config', () => {
-    const badConfig = { ...portfolioConfig, profile: { ...portfolioConfig.profile, name: '' } }
-    const envelope = { schemaVersion: 2, savedAt: new Date().toISOString(), config: badConfig }
-    expect(() => parseImportedConfig(JSON.stringify(envelope))).toThrow('Validation failed')
-  })
-
-  it('saveDraftToLocalStorage writes v2 envelope', () => {
-    saveDraftToLocalStorage(portfolioConfig)
-    const raw = localStorage.getItem(STORAGE_KEY)
-    expect(raw).toBeTruthy()
-    const envelope = JSON.parse(raw!) as StoredDraft
-    expect(envelope.schemaVersion).toBe(2)
-    expect(envelope.config.profile.name).toBe(portfolioConfig.profile.name)
-  })
-
-  it('loadDraftFromLocalStorage returns null when no draft', () => {
-    expect(loadDraftFromLocalStorage()).toBeNull()
-  })
-
-  it('loadDraftFromLocalStorage loads and validates v2 envelope draft', () => {
-    saveDraftToLocalStorage(portfolioConfig)
-    const loaded = loadDraftFromLocalStorage()
-    expect(loaded).not.toBeNull()
-    expect(loaded!.profile.name).toBe(portfolioConfig.profile.name)
-  })
-
-  it('loadDraftFromLocalStorage migrates legacy v1 unversioned draft', () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(portfolioConfig))
-    const loaded = loadDraftFromLocalStorage()
-    expect(loaded).not.toBeNull()
-    expect(loaded!.profile.name).toBe(portfolioConfig.profile.name)
-  })
-
-  it('loadDraftFromLocalStorage quarantines and returns null on parse failure', () => {
-    localStorage.setItem(STORAGE_KEY, 'not valid json')
-    const loaded = loadDraftFromLocalStorage()
-    expect(loaded).toBeNull()
-    const quarantined = getQuarantinedDraft()
-    expect(quarantined).toBe('not valid json')
-  })
-
-  it('loadDraftFromLocalStorage quarantines and returns null on validation failure', () => {
-    const badConfig = { ...portfolioConfig, profile: { ...portfolioConfig.profile, name: '' } }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 2, savedAt: new Date().toISOString(), config: badConfig }))
-    const loaded = loadDraftFromLocalStorage()
-    expect(loaded).toBeNull()
-    const quarantined = getQuarantinedDraft()
-    expect(quarantined).toBeTruthy()
-  })
-
-  it('loadDraftFromLocalStorage quarantines legacy draft that fails validation', () => {
-    const badConfig = { ...portfolioConfig, profile: { ...portfolioConfig.profile, name: '' } }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(badConfig))
-    const loaded = loadDraftFromLocalStorage()
-    expect(loaded).toBeNull()
-    const quarantined = getQuarantinedDraft()
-    expect(quarantined).toBeTruthy()
-  })
-
-  it('getQuarantinedDraft returns quarantined payload', () => {
-    localStorage.setItem(QUARANTINE_KEY, 'quarantined-data')
-    expect(getQuarantinedDraft()).toBe('quarantined-data')
-  })
-
-  it('clearQuarantine removes quarantined draft', () => {
-    localStorage.setItem(QUARANTINE_KEY, 'data')
-    clearQuarantine()
-    expect(getQuarantinedDraft()).toBeNull()
-  })
-
-  it('export/import round-trip preserves config', () => {
-    const json = exportConfig(portfolioConfig)
-    const parsed = parseImportedConfig(json)
-    expect(parsed).toEqual(portfolioConfig)
-  })
-
-  it('saveDraftToLocalStorage + loadDraftFromLocalStorage round-trip', () => {
-    saveDraftToLocalStorage(portfolioConfig)
-    const loaded = loadDraftFromLocalStorage()
-    expect(loaded).toEqual(portfolioConfig)
-  })
-})
+// CMS-UNIFY-CONFIG-EDITOR: the 'validateFullConfig href-bound URL safety'
+// and 'exportImport v2 envelope & quarantine' describe blocks that used to
+// live here were removed along with the retired
+// src/lib/config/exportImport.ts and validationRegistry.ts (the legacy
+// localStorage Configuration Panel's draft/import/export machinery). The
+// one function with a surviving public consumer, isValidSafeUrl, moved to
+// src/lib/validation/safeUrl.ts and is covered by the sections that use it
+// directly (CertificationsSection, Navbar, Footer, project/case-study
+// detail pages) rather than a standalone unit here.

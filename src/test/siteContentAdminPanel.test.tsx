@@ -177,4 +177,88 @@ describe('SiteContentAdminPanel', () => {
       expect(screen.getByRole('button', { name: labelPattern(key) })).toBeInTheDocument()
     }
   })
+
+  // CMS-UNIFY-CONFIG-EDITOR step (c): bulk export/import against the DB,
+  // replacing the retired legacy panel's localStorage-config-JSON download.
+  describe('bulk export/import (against the DB, not localStorage)', () => {
+    beforeEach(() => {
+      vi.stubGlobal('URL', { ...URL, createObjectURL: vi.fn(() => 'blob:mock'), revokeObjectURL: vi.fn() })
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    })
+
+    it('exports every key by fetching each admin record and downloading one JSON bundle', async () => {
+      ;(fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
+        const key = url.split('/').pop()
+        return Promise.resolve(
+          jsonResponse({ section_key: key, data: { probe: key }, status: 'published', published_at: 'now', updated_at: 'now' }),
+        )
+      })
+      const user = userEvent.setup()
+      render(<SiteContentAdminPanel />)
+
+      await user.click(await screen.findByRole('button', { name: 'Export all as JSON' }))
+
+      await waitFor(() => expect(screen.getByText(/Exported all \d+ keys\./)).toBeInTheDocument())
+      expect(URL.createObjectURL).toHaveBeenCalled()
+      expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled()
+    })
+
+    it('reports partial export when some keys 404 (not yet published)', async () => {
+      ;(fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
+        const key = url.split('/').pop()
+        if (key === 'metrics') return Promise.resolve(jsonResponse({ detail: 'Content not found' }, 404))
+        return Promise.resolve(
+          jsonResponse({ section_key: key, data: { probe: key }, status: 'published', published_at: 'now', updated_at: 'now' }),
+        )
+      })
+      const user = userEvent.setup()
+      render(<SiteContentAdminPanel />)
+
+      await user.click(await screen.findByRole('button', { name: 'Export all as JSON' }))
+
+      await waitFor(() => expect(screen.getByText(/\(1 not yet published\)/)).toBeInTheDocument())
+    })
+
+    it('imports a bundle by PUTting each key with its own status, then reports a summary', async () => {
+      ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        jsonResponse({ section_key: 'profile', data: { name: 'x' }, status: 'published', published_at: 'now', updated_at: 'now' }),
+      )
+      const user = userEvent.setup()
+      render(<SiteContentAdminPanel />)
+      await screen.findByRole('button', { name: 'Export all as JSON' })
+
+      const bundle = {
+        contact: { section_key: 'contact', data: { title: 'Imported' }, status: 'published', published_at: 'now', updated_at: 'now' },
+        footer: { section_key: 'footer', data: { text: 'Imported footer' }, status: 'draft', published_at: null, updated_at: 'now' },
+      }
+      const file = new File([JSON.stringify(bundle)], 'export.json', { type: 'application/json' })
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement
+      await user.upload(input, file)
+
+      await waitFor(() => expect(screen.getByText('Imported 2 key(s).')).toBeInTheDocument())
+
+      const putCalls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(([, init]) => init?.method === 'PUT')
+      expect(putCalls.length).toBe(2)
+      const bodies = putCalls.map(([, init]) => JSON.parse(init.body))
+      expect(bodies.find((b) => b.section_key === 'contact')?.status).toBe('published')
+      expect(bodies.find((b) => b.section_key === 'footer')?.status).toBe('draft')
+    })
+
+    it('rejects a non-JSON-object import file without calling PUT', async () => {
+      ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
+        jsonResponse({ section_key: 'profile', data: { name: 'x' }, status: 'published', published_at: 'now', updated_at: 'now' }),
+      )
+      const user = userEvent.setup()
+      render(<SiteContentAdminPanel />)
+      await screen.findByRole('button', { name: 'Export all as JSON' })
+
+      const file = new File(['not valid json'], 'export.json', { type: 'application/json' })
+      const input = document.querySelector('input[type="file"]') as HTMLInputElement
+      await user.upload(input, file)
+
+      await waitFor(() => expect(screen.getByText(/Import failed: invalid JSON/)).toBeInTheDocument())
+      const putCalls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(([, init]) => init?.method === 'PUT')
+      expect(putCalls.length).toBe(0)
+    })
+  })
 })

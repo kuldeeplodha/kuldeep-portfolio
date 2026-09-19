@@ -54,34 +54,57 @@ test.describe('Portfolio', () => {
     await expect(page.locator('h1')).toContainText('Configuration Panel')
   })
 
-  test('admin panel V2 controls allow reordering, adding and deleting with confirm modal', async ({ page, isMobile }) => {
+  // CMS-UNIFY-CONFIG-EDITOR: the legacy localStorage Configuration Panel
+  // (per-tab Add/Move/Duplicate/Delete entity controls, tested here
+  // previously) is retired -- every section is now edited through the
+  // single DB-backed Site Content editor. Replaced with a test of the
+  // actual acceptance criteria: editing a section and saving a draft is a
+  // real network PUT (the whole point of this retirement -- the old
+  // "Save Draft" silently wrote to localStorage only, PR #78).
+  test('Site Content editor Save Draft is a real network PUT, not a localStorage no-op', async ({ page }) => {
     await page.route('**/api/auth/login', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'fake-jwt', expiresIn: 86400 }) }),
     )
+    await page.route('**/api/admin/content/contact', (route) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ section_key: 'contact', data: { title: 'Original title' }, status: 'published', published_at: 'now', updated_at: 'now' }),
+        })
+      }
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ section_key: 'contact', data: JSON.parse(route.request().postData() ?? '{}').data, status: 'draft', published_at: null, updated_at: 'now' }),
+      })
+    })
+
     await page.goto('/admin')
     await page.getByLabel('Admin password').fill('test-admin-password')
     await page.getByRole('button', { name: 'Sign in' }).click()
     await expect(page.locator('h1')).toContainText('Configuration Panel')
 
-    // Navigate to Experience tab
-    const expTab = isMobile
-      ? page.locator('div[aria-label="Mobile sections"]').getByRole('button', { name: /Experience/i })
-      : page.locator('nav[aria-label="Admin sections"]').getByRole('button', { name: /Experience/i })
-    await expTab.click()
+    // Site Content is already the default landing tab, but it sits behind
+    // its OWN inner CmsAuthGate (the outer gate above only unlocks the page
+    // shell) -- the unmocked /api/auth/verify call fails, so it re-shows
+    // its sign-in form; same pattern as v22-p2-admin-cms.spec.ts's tests.
+    await page.getByLabel('Admin password').fill('test-admin-password')
+    await page.getByRole('button', { name: 'Sign in' }).click()
 
-    // Add experience item
-    await page.getByRole('button', { name: /Add new Experience/i }).click()
-    await expect(page.getByRole('textbox', { name: 'Organization' })).toHaveValue('New Organization')
+    // 'Contact' is a key inside SiteContentAdminPanel's own sidebar.
+    await page.locator('nav[aria-label="Site content sections"]').getByRole('button', { name: 'Contact' }).click()
 
-    // Click Delete to open confirmation dialog
-    await page.getByRole('button', { name: /^Delete /i }).first().click()
-    const dialog = page.getByRole('dialog')
-    await expect(dialog).toBeVisible()
-    await expect(dialog).toHaveAttribute('aria-modal', 'true')
+    const titleInput = page.getByRole('textbox').first()
+    await titleInput.fill('Updated title')
 
-    // Cancel modal
-    await page.getByRole('button', { name: 'Cancel' }).click()
-    await expect(dialog).not.toBeVisible()
+    const putRequest = page.waitForRequest(
+      (req) => req.url().includes('/api/admin/content/contact') && req.method() === 'PUT',
+    )
+    await page.getByRole('button', { name: 'Save draft' }).click()
+    const req = await putRequest
+    expect(JSON.parse(req.postData() ?? '{}').status).toBe('draft')
+    await expect(page.getByText('Saved.')).toBeVisible()
   })
 
   test('unknown route renders not-found fallback', async ({ page }) => {
