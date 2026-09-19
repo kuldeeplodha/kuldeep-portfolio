@@ -46,11 +46,17 @@ class CaseStudy(BaseModel):
     featured_media_url: Optional[str] = None
     media_urls: List[str]
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 class SiteContent(BaseModel):
     section_key: str = Field(..., pattern=r'^[a-z0-9_-]{1,64}$')
-    data: Dict[str, Any]
+    # CMS-BUG-PUT-DATA-DICT-422: `data` must accept either shape a
+    # section actually stores (11 of the 20 site_content keys are
+    # JSON arrays: experience/projects/metrics/skills/education/
+    # certifications/ai-knowledge/engineering-signal/experience-story/
+    # career-journey/resumes). Union keeps scalars/None rejected (422)
+    # while both real container shapes round-trip via json.dumps.
+    data: Union[Dict[str, Any], List[Any]]
     status: str
     published_at: Optional[str] = None
     updated_at: str
