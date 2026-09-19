@@ -1,6 +1,6 @@
 import { portfolioConfig } from '../../config'
 import { useSiteContent } from '../../lib/content/SiteContentProvider'
-import { isValidSafeUrl } from '../../lib/config/exportImport'
+import { isValidSafeUrl } from '../../lib/validation/safeUrl'
 import { GRID_PADDING, GRID_WIDTH } from '../ui/grid'
 
 /**

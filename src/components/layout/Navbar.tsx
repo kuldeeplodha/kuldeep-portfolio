@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { portfolioConfig, getResumeForVariant, resumes } from '../../config'
 import { useSiteContent } from '../../lib/content/SiteContentProvider'
-import { isValidSafeUrl } from '../../lib/config/exportImport'
+import { isValidSafeUrl } from '../../lib/validation/safeUrl'
 import { useRole } from '../../hooks/useRole'
 import { GRID_PADDING, GRID_WIDTH } from '../ui/grid'
 

@@ -36,16 +36,14 @@ export default defineConfig({
       // (statements/lines 58, functions 45, branches 50). Floors are
       // up-only: Phase B ratchets them higher after targeted suites, never
       // down without an ADR note. The per-file validationRegistry branch
-      // floor (PRD-V1.4 AC-1.3) is already satisfied (>=90%) by the suites
-      // expanded in this card and is locked in here.
+      // floor (PRD-V1.4 AC-1.3) was removed along with that file
+      // (CMS-UNIFY-CONFIG-EDITOR retired the whole legacy config-draft
+      // validation system it was measuring).
       thresholds: {
         statements: 58,
         lines: 58,
         functions: 45,
         branches: 50,
-        'src/lib/config/validationRegistry.ts': {
-          branches: 90,
-        },
       },
     },
   },

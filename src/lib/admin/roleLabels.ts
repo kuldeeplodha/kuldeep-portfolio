@@ -8,10 +8,3 @@ export const ROLE_LABELS: Record<RoleId, string> = {
   data: 'Data Analyst',
   system: 'System View',
 }
-
-export const RESUME_LABELS: Record<RoleId, string> = {
-  software: 'Software resume',
-  ai: 'AI/ML resume',
-  data: 'Data Analyst resume',
-  system: 'All resumes',
-}

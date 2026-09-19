@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../App'
 import { RoleSwitcher } from '../components/ui/RoleSwitcher'
-import { validateProfile, parseImportedConfig, exportConfig } from '../lib/config/exportImport'
 import { portfolioConfig } from '../config'
 
 describe('RoleSwitcher', () => {
@@ -29,78 +28,9 @@ describe('RoleSwitcher', () => {
   })
 })
 
-describe('config export/import', () => {
-  it('exports and parses valid config', () => {
-    const json = exportConfig(portfolioConfig)
-    const parsed = parseImportedConfig(json)
-    expect(parsed.profile.name).toBe('Kuldeep Lodha')
-    // Deep round-trip check
-    expect(parsed).toEqual(portfolioConfig)
-  })
-
-  it('rejects invalid config', () => {
-    expect(() => parseImportedConfig('{}')).toThrow('Profile is missing')
-  })
-
-  it('rejects config when experience is not an array', () => {
-    const malformed = {
-      ...portfolioConfig,
-      experience: 'not-an-array' as any,
-    }
-    expect(() => parseImportedConfig(JSON.stringify(malformed))).toThrow('Experience section must be an array')
-  })
-
-  it('rejects config when experience is missing required fields', () => {
-    const malformed = {
-      ...portfolioConfig,
-      experience: [
-        {
-          id: 'exp1',
-          role: 'Developer',
-          period: '2020-2021',
-          // missing organization
-        } as any,
-      ],
-    }
-    expect(() => parseImportedConfig(JSON.stringify(malformed))).toThrow('Organization is required')
-  })
-
-  it('rejects config when project is missing title', () => {
-    const malformed = {
-      ...portfolioConfig,
-      projects: [
-        {
-          id: 'proj1',
-          overview: 'Brief overview',
-          // missing title
-        } as any,
-      ],
-    }
-    expect(() => parseImportedConfig(JSON.stringify(malformed))).toThrow('Title is required')
-  })
-
-  it('rejects config when AI knowledge matches are empty', () => {
-    const malformed = {
-      ...portfolioConfig,
-      aiKnowledge: [
-        {
-          id: 'k1',
-          questionPatterns: [],
-          answer: 'Some answer',
-        } as any,
-      ],
-    }
-    expect(() => parseImportedConfig(JSON.stringify(malformed))).toThrow('At least one question pattern is required')
-  })
-
-  it('validates profile fields', () => {
-    const errors = validateProfile({
-      ...portfolioConfig.profile,
-      email: 'invalid',
-    })
-    expect(errors.some((e) => e.includes('Email'))).toBe(true)
-  })
-})
+// CMS-UNIFY-CONFIG-EDITOR: 'config export/import' (exportConfig/
+// parseImportedConfig/validateProfile) removed along with the retired
+// src/lib/config/exportImport.ts.
 
 describe('role filtering', () => {
   it('software role highlights backend metrics', () => {

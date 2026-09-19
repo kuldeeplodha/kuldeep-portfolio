@@ -81,6 +81,8 @@ export function SiteContentAdminPanel() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveOk, setSaveOk] = useState(false)
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [bulkStatus, setBulkStatus] = useState<string | null>(null)
 
   const load = useCallback((key: string) => {
     setLoading(true)
@@ -141,6 +143,92 @@ export function SiteContentAdminPanel() {
     [jsonText, selectedKey, record],
   )
 
+  // CMS-UNIFY-CONFIG-EDITOR step (c): "keep import/export working, now
+  // against the DB path." The retired legacy panel's export/import
+  // round-tripped a single PortfolioConfig JSON via a browser download +
+  // file input; there's no equivalent single object anymore (20 independent
+  // DB rows), so this exports/imports ALL site_content keys as one JSON
+  // file -- a full backup/restore rather than a config snapshot. Each
+  // imported key is PUT with whatever status/data it already had in the
+  // file (a true restore, not a forced re-publish).
+  const handleExportAll = useCallback(async () => {
+    setBulkBusy(true)
+    setBulkStatus(null)
+    try {
+      const results = await Promise.allSettled(ALL_KEYS.map((k) => getAdminContent(k.key)))
+      const bundle: Record<string, SiteContentRecord> = {}
+      let missing = 0
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') bundle[ALL_KEYS[i].key] = r.value
+        else missing += 1
+      })
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'site-content-export.json'
+      a.click()
+      URL.revokeObjectURL(url)
+      setBulkStatus(
+        missing > 0
+          ? `Exported ${ALL_KEYS.length - missing} of ${ALL_KEYS.length} keys (${missing} not yet published).`
+          : `Exported all ${ALL_KEYS.length} keys.`,
+      )
+    } catch (err) {
+      setBulkStatus(err instanceof CmsApiError ? `Export failed: ${err.message}` : 'Export failed.')
+    } finally {
+      setBulkBusy(false)
+    }
+  }, [])
+
+  const handleImportAll = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      e.target.value = ''
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = async () => {
+        let bundle: Record<string, Partial<SiteContentRecord>>
+        try {
+          bundle = JSON.parse(reader.result as string)
+          if (!bundle || typeof bundle !== 'object' || Array.isArray(bundle)) {
+            throw new Error('Expected a JSON object of section_key -> record.')
+          }
+        } catch (err) {
+          setBulkStatus(`Import failed: invalid JSON — ${err instanceof Error ? err.message : 'could not parse'}`)
+          return
+        }
+
+        setBulkBusy(true)
+        setBulkStatus(null)
+        let succeeded = 0
+        let failed = 0
+        for (const [key, entry] of Object.entries(bundle)) {
+          if (!entry || typeof entry !== 'object' || !('data' in entry)) {
+            failed += 1
+            continue
+          }
+          try {
+            await updateAdminContent(key, {
+              data: entry.data,
+              status: entry.status ?? 'draft',
+              published_at: entry.published_at ?? null,
+              updated_at: nowIso(),
+            })
+            succeeded += 1
+          } catch {
+            failed += 1
+          }
+        }
+        setBulkBusy(false)
+        setBulkStatus(`Imported ${succeeded} key(s)${failed > 0 ? `, ${failed} failed` : ''}.`)
+        load(selectedKey)
+      }
+      reader.readAsText(file)
+    },
+    [load, selectedKey],
+  )
+
   // CMS-UNIFY-CONFIG-EDITOR: the 5 newly-unified keys have no CmsFormEditor
   // case (its switch falls through to `default: return null`, i.e. a BLANK
   // form) — force raw JSON for all of them rather than risk a silently
@@ -173,6 +261,26 @@ export function SiteContentAdminPanel() {
       title="Site Content"
       description="Every homepage/section payload, admin-editable here instead of a code commit. The public site always falls back to the bundled default if a key is unpublished or the backend is unreachable."
     >
+      <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-slate-800 pb-4">
+        <button
+          type="button"
+          onClick={handleExportAll}
+          disabled={bulkBusy}
+          className="inline-flex min-h-[36px] items-center rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:border-cyan-400 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {bulkBusy ? 'Working…' : 'Export all as JSON'}
+        </button>
+        <label className="inline-flex min-h-[36px] cursor-pointer items-center rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:border-cyan-400 hover:text-white">
+          Import JSON
+          <input type="file" accept=".json" onChange={handleImportAll} disabled={bulkBusy} className="hidden" />
+        </label>
+        {bulkStatus && (
+          <span className="text-xs text-slate-400" role="status">
+            {bulkStatus}
+          </span>
+        )}
+      </div>
+
       <div className="grid gap-6 md:grid-cols-[220px_1fr]">
         <nav aria-label="Site content sections" className="space-y-4">
           {SECTION_GROUPS.map((group) => (

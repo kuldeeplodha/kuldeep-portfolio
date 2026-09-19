@@ -1,5 +1,5 @@
 import { useRole } from '../../hooks/useRole'
-import { isValidSafeUrl } from '../../lib/config/exportImport'
+import { isValidSafeUrl } from '../../lib/validation/safeUrl'
 import { SectionHeader } from '../ui/SectionHeader'
 import { SectionShell } from '../ui/SectionShell'
 
