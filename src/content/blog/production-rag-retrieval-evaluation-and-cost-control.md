@@ -1,7 +1,7 @@
 ---
 title: Production RAG: Retrieval Quality, Evaluation, and Cost Control
 slug: production-rag-retrieval-evaluation-and-cost-control
-date: 2026-09-22
+date: 2026-09-21
 excerpt: How to ship retrieval-augmented generation that stays accurate, measurable, and affordable after the demo — retrieval metrics, eval datasets, and cost levers that matter in production.
 tags: [ai, rag, llm, evaluation, architecture, mlops]
 readingTimeMinutes: 10
