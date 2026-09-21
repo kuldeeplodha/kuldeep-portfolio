@@ -4,7 +4,7 @@ slug: production-rag-retrieval-evaluation-and-cost-control
 date: 2026-09-22
 excerpt: How to ship retrieval-augmented generation that stays accurate, measurable, and affordable after the demo — retrieval metrics, eval datasets, and cost levers that matter in production.
 tags: [ai, rag, llm, evaluation, architecture, mlops]
-readingTimeMinutes: 11
+readingTimeMinutes: 10
 roles: [software, ai]
 ---
 
@@ -64,6 +64,12 @@ Report **per stratum**, not one global average: single-fact lookups, multi-hop q
 No universal chunk size. Smaller chunks improve precision; larger chunks preserve local context. Overlap reduces boundary cuts but increases index size. **Evaluate chunking changes** on the same gold set — do not ship a new splitter because it “felt better” in one example.
 
 Refresh a slice of the gold set quarterly from **production queries** (with consent and redaction). Query distribution drifts; your 2025 test set lies to you in 2026.
+
+### Hybrid retrieval and reranking
+
+Pure vector search misses exact identifiers — SKUs, error codes, legal section numbers. **Hybrid retrieval** (dense + sparse/BM25) is standard in production for mixed query types. Fuse with reciprocal rank fusion or weighted merge, then **rerank** only the top N candidates (often 20–50, not hundreds) through a cross-encoder or lightweight reranker API.
+
+Reranking improves precision@packed-context but adds latency and cost. Cap candidates entering rerank; dedupe near-duplicate chunks first. Measure **NDCG at the depth you actually pack into the prompt**, not at k=100 you never use.
 
 ## Generation quality: faithfulness and citations
 
@@ -140,6 +146,20 @@ Log structured fields per request:
 - `abstained` (bool), `user_feedback` (if collected)
 
 Dashboards: P95 latency, cost per query, citation rate, abstention spike, embedding/LLM error rate.
+
+## Operational runbook (checklist)
+
+Before calling RAG “production”:
+
+- [ ] Gold set versioned; CI fails on stratum regressions
+- [ ] `corpus_version` / `index_build_id` logged on every answer
+- [ ] Rollback path for index rebuilds and embedding model changes
+- [ ] Canary or shadow traffic for new retriever configs
+- [ ] ACL enforced at retrieval, not in the prompt
+- [ ] Cost and P95 alarms with on-call runbook
+- [ ] Human review queue for low-confidence or high-risk query classes
+
+Incidents often trace to **silent index drift** (documents updated, index not rebuilt) or **prompt edits** that shrink citation instructions. Change-control both like application code.
 
 ## When RAG is enough (and when it is not)
 
