@@ -51,7 +51,10 @@ test.describe('V2.2 P2 admin CMS (mocked backend)', () => {
     let created: Record<string, unknown> | null = null
 
     await page.route('**/api/auth/login', (route) => json(route, { token: 'fake-jwt', expiresIn: 86400 }))
-    await page.route('**/api/admin/blogs', (route) => {
+    // BUG-ADMIN-BLOG-MAP-CRASH: listAdminBlogs now requests
+    // '/admin/blogs?limit=50', so the mock must match with or without a
+    // query string (this route also intercepts the plain-URL POST).
+    await page.route('**/api/admin/blogs*', (route) => {
       if (route.request().method() === 'POST') {
         created = JSON.parse(route.request().postData() ?? '{}')
         return json(route, created)
@@ -84,7 +87,7 @@ test.describe('V2.2 P2 admin CMS (mocked backend)', () => {
 
   test('a request failure surfaces as an inline error, not a crash', async ({ page, isMobile }) => {
     await page.route('**/api/auth/login', (route) => json(route, { token: 'fake-jwt', expiresIn: 86400 }))
-    await page.route('**/api/admin/blogs', (route) => json(route, { detail: 'Database unavailable' }, 500))
+    await page.route('**/api/admin/blogs*', (route) => json(route, { detail: 'Database unavailable' }, 500))
 
     await loginToAdmin(page)
     await openTab(page, /Blog Posts/i, isMobile)
@@ -96,7 +99,7 @@ test.describe('V2.2 P2 admin CMS (mocked backend)', () => {
 
   test('media upload signs via the backend then embeds the returned URL', async ({ page, isMobile }) => {
     await page.route('**/api/auth/login', (route) => json(route, { token: 'fake-jwt', expiresIn: 86400 }))
-    await page.route('**/api/admin/blogs', (route) => json(route, []))
+    await page.route('**/api/admin/blogs*', (route) => json(route, []))
     await page.route('**/api/admin/media/sign', (route) =>
       json(route, { signature: 'sig', timestamp: 123, apiKey: 'key', cloudName: 'demo' }),
     )
@@ -122,7 +125,8 @@ test.describe('V2.2 P2 admin CMS (mocked backend)', () => {
   test('Case Studies tab creates a draft with structured sections', async ({ page, isMobile }) => {
     let created: Record<string, unknown> | null = null
     await page.route('**/api/auth/login', (route) => json(route, { token: 'fake-jwt', expiresIn: 86400 }))
-    await page.route('**/api/admin/case-studies', (route) => {
+    // Same query-string-tolerant match as the blogs routes above.
+    await page.route('**/api/admin/case-studies*', (route) => {
       if (route.request().method() === 'POST') {
         created = JSON.parse(route.request().postData() ?? '{}')
         return json(route, created)
