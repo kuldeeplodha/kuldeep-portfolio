@@ -174,8 +174,14 @@ export interface CmsCaseStudy {
 
 // --- Blogs ---
 
-export function listAdminBlogs(): Promise<CmsBlogPost[]> {
-  return request('/admin/blogs')
+// V23-BE-PAGINATE: GET /admin/blogs now returns a paginated
+// {items,page,total,total_pages,has_more} envelope instead of a bare
+// array. limit=50 is the backend max, so every blog shows without a
+// paginator (mirrors the defensive unwrap already done for the public
+// endpoints in src/lib/content/api.ts).
+export async function listAdminBlogs(): Promise<CmsBlogPost[]> {
+  const data = await request<CmsBlogPost[] | { items: CmsBlogPost[] }>('/admin/blogs?limit=50')
+  return Array.isArray(data) ? data : (data?.items ?? [])
 }
 
 export function createBlog(blog: CmsBlogPost): Promise<CmsBlogPost> {
@@ -194,8 +200,10 @@ export function deleteBlog(id: string): Promise<void> {
 
 // --- Case studies ---
 
-export function listAdminCaseStudies(): Promise<CmsCaseStudy[]> {
-  return request('/admin/case-studies')
+// V23-BE-PAGINATE: same paginated-envelope unwrap as listAdminBlogs above.
+export async function listAdminCaseStudies(): Promise<CmsCaseStudy[]> {
+  const data = await request<CmsCaseStudy[] | { items: CmsCaseStudy[] }>('/admin/case-studies?limit=50')
+  return Array.isArray(data) ? data : (data?.items ?? [])
 }
 
 export function createCaseStudy(cs: CmsCaseStudy): Promise<CmsCaseStudy> {

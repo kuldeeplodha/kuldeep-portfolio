@@ -13,11 +13,12 @@ import {
   isCmsAuthenticated,
   isDevBypassActive,
   listAdminBlogs,
+  listAdminCaseStudies,
   slugify,
   updateBlog,
   uploadMedia,
 } from '../lib/admin/cms'
-import type { CmsBlogPost } from '../lib/admin/cms'
+import type { CmsBlogPost, CmsCaseStudy } from '../lib/admin/cms'
 
 function jsonResponse(body: unknown, init: Partial<Response> & { status?: number } = {}) {
   return {
@@ -41,6 +42,28 @@ const sampleBlog: CmsBlogPost = {
   tags: [],
   relevant_roles: [],
   reading_time_minutes: 1,
+  featured_media_url: null,
+  media_urls: [],
+}
+
+const sampleCaseStudy: CmsCaseStudy = {
+  id: 'cs1',
+  slug: 'case-one',
+  title: 'Case One',
+  excerpt: 'x',
+  status: 'draft',
+  published_at: null,
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+  technologies: [],
+  relevant_roles: [],
+  problem: '',
+  context: '',
+  architecture: '',
+  outcome: '',
+  future_improvements: null,
+  github_url: null,
+  live_url: null,
   featured_media_url: null,
   media_urls: [],
 }
@@ -98,6 +121,44 @@ describe('cms client', () => {
     const [url, init] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
     expect(url).toContain('/api/admin/blogs')
     expect((init.headers as Headers).get('Authorization')).toBe('Bearer jwt-abc')
+  })
+
+  // BUG-ADMIN-BLOG-MAP-CRASH: V23-BE-PAGINATE changed GET /admin/blogs (and
+  // /admin/case-studies) to return {items,page,total,...} instead of a bare
+  // array, which crashed the admin panels' posts.map(...) with "e.map is
+  // not a function". listAdminBlogs/listAdminCaseStudies must defensively
+  // unwrap either shape and always resolve to an array.
+  it('listAdminBlogs unwraps the paginated {items} envelope into a plain array', async () => {
+    sessionStorage.setItem('kuldeep-portfolio-cms-jwt', 'jwt-abc')
+    ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      jsonResponse({ items: [sampleBlog], page: 1, limit: 50, total: 1, total_pages: 1, has_more: false }),
+    )
+    const posts = await listAdminBlogs()
+    expect(Array.isArray(posts)).toBe(true)
+    expect(posts).toEqual([sampleBlog])
+    const [url] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+    expect(url).toContain('/api/admin/blogs')
+    expect(url).toContain('limit=50')
+  })
+
+  it('listAdminCaseStudies unwraps the paginated {items} envelope into a plain array', async () => {
+    sessionStorage.setItem('kuldeep-portfolio-cms-jwt', 'jwt-abc')
+    ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      jsonResponse({ items: [sampleCaseStudy], page: 1, limit: 50, total: 1, total_pages: 1, has_more: false }),
+    )
+    const studies = await listAdminCaseStudies()
+    expect(Array.isArray(studies)).toBe(true)
+    expect(studies).toEqual([sampleCaseStudy])
+    const [url] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+    expect(url).toContain('/api/admin/case-studies')
+    expect(url).toContain('limit=50')
+  })
+
+  it('listAdminCaseStudies still returns an array if the backend ever reverts to a bare array', async () => {
+    sessionStorage.setItem('kuldeep-portfolio-cms-jwt', 'jwt-abc')
+    ;(fetch as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(jsonResponse([sampleCaseStudy]))
+    const studies = await listAdminCaseStudies()
+    expect(studies).toEqual([sampleCaseStudy])
   })
 
   it('createBlog POSTs the full payload', async () => {
