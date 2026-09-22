@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" role="img" aria-labelledby="title">
+  <title id="title">Hero: SKILL.md flows into Claude Code sessions</title>
+  <rect width="800" height="240" fill="#1a1d23"/>
+  <rect x="40" y="50" width="220" height="140" rx="8" fill="#252b36" stroke="#4a9eff" stroke-width="1.5"/>
+  <text x="60" y="85" fill="#8ab4f8" font-family="ui-monospace,monospace" font-size="14">SKILL.md</text>
+  <text x="60" y="110" fill="#9aa0a6" font-family="ui-monospace,monospace" font-size="11">---</text>
+  <text x="60" y="128" fill="#9aa0a6" font-family="ui-monospace,monospace" font-size="11">description: &</text>
+  <text x="60" y="146" fill="#9aa0a6" font-family="ui-monospace,monospace" font-size="11">---</text>
+  <text x="60" y="168" fill="#e8eaed" font-family="ui-sans-serif,sans-serif" font-size="12">Instructions&</text>
+  <path d="M280 120 H360" stroke="#4a9eff" stroke-width="2"/>
+  <polygon points="360,120 350,115 350,125" fill="#4a9eff"/>
+  <rect x="380" y="70" width="380" height="100" rx="8" fill="#252b36" stroke="#3d4f66"/>
+  <text x="400" y="105" fill="#e8eaed" font-family="ui-sans-serif,sans-serif" font-size="15">Claude Code session</text>
+  <text x="400" y="130" fill="#9aa0a6" font-family="ui-sans-serif,sans-serif" font-size="12">/skill-name  ·  auto-load when relevant</text>
+  <text x="400" y="152" fill="#9aa0a6" font-family="ui-sans-serif,sans-serif" font-size="12">Body loads on use (not every turn)</text>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 320" role="img" aria-labelledby="title">
+  <title id="title">Diagram: Claude Code skill folder layout (not a product screenshot)</title>
+  <rect width="720" height="320" fill="#1a1d23"/>
+  <rect x="0" y="0" width="720" height="320" fill="url(#g)" opacity="0.15"/>
+  <defs>
+    <pattern id="g" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#2a3340" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <text x="36" y="44" fill="#8ab4f8" font-family="ui-monospace,monospace" font-size="14">Personal (all projects)</text>
+  <rect x="36" y="56" width="300" height="88" rx="6" fill="#252b36" stroke="#3d4f66" stroke-width="1"/>
+  <text x="52" y="88" fill="#e8eaed" font-family="ui-monospace,monospace" font-size="13">~/.claude/skills/my-skill/</text>
+  <text x="52" y="112" fill="#9aa0a6" font-family="ui-monospace,monospace" font-size="12">  SKILL.md</text>
+  <text x="52" y="132" fill="#9aa0a6" font-family="ui-monospace,monospace" font-size="12">  reference.md (optional)</text>
+  <text x="384" y="44" fill="#8ab4f8" font-family="ui-monospace,monospace" font-size="14">Project (this repo)</text>
+  <rect x="384" y="56" width="300" height="88" rx="6" fill="#252b36" stroke="#3d4f66" stroke-width="1"/>
+  <text x="400" y="88" fill="#e8eaed" font-family="ui-monospace,monospace" font-size="13">.claude/skills/deploy/</text>
+  <text x="400" y="112" fill="#9aa0a6" font-family="ui-monospace,monospace" font-size="12">  SKILL.md</text>
+  <text x="36" y="200" fill="#8ab4f8" font-family="ui-sans-serif,sans-serif" font-size="14">Invoke in chat: /my-skill  or /deploy</text>
+  <text x="36" y="228" fill="#9aa0a6" font-family="ui-sans-serif,sans-serif" font-size="12">Source: Claude Code skills docs  code.claude.com/docs/en/skills</text>
+</svg>
