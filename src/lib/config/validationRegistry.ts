@@ -1353,6 +1353,33 @@ export function validateConfigRegistry(config: PortfolioConfig): ValidationSumma
         })
       }
 
+      // CERT-MEDIA-VERIFIED-FEATURE: verifyUrl/mediaUrl are rendered as a
+      // clickable link / <img src> on the public site, so they get the same
+      // safe-URL gate as `url` (blocks javascript:/data:/protocol-relative).
+      if (cert.verifyUrl && !isValidSafeUrl(cert.verifyUrl)) {
+        pushIssue({
+          id: `certifications-${itemId}-verifyUrl-invalid`,
+          section: 'certifications',
+          itemId,
+          field: 'verifyUrl',
+          severity: 'error',
+          message: `${prefix} Invalid Verification URL`,
+          remediation: 'Provide valid HTTPS verification link.',
+        })
+      }
+
+      if (cert.mediaUrl && !isValidSafeUrl(cert.mediaUrl)) {
+        pushIssue({
+          id: `certifications-${itemId}-mediaUrl-invalid`,
+          section: 'certifications',
+          itemId,
+          field: 'mediaUrl',
+          severity: 'error',
+          message: `${prefix} Invalid media URL`,
+          remediation: 'Re-upload the certificate media.',
+        })
+      }
+
       if (cert.date !== undefined && !cert.date?.trim()) {
         pushIssue({
           id: `certifications-${itemId}-date-warn`,

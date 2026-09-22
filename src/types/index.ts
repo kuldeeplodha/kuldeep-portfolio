@@ -146,6 +146,12 @@ export interface Certification {
   date?: string
   sourceVariants: ResumeVariant[]
   url?: string
+  /** CERT-MEDIA-VERIFIED-FEATURE: Cloudinary secure_url for an uploaded cert image/PDF. */
+  mediaUrl?: string | null
+  /** CERT-MEDIA-VERIFIED-FEATURE: shows a "Verified" badge on the public card. */
+  verified?: boolean
+  /** CERT-MEDIA-VERIFIED-FEATURE: public link the "Verified" badge points to. */
+  verifyUrl?: string | null
 }
 
 export interface Research {
