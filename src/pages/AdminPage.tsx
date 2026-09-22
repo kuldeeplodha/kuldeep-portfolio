@@ -42,6 +42,7 @@ import { CmsAuthGate } from '../components/admin/cms/CmsAuthGate'
 import { BlogsAdminPanel } from '../components/admin/cms/BlogsAdminPanel'
 import { CaseStudiesAdminPanel } from '../components/admin/cms/CaseStudiesAdminPanel'
 import { SiteContentAdminPanel } from '../components/admin/cms/SiteContentAdminPanel'
+import { MediaUploadField } from '../components/admin/cms/MediaUploadField'
 
 type AdminTab =
   | 'profile'
@@ -1833,6 +1834,30 @@ function AdminPanel() {
                       <input
                         value={selectedCert.url || ''}
                         onChange={(e) => updateCert({ url: e.target.value })}
+                        className={adminInputClass}
+                      />
+                    </label>
+                    <MediaUploadField
+                      label="Certificate media (image/PDF)"
+                      value={selectedCert.mediaUrl ?? null}
+                      onChange={(url) => updateCert({ mediaUrl: url })}
+                      hint="Optional. Shown as a thumbnail on the public certifications card."
+                    />
+                    <label className="flex items-center gap-2 text-sm text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={selectedCert.verified === true}
+                        onChange={(e) => updateCert({ verified: e.target.checked })}
+                        className="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-2 focus:ring-cyan-400"
+                      />
+                      Verified
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-sm text-slate-400">Verification URL</span>
+                      <input
+                        value={selectedCert.verifyUrl || ''}
+                        onChange={(e) => updateCert({ verifyUrl: e.target.value })}
+                        placeholder="https://..."
                         className={adminInputClass}
                       />
                     </label>

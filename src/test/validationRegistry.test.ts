@@ -146,6 +146,51 @@ describe('validationRegistry', () => {
     })
   })
 
+  describe('CERT-MEDIA-VERIFIED-FEATURE: certifications mediaUrl/verified/verifyUrl', () => {
+    it('passes validation when a cert has no mediaUrl/verified/verifyUrl set (back-compat)', () => {
+      const cfg = clone()
+      // Golden config's existing certs predate these fields entirely.
+      expect(cfg.certifications[0].mediaUrl).toBeUndefined()
+      expect(cfg.certifications[0].verified).toBeUndefined()
+      const summary = validateConfigRegistry(cfg)
+      expect(summary.isValid).toBe(true)
+      expect(summary.errors.some((e) => e.itemId === cfg.certifications[0].id)).toBe(false)
+    })
+
+    it('accepts a cert with mediaUrl set, verified true, and a valid verifyUrl', () => {
+      const cfg = clone()
+      cfg.certifications[0].mediaUrl = 'https://res.cloudinary.com/demo/image/upload/cert.png'
+      cfg.certifications[0].verified = true
+      cfg.certifications[0].verifyUrl = 'https://issuer.example.com/verify/abc123'
+      const summary = validateConfigRegistry(cfg)
+      expect(summary.errors.some((e) => e.itemId === cfg.certifications[0].id)).toBe(false)
+    })
+
+    it('flags an unsafe verifyUrl (javascript:) as a blocking error', () => {
+      const cfg = clone()
+      cfg.certifications[0].verifyUrl = 'javascript:alert(1)'
+      const summary = validateConfigRegistry(cfg)
+      expect(summary.isValid).toBe(false)
+      expect(
+        summary.errors.some(
+          (e) => e.itemId === cfg.certifications[0].id && e.field === 'verifyUrl',
+        ),
+      ).toBe(true)
+    })
+
+    it('flags an unsafe mediaUrl (protocol-relative) as a blocking error', () => {
+      const cfg = clone()
+      cfg.certifications[0].mediaUrl = '//evil.example.com/x.png'
+      const summary = validateConfigRegistry(cfg)
+      expect(summary.isValid).toBe(false)
+      expect(
+        summary.errors.some(
+          (e) => e.itemId === cfg.certifications[0].id && e.field === 'mediaUrl',
+        ),
+      ).toBe(true)
+    })
+  })
+
   describe('O(1) Rendering Indexes (issuesBySection, issuesByEntity, issuesByField)', () => {
     it('populates lookup maps for instant field, entity, and section queries', () => {
       const cfg = clone()
