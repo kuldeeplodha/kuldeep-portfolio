@@ -17,5 +17,5 @@
   <text x="400" y="88" fill="#e8eaed" font-family="ui-monospace,monospace" font-size="13">.claude/skills/deploy/</text>
   <text x="400" y="112" fill="#9aa0a6" font-family="ui-monospace,monospace" font-size="12">  SKILL.md</text>
   <text x="36" y="200" fill="#8ab4f8" font-family="ui-sans-serif,sans-serif" font-size="14">Invoke in chat: /my-skill  or /deploy</text>
-  <text x="36" y="228" fill="#9aa0a6" font-family="ui-sans-serif,sans-serif" font-size="12">Source: Claude Code skills docs  code.claude.com/docs/en/skills</text>
+  <text x="36" y="228" fill="#9aa0a6" font-family="ui-sans-serif,sans-serif" font-size="12">Source: Claude Code skills docs - code.claude.com/docs/en/skills</text>
 </svg>
