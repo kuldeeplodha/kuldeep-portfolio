@@ -60,9 +60,9 @@ mkdir -p ~/.claude/skills/summarize-changes
 
 Every skill file starts with frontmatter between `---` lines. The opening `---` must be the **first line** of the file; otherwise Claude Code treats the whole file as skill content and ignores your metadata.
 
-![Illustration of a SKILL.md file with YAML frontmatter name and description loaded at startup](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-skill-md-frontmatter.jpg)
+![Anthropic example of a simple SKILL.md file showing YAML frontmatter and markdown instructions](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-skill-md-simple.jpg)
 
-*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Anthropic Engineering).*
+*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) — figure “A simple SKILL.md file” ([CDN](https://www-cdn.anthropic.com/images/4zrzovbb/website/6f22d8913dbc6228e7f11a41e0b3c124d817b6d2-1650x929.jpg)).*
 
 Save `~/.claude/skills/summarize-changes/SKILL.md`:
 
@@ -142,9 +142,9 @@ Anthropic's docs describe skills loading into the context window only when trigg
 
 *Source: [Agent Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (Anthropic).*
 
-![Sequence diagram of a skill triggered in context: read SKILL.md, then bundled files, then execute the task](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-context-window-sequence.jpg)
+![Table of progressive disclosure levels: SKILL.md metadata always loaded, body when triggered, bundled files as needed](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-progressive-disclosure-tokens-table.jpg)
 
-*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Anthropic Engineering).*
+*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) — progressive disclosure token levels ([CDN](https://www-cdn.anthropic.com/images/4zrzovbb/website/a3bca2763d7892982a59c28aa4df7993aaae55ae-2292x673.jpg)).*
 
 ### Cowork, cloud, and claude.ai sync
 
@@ -203,9 +203,9 @@ Keep **facts** (stack, conventions) in `CLAUDE.md`. Keep **procedures** (multi-s
 | `anthropic-agent-skills-architecture.png` | [platform.claude.com/docs/images/agent-skills-architecture.png](https://platform.claude.com/docs/images/agent-skills-architecture.png) — Agent Skills docs |
 | `anthropic-agent-skills-context-window.png` | [platform.claude.com/docs/images/agent-skills-context-window.png](https://platform.claude.com/docs/images/agent-skills-context-window.png) — Agent Skills docs |
 | `anthropic-engineering-skill-directory.png` | [Anthropic Engineering blog](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Sanity CDN) |
-| `anthropic-engineering-skill-md-frontmatter.jpg` | Same engineering post |
+| `anthropic-engineering-skill-md-simple.jpg` | [Engineering blog](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) — [6f22d891…929.jpg](https://www-cdn.anthropic.com/images/4zrzovbb/website/6f22d8913dbc6228e7f11a41e0b3c124d817b6d2-1650x929.jpg) |
 | `anthropic-engineering-skill-bundled-files.jpg` | Same engineering post |
-| `anthropic-engineering-context-window-sequence.jpg` | Same engineering post |
+| `anthropic-engineering-progressive-disclosure-tokens-table.jpg` | Same engineering post — [a3bca276…673.jpg](https://www-cdn.anthropic.com/images/4zrzovbb/website/a3bca2763d7892982a59c28aa4df7993aaae55ae-2292x673.jpg) |
 | `folder-structure.svg` | Editorial diagram (this repo) for Claude Code personal vs project paths; not a product screenshot |
 
 All Anthropic imagery is used with attribution for a tutorial about Anthropic products. Claude Code-specific UI may differ; see [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills) for terminal workflows.
