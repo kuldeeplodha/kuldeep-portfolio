@@ -1072,7 +1072,12 @@ function AdminPanel() {
                       onChange={(roles) => updateProject({ relevantRoles: roles })}
                     />
                     <label className="block">
-                      <span className="mb-1 block text-sm text-slate-400">Title</span>
+                      <span className="mb-1 block text-sm text-slate-400">
+                        Title
+                        <span className="ml-1 text-red-400" aria-hidden="true">
+                          *
+                        </span>
+                      </span>
                       <input
                         id={`input-projects-${selectedProject.id}-title`}
                         value={selectedProject.title}
@@ -1124,7 +1129,12 @@ function AdminPanel() {
                       />
                     </label>
                     <label className="block">
-                      <span className="mb-1 block text-sm text-slate-400">Overview</span>
+                      <span className="mb-1 block text-sm text-slate-400">
+                        Overview
+                        <span className="ml-1 text-red-400" aria-hidden="true">
+                          *
+                        </span>
+                      </span>
                       <textarea
                         id={`input-projects-${selectedProject.id}-overview`}
                         value={selectedProject.overview}
@@ -2084,6 +2094,32 @@ function AdminPanel() {
               ? `Will save: ${Array.from(dirtyKeys).join(', ')}`
               : 'No changes since load — only edited sections are ever saved.'}
           </span>
+          {/* FIX-ADMIN-SAVE-UX: the buttons below used to explain a
+              validationSummary.errorCount block ONLY via a hover title=
+              tooltip -- easy to miss (and to never notice at all if you
+              never hover), which is exactly how a human's real edit could
+              silently fail to save with no visible reason. The top-of-page
+              ValidationStatusBar already lists every blocking error, but a
+              user scrolled down to this save bar may not see it without
+              scrolling back up -- so repeat it here, right next to the
+              buttons, always on screen when it applies. */}
+          {validationSummary.errorCount > 0 && (
+            <p className="w-full text-xs font-medium text-red-400" role="alert">
+              Save and Publish are disabled: {validationSummary.errorCount} blocking issue
+              {validationSummary.errorCount > 1 ? 's' : ''} must be fixed first.{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  const first = validationSummary.errors[0]
+                  handleNavigateToIssue(first.section, first.itemId, first.field)
+                }}
+                className="underline hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-400"
+              >
+                Jump to the first one
+              </button>
+              .
+            </p>
+          )}
           <button
             type="submit"
             disabled={validationSummary.errorCount > 0 || saving || dirtyKeys.size === 0}

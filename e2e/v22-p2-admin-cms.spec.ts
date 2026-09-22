@@ -152,4 +152,55 @@ test.describe('V2.2 P2 admin CMS (mocked backend)', () => {
     expect(created).not.toBeNull()
     expect((created as Record<string, unknown>).status).toBe('draft')
   })
+
+  // FIX-ADMIN-SAVE-UX: a case study used to be publishable with a real
+  // title+summary but a genuinely empty structured body -- it looked
+  // "finished" live but wasn't. Publish must stay disabled, with a visible
+  // on-screen reason, until Problem/Context/Architecture/Outcome are all
+  // filled; Save draft must still work with them blank.
+  test('Case Studies tab: Publish stays disabled with a visible reason until the body is filled, then goes live', async ({
+    page,
+    isMobile,
+  }) => {
+    let created: Record<string, unknown> | null = null
+    await page.route('**/api/auth/login', (route) => json(route, { token: 'fake-jwt', expiresIn: 86400 }))
+    await page.route('**/api/admin/case-studies*', (route) => {
+      if (route.request().method() === 'POST') {
+        created = JSON.parse(route.request().postData() ?? '{}')
+        return json(route, created)
+      }
+      return json(route, created ? [created] : [])
+    })
+
+    await loginToAdmin(page)
+    await openTab(page, /Case Studies/i, isMobile)
+    await page.getByLabel('Admin password').fill(CMS_PASSWORD)
+    await page.getByRole('button', { name: 'Sign in' }).click()
+
+    await page.getByRole('button', { name: '+ New Case Study' }).click()
+    await page.getByLabel('Title', { exact: true }).fill('Empty-Body Case Study')
+
+    const publishBtn = page.getByRole('button', { name: 'Publish' })
+    await expect(publishBtn).toBeDisabled()
+    // Visible on screen, not just a hover title= tooltip.
+    await expect(
+      page.getByText('Publish is disabled until you fill in: Problem, Context, Architecture, Outcome'),
+    ).toBeVisible()
+
+    await page.getByLabel('Problem').fill('The problem.')
+    await page.getByLabel('Context').fill('The context.')
+    await page.getByLabel('Architecture').fill('The architecture.')
+    await page.getByLabel('Outcome').fill('The outcome.')
+
+    await expect(
+      page.getByText('Publish is disabled until you fill in: Problem, Context, Architecture, Outcome'),
+    ).toBeHidden()
+    await expect(publishBtn).toBeEnabled()
+    await publishBtn.click()
+
+    await expect(page.getByText('Empty-Body Case Study')).toBeVisible()
+    expect(created).not.toBeNull()
+    expect((created as Record<string, unknown>).status).toBe('published')
+    expect((created as Record<string, unknown>).problem).toBe('The problem.')
+  })
 })

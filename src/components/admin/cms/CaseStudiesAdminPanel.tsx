@@ -55,6 +55,16 @@ const SECTION_FIELDS: { field: 'problem' | 'context' | 'architecture' | 'outcome
   { field: 'outcome', label: 'Outcome' },
 ]
 
+// FIX-ADMIN-SAVE-UX: Problem/Context/Architecture/Outcome are the case
+// study's structured "body" (there is no separate `body` field — see
+// backend/models.py's CaseStudy). Publishing with all 4 blank produced a
+// live case study with a real title+summary but a genuinely empty body,
+// which looked "finished" but wasn't. Required for Publish; Save draft
+// still allows an incomplete draft.
+function missingBodyFields(cs: CmsCaseStudy): typeof SECTION_FIELDS {
+  return SECTION_FIELDS.filter(({ field }) => !cs[field]?.trim())
+}
+
 export function CaseStudiesAdminPanel() {
   const [items, setItems] = useState<CmsCaseStudy[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,6 +109,7 @@ export function CaseStudiesAdminPanel() {
   }, [])
 
   const isNew = editing !== null && !items.some((i) => i.id === editing.id)
+  const missing = editing ? missingBodyFields(editing) : []
 
   const handleSave = async (nextStatus?: ContentStatus) => {
     if (!editing) return
@@ -224,17 +235,33 @@ export function CaseStudiesAdminPanel() {
           }
         />
 
-        {SECTION_FIELDS.map(({ field, label }) => (
-          <label key={field} className="block">
-            <span className="mb-1 block text-sm text-slate-400">{label}</span>
-            <textarea
-              className={adminInputClass}
-              rows={5}
-              value={editing[field]}
-              onChange={(e) => setEditing({ ...editing, [field]: e.target.value })}
-            />
-          </label>
-        ))}
+        {SECTION_FIELDS.map(({ field, label }) => {
+          const isMissing = !editing[field]?.trim()
+          return (
+            <label key={field} className="block">
+              <span className="mb-1 block text-sm text-slate-400">
+                {label}
+                <span className="ml-1 text-red-400" aria-hidden="true">
+                  *
+                </span>
+                <span className="ml-1 text-[11px] font-normal text-slate-500">(required to publish)</span>
+              </span>
+              <textarea
+                className={isMissing ? `${adminInputClass} border-amber-500/60` : adminInputClass}
+                rows={5}
+                value={editing[field]}
+                onChange={(e) => setEditing({ ...editing, [field]: e.target.value })}
+                aria-invalid={isMissing || undefined}
+                aria-describedby={isMissing ? `cs-${field}-missing` : undefined}
+              />
+              {isMissing && (
+                <p id={`cs-${field}-missing`} className="mt-1.5 text-xs text-amber-400" role="status">
+                  {label} is empty — Publish is disabled until every body field has content.
+                </p>
+              )}
+            </label>
+          )
+        })}
         <label className="block">
           <span className="mb-1 block text-sm text-slate-400">Future improvements (optional)</span>
           <textarea
@@ -269,23 +296,45 @@ export function CaseStudiesAdminPanel() {
           </p>
         )}
 
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            disabled={saving || !editing.title || !editing.slug}
-            onClick={() => handleSave('draft')}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Save draft
-          </button>
-          <button
-            type="button"
-            disabled={saving || !editing.title || !editing.slug}
-            onClick={() => handleSave('published')}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {saving ? 'Saving…' : 'Publish'}
-          </button>
+        {/* FIX-ADMIN-SAVE-UX: always-visible reason the Publish button is
+            disabled -- a hover title= tooltip alone is easy to miss, and
+            this is exactly the trap that made a body-less case study look
+            silently unpublishable/unfinished with no on-screen feedback. */}
+        {missing.length > 0 && (
+          <p className="text-sm text-amber-400" role="status">
+            Publish is disabled until you fill in: {missing.map((m) => m.label).join(', ')}. You can still save a
+            draft with these blank.
+          </p>
+        )}
+
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="space-y-1">
+            <button
+              type="button"
+              disabled={saving || !editing.title || !editing.slug}
+              onClick={() => handleSave('draft')}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Save draft
+            </button>
+            <p className="text-[11px] text-slate-500">Private — not visible on the live site.</p>
+          </div>
+          <div className="space-y-1">
+            <button
+              type="button"
+              disabled={saving || !editing.title || !editing.slug || missing.length > 0}
+              title={
+                missing.length > 0
+                  ? `Cannot publish: fill in ${missing.map((m) => m.label).join(', ')} first`
+                  : undefined
+              }
+              onClick={() => handleSave('published')}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-base)] bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : 'Publish'}
+            </button>
+            <p className="text-[11px] text-cyan-500/80">Goes live immediately on the public site.</p>
+          </div>
           <button
             type="button"
             onClick={() => setEditing(null)}
