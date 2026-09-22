@@ -4,14 +4,13 @@
 // same token to gate the whole /admin page (CmsAuthGate) — the old
 // client-side SHA-256 hash gate (lib/admin/auth.ts) is gone.
 //
-// Known gap (flagged to Alex/god, see hive outbox): the backend only exposes
-// GET (list) and POST (create) for /api/admin/blogs and /api/admin/case-studies.
-// PUT (update) and DELETE do not exist yet, even though the PRD (AC-2.1/2.2)
-// and this UI need them. The request builders below are written against the
-// PRD's documented paths (PUT/DELETE `/api/admin/{resource}/{id}`) so the UI
-// is ready the moment those routes land — until then, calling update()/
-// remove() will fail with a 404/405 from the live backend, which the UI
-// surfaces as a normal request-error state rather than crashing.
+// V22-P1.1-CRUD (FIX-ADMIN-SAVE-UX, 2026-09-23): the backend now fully
+// implements PUT (update) and DELETE for /api/admin/blogs/{id} and
+// /api/admin/case-studies/{id} (backend/routers/blogs.py,
+// case_studies.py) — the request builders below already targeted these
+// PRD-documented paths, so nothing needed to change there. This comment
+// used to say update()/delete() would 404 against a live backend; that
+// stopped being true once V22-P1.1-CRUD shipped and was stale.
 
 const TOKEN_KEY = 'kuldeep-portfolio-cms-jwt'
 
@@ -188,12 +187,10 @@ export function createBlog(blog: CmsBlogPost): Promise<CmsBlogPost> {
   return request('/admin/blogs', { method: 'POST', body: JSON.stringify(blog) })
 }
 
-// Not yet supported by the live backend — see the file-header note.
 export function updateBlog(id: string, blog: CmsBlogPost): Promise<CmsBlogPost> {
   return request(`/admin/blogs/${id}`, { method: 'PUT', body: JSON.stringify(blog) })
 }
 
-// Not yet supported by the live backend — see the file-header note.
 export function deleteBlog(id: string): Promise<void> {
   return request(`/admin/blogs/${id}`, { method: 'DELETE' })
 }
@@ -210,12 +207,10 @@ export function createCaseStudy(cs: CmsCaseStudy): Promise<CmsCaseStudy> {
   return request('/admin/case-studies', { method: 'POST', body: JSON.stringify(cs) })
 }
 
-// Not yet supported by the live backend — see the file-header note.
 export function updateCaseStudy(id: string, cs: CmsCaseStudy): Promise<CmsCaseStudy> {
   return request(`/admin/case-studies/${id}`, { method: 'PUT', body: JSON.stringify(cs) })
 }
 
-// Not yet supported by the live backend — see the file-header note.
 export function deleteCaseStudy(id: string): Promise<void> {
   return request(`/admin/case-studies/${id}`, { method: 'DELETE' })
 }
