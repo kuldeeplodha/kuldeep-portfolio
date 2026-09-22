@@ -14,11 +14,17 @@ You finally wrote the perfect checklist: how your team runs migrations, reviews 
 
 This tutorial follows the official Claude Code skills documentation as of September 2026 ([Extend Claude with skills](https://code.claude.com/docs/en/skills)). UI details change; paths and mechanics below are what the docs specify today.
 
-![Diagram: SKILL.md frontmatter and instructions feed a Claude Code session when invoked or auto-loaded](/blog-assets/creating-local-claude-skills-reuse-later-chats/hero.svg)
+![Agent Skills architecture showing how skills integrate with agent configuration and the execution environment](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-agent-skills-architecture.png)
+
+*Source: [Agent Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (Anthropic).*
 
 ## What is a Claude Code skill?
 
 A **skill** is a folder with a `SKILL.md` file: YAML **frontmatter** (metadata Claude reads at discovery time) plus **markdown instructions** (the body loads when the skill runs, not on every turn). That lazy loading matters for long runbooks—you are not paying context for a deploy guide until someone actually deploys.
+
+![Anthropic illustration of a skill directory containing a SKILL.md file with instructions, scripts, and resources](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-skill-directory.png)
+
+*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Anthropic Engineering, Oct 2025).*
 
 Skills extend the open [Agent Skills](https://agentskills.io) standard; Claude Code adds invocation control, subagents, and dynamic context injection on top.
 
@@ -54,6 +60,10 @@ mkdir -p ~/.claude/skills/summarize-changes
 
 Every skill file starts with frontmatter between `---` lines. The opening `---` must be the **first line** of the file; otherwise Claude Code treats the whole file as skill content and ignores your metadata.
 
+![Illustration of a SKILL.md file with YAML frontmatter name and description loaded at startup](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-skill-md-frontmatter.jpg)
+
+*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Anthropic Engineering).*
+
 Save `~/.claude/skills/summarize-changes/SKILL.md`:
 
 ```yaml
@@ -78,6 +88,12 @@ Two mechanics worth noting:
 
 1. **`description`** — Claude uses this to decide whether to load the skill automatically when your message matches the intent.
 2. **`!`command``** — *Dynamic context injection*: Claude Code runs the shell command and replaces that line with output **before** Claude reads the skill, so the summary is grounded in your real diff ([skills docs — Getting started](https://code.claude.com/docs/en/skills)).
+
+As skills grow, you can bundle extra markdown or scripts beside `SKILL.md` and reference them by filename—Claude loads those files only when needed ([progressive disclosure](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)).
+
+![Illustration of a skill folder with SKILL.md referencing additional bundled files such as reference.md](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-skill-bundled-files.jpg)
+
+*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Anthropic Engineering).*
 
 ### Test in Claude Code
 
@@ -120,7 +136,15 @@ Claude Code also **watches** skill directories during a session—edits to `SKIL
 
 Commit the skill folder to git. Teammates get the same `/skill-name` after pull. **Cloud sessions** that clone your repository load project skills from the repo; personal `~/.claude/` paths on your laptop do not travel with them.
 
-![Diagram: personal skills persist on your machine; project skills travel via git (not Anthropic UI)](/blog-assets/creating-local-claude-skills-reuse-later-chats/reuse-across-sessions.svg)
+Anthropic's docs describe skills loading into the context window only when triggered—metadata first, then the skill body, then optional bundled files. That model is why reuse across sessions works: the files on disk (or in git) are the source of truth, not a single chat transcript.
+
+![Skills loading into the context window with progressive loading of metadata and skill content](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-agent-skills-context-window.png)
+
+*Source: [Agent Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (Anthropic).*
+
+![Sequence diagram of a skill triggered in context: read SKILL.md, then bundled files, then execute the task](/blog-assets/creating-local-claude-skills-reuse-later-chats/anthropic-engineering-context-window-sequence.jpg)
+
+*Source: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Anthropic Engineering).*
 
 ### Cowork, cloud, and claude.ai sync
 
@@ -172,4 +196,16 @@ Keep **facts** (stack, conventions) in `CLAUDE.md`. Keep **procedures** (multi-s
 
 ---
 
-*Image note: Figures in this post are **editorial diagrams** (SVG), not screenshots of Claude Code. The official skills page does not ship embeddable step images in its public HTML; for current UI, use the linked Anthropic documentation.*
+## Image credits
+
+| Asset | Source |
+| --- | --- |
+| `anthropic-agent-skills-architecture.png` | [platform.claude.com/docs/images/agent-skills-architecture.png](https://platform.claude.com/docs/images/agent-skills-architecture.png) — Agent Skills docs |
+| `anthropic-agent-skills-context-window.png` | [platform.claude.com/docs/images/agent-skills-context-window.png](https://platform.claude.com/docs/images/agent-skills-context-window.png) — Agent Skills docs |
+| `anthropic-engineering-skill-directory.png` | [Anthropic Engineering blog](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (Sanity CDN) |
+| `anthropic-engineering-skill-md-frontmatter.jpg` | Same engineering post |
+| `anthropic-engineering-skill-bundled-files.jpg` | Same engineering post |
+| `anthropic-engineering-context-window-sequence.jpg` | Same engineering post |
+| `folder-structure.svg` | Editorial diagram (this repo) for Claude Code personal vs project paths; not a product screenshot |
+
+All Anthropic imagery is used with attribution for a tutorial about Anthropic products. Claude Code-specific UI may differ; see [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills) for terminal workflows.
